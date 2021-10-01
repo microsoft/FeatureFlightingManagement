@@ -1,0 +1,27 @@
+{
+  "name": "@fxp/flightingsdk",
+  "version": "1.1.4",
+  "description": "A client side package for flighting features in application.",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rimraf node_modules",
+    "copy:npmrc": "cpr .npmrc lib/.npmrc -o",
+    "copy:packagejson": "cpr package.json lib/package.json -o",
+    "copyfiles:publish": "npm run copy:packagejson && npm run copy:npmrc && cd lib && npm run refreshVSToken && npm publish",
+    "copyfiles:dryRun": "npm run copy:packagejson && npm run copy:npmrc && cd lib && npm run refreshVSToken && npm pack --dry-run",
+    "rebuild": "npm clean && npm i && npm build",
+    "refreshVSToken": "vsts-npm-auth -config .npmrc",
+    "release:major": "npm run build && npm version major && npm run copyfiles:publish",
+    "release:minor": "npm run build && npm version minor && npm run copyfiles:publish"
+  },
+  "author": "FXP",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/angular": "^1.7.2",
+    "typescript": "3.5.3"
+  },
+  "dependencies": {
+    "cpr": "^3.0.1"
+  }
+}
