@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Microsoft.PS.FlightingService.Api.Tests.ActionFiltersTests
+namespace Microsoft.FeatureFlighting.Api.Tests.ActionFiltersTests
 {
     [ExcludeFromCodeCoverage]
     [TestCategory("ValidationModelAttribute")]

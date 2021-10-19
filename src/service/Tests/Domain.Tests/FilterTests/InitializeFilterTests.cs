@@ -3,13 +3,13 @@ using System.Threading.Tasks;
 using AppInsights.EnterpriseTelemetry;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.Extensions.Configuration;
-using Microsoft.PS.FlightingService.Common;
+using Microsoft.FeatureFlighting.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.PS.FlightingService.Domain.Interfaces;
-using Microsoft.PS.FlightingService.Domain.Evaluators;
-using Microsoft.PS.FlightingService.Domain.FeatureFilters;
+using Microsoft.FeatureFlighting.Domain.Interfaces;
+using Microsoft.FeatureFlighting.Domain.Evaluators;
+using Microsoft.FeatureFlighting.Domain.FeatureFilters;
 
-namespace Microsoft.PS.FlightingService.Domain.Tests.FilterTests
+namespace Microsoft.FeatureFlighting.Domain.Tests.FilterTests
 {
     [TestClass]
     public class InitializeFilterTests

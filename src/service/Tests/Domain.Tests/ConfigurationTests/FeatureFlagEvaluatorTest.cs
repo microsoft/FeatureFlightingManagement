@@ -3,8 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureManagement;
 using AppInsights.EnterpriseTelemetry;
 using AppInsights.EnterpriseTelemetry.Context;
-using Microsoft.PS.FlightingService.Common;
-using Microsoft.PS.FlightingService.Services.Interfaces;
+using Microsoft.FeatureFlighting.Common;
+using Microsoft.FeatureFlighting.Services.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.PS.FlightingService.Domain.Tests.ConfigurationTests
+namespace Microsoft.FeatureFlighting.Domain.Tests.ConfigurationTests
 {
     [TestClass]
     [TestCategory("FeatureFlagEvaluatorTests")]

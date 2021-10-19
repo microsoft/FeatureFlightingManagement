@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using Microsoft.FeatureManagement;
 using Microsoft.Extensions.Configuration;
-using Microsoft.PS.FlightingService.Common;
+using Microsoft.FeatureFlighting.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.PS.FlightingService.Common.AppExcpetions;
-using Microsoft.PS.FlightingService.Domain.FeatureFilters;
+using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Domain.FeatureFilters;
 
-namespace Microsoft.PS.FlightingService.Domain.Tests.FilterTests
+namespace Microsoft.FeatureFlighting.Domain.Tests.FilterTests
 {
     [TestCategory("CountryFilter")]
     [TestClass]

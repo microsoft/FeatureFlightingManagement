@@ -1,18 +1,18 @@
-﻿using Microsoft.PS.FlightingService.Common;
-using Microsoft.PS.FlightingService.Domain.Evaluators;
-using Microsoft.PS.FlightingService.Domain.FeatureFilters;
-using Microsoft.PS.FlightingService.Domain.Interfaces;
+﻿using Microsoft.FeatureFlighting.Common;
+using Microsoft.FeatureFlighting.Domain.Evaluators;
+using Microsoft.FeatureFlighting.Domain.FeatureFilters;
+using Microsoft.FeatureFlighting.Domain.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.PS.FlightingService.Services.Interfaces;
-using Microsoft.PS.FlightingService.Services;
+using Microsoft.FeatureFlighting.Services.Interfaces;
+using Microsoft.FeatureFlighting.Services;
 using System;
 using System.Collections.Generic;
-using Microsoft.PS.FlightingService.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Common.AppExcpetions;
 
-namespace Microsoft.PS.FlightingService.Domain.Tests.OperatorTests
+namespace Microsoft.FeatureFlighting.Domain.Tests.OperatorTests
 {
     [TestClass]
     public class MemberOfSecurityGroupEvaluatorTests

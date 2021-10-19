@@ -5,12 +5,12 @@ using AppInsights.EnterpriseTelemetry;
 using Microsoft.AspNetCore.Http;
 using System.Diagnostics.CodeAnalysis;
 using AppInsights.EnterpriseTelemetry.Context;
-using Microsoft.PS.FlightingService.Common;
+using Microsoft.FeatureFlighting.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.PS.FlightingService.Common.AppExcpetions;
-using Microsoft.PS.FlightingService.Api.ExceptionHandler;
+using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Api.ExceptionHandler;
 
-namespace Microsoft.PS.FlightingService.Api.Tests.ExceptionHandlerTests
+namespace Microsoft.FeatureFlighting.Api.Tests.ExceptionHandlerTests
 {
     [ExcludeFromCodeCoverage]
     [TestClass]

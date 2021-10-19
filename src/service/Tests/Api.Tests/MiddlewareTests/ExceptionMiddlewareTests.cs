@@ -2,8 +2,8 @@
 //using Microsoft.AspNetCore.Http.Features;
 //using AppInsights.EnterpriseTelemetry;
 //using AppInsights.EnterpriseTelemetry.Context;
-//using Microsoft.PS.FlightingService.Api.Middleware;
-//using Microsoft.PS.FlightingService.Common.AppExcpetions;
+//using Microsoft.FeatureFlighting.Api.Middleware;
+//using Microsoft.FeatureFlighting.Common.AppExcpetions;
 //using Microsoft.VisualStudio.TestTools.UnitTesting;
 //using Moq;
 //using Newtonsoft.Json;
@@ -12,7 +12,7 @@
 //using System.Net;
 //using System.Threading.Tasks;
 
-//namespace Microsoft.PS.FlightingService.Api.Tests.MiddlewareTests
+//namespace Microsoft.FeatureFlighting.Api.Tests.MiddlewareTests
 //{
 //    [ExcludeFromCodeCoverage]
 //    [TestCategory("ExceptionMiddleware")]

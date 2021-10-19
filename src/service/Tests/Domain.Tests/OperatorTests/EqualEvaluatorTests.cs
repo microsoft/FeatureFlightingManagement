@@ -1,12 +1,12 @@
-﻿using Microsoft.PS.FlightingService.Common;
-using Microsoft.PS.FlightingService.Domain.Evaluators;
-using Microsoft.PS.FlightingService.Domain.FeatureFilters;
-using Microsoft.PS.FlightingService.Domain.Interfaces;
+﻿using Microsoft.FeatureFlighting.Common;
+using Microsoft.FeatureFlighting.Domain.Evaluators;
+using Microsoft.FeatureFlighting.Domain.FeatureFilters;
+using Microsoft.FeatureFlighting.Domain.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Threading.Tasks;
 
-namespace Microsoft.PS.FlightingService.Domain.Tests.OperatorTests
+namespace Microsoft.FeatureFlighting.Domain.Tests.OperatorTests
 {
     [TestClass]
     public class EqualEvaluatorTests

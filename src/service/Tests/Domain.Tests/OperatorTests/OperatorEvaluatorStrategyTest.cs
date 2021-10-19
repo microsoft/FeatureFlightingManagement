@@ -1,12 +1,12 @@
 ﻿using Microsoft.Graph;
-using Microsoft.PS.FlightingService.Domain.Evaluators;
-using Microsoft.PS.FlightingService.Domain.FeatureFilters;
+using Microsoft.FeatureFlighting.Domain.Evaluators;
+using Microsoft.FeatureFlighting.Domain.FeatureFilters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.PS.FlightingService.Domain.Tests.OperatorTests
+namespace Microsoft.FeatureFlighting.Domain.Tests.OperatorTests
 {
     [TestClass]
     public class OperatorEvaluatorStrategyTest

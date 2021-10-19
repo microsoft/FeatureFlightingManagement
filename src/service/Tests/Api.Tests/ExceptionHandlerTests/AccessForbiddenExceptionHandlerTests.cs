@@ -5,10 +5,10 @@ using AppInsights.EnterpriseTelemetry;
 using Microsoft.AspNetCore.Http;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.PS.FlightingService.Common.AppExcpetions;
-using Microsoft.PS.FlightingService.Api.ExceptionHandler;
+using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Api.ExceptionHandler;
 
-namespace Microsoft.PS.FlightingService.Api.Tests.ExceptionHandlerTests
+namespace Microsoft.FeatureFlighting.Api.Tests.ExceptionHandlerTests
 {
     [TestClass]
     public class AccessForbiddenExceptionHandlerTests
