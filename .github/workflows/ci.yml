@@ -27,9 +27,3 @@ jobs:
     
     - name: Test
       run: dotnet test src/service/Microsoft.FeatureFlighting.sln --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
-    
-    - name: Publish to coveralls
-      uses: coverallsapp/github-action@master   
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }} 
-        path-to-lcov: src/service/TestResults/coverage.info
