@@ -20,13 +20,13 @@ jobs:
         dotnet-version: 3.1.x
     
     - name: Restore dependencies
-      run: dotnet restore  src/service/Microsoft.PS.FlightingService.sln
+      run: dotnet restore  src/service/Microsoft.FeatureFlighting.sln
     
     - name: Build
-      run: dotnet build src/service/Microsoft.PS.FlightingService.sln --no-restore
+      run: dotnet build src/service/Microsoft.FeatureFlighting.sln --no-restore
     
     - name: Test
-      run: dotnet test src/service/Microsoft.PS.FlightingService.sln --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
+      run: dotnet test src/service/Microsoft.FeatureFlighting.sln --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
     
     - name: Publish to coveralls
       uses: coverallsapp/github-action@master   
