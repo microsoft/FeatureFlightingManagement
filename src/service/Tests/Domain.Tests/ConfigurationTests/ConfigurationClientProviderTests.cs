@@ -1,7 +1,7 @@
 ﻿using Azure;
 using Azure.Data.AppConfiguration;
 using Microsoft.Extensions.Configuration;
-using Microsoft.PS.FlightingService.Domain.Configuration;
+using Microsoft.FeatureFlighting.Domain.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Newtonsoft.Json;
@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 
-namespace Microsoft.PS.FlightingService.Domain.Tests.ConfigurationTests
+namespace Microsoft.FeatureFlighting.Domain.Tests.ConfigurationTests
 {
     [TestClass]
     [TestCategory("ConfigurationClientProvider")]

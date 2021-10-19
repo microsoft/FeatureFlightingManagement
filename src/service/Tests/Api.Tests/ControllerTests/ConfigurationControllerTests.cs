@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.PS.FlightingService.Api.Controllers;
-using Microsoft.PS.FlightingService.Domain.Interfaces;
+using Microsoft.FeatureFlighting.Api.Controllers;
+using Microsoft.FeatureFlighting.Domain.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Microsoft.PS.FlightingService.Api.Tests.ControllerTests
+namespace Microsoft.FeatureFlighting.Api.Tests.ControllerTests
 {
     [ExcludeFromCodeCoverage]
     [TestCategory("ConfigurationController")]

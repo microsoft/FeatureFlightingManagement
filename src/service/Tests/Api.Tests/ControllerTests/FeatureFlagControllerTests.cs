@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using AppInsights.EnterpriseTelemetry;
 using AppInsights.EnterpriseTelemetry.Context;
-using Microsoft.PS.FlightingService.Common;
-using Microsoft.PS.FlightingService.Common.AppExcpetions;
-using Microsoft.PS.FlightingService.Domain.Configuration;
-using Microsoft.PS.FlightingService.Domain.Interfaces;
-using Microsoft.PS.FlightingService.Services.Interfaces;
+using Microsoft.FeatureFlighting.Common;
+using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Domain.Configuration;
+using Microsoft.FeatureFlighting.Domain.Interfaces;
+using Microsoft.FeatureFlighting.Services.Interfaces;
 using Microsoft.PS.Services.FlightingService.Api.ActionFilters;
 using Microsoft.PS.Services.FlightingService.Api.Controllers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,7 +18,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Microsoft.PS.FlightingService.Api.Tests.ControllerTests
+namespace Microsoft.FeatureFlighting.Api.Tests.ControllerTests
 {
     [ExcludeFromCodeCoverage]
     [TestCategory("FeatureFlagController")]

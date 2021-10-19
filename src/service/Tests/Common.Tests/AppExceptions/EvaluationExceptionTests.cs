@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.PS.FlightingService.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Common.AppExcpetions;
 
 
-namespace Microsoft.PS.FlightingService.Common.Tests.AppExceptions
+namespace Microsoft.FeatureFlighting.Common.Tests.AppExceptions
 {   
     [ExcludeFromCodeCoverage]
     [TestClass]

@@ -3,11 +3,11 @@ using Azure.Data.AppConfiguration;
 using Microsoft.Extensions.Configuration;
 using AppInsights.EnterpriseTelemetry;
 using AppInsights.EnterpriseTelemetry.Context;
-using Microsoft.PS.FlightingService.Common;
-using Microsoft.PS.FlightingService.Common.AppExcpetions;
-using Microsoft.PS.FlightingService.Common.Caching;
-using Microsoft.PS.FlightingService.Domain.Configuration;
-using Microsoft.PS.FlightingService.Domain.Interfaces;
+using Microsoft.FeatureFlighting.Common;
+using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Common.Caching;
+using Microsoft.FeatureFlighting.Domain.Configuration;
+using Microsoft.FeatureFlighting.Domain.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Newtonsoft.Json;
@@ -16,7 +16,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.PS.FlightingService.Domain.Tests.ConfigurationTests
+namespace Microsoft.FeatureFlighting.Domain.Tests.ConfigurationTests
 {
     [TestClass]
     [TestCategory("FeatureFlagManagerTests")]

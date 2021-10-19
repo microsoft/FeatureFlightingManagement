@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using AppInsights.EnterpriseTelemetry;
 using AppInsights.EnterpriseTelemetry.Context;
-using Microsoft.PS.FlightingService.Services.Interfaces;
+using Microsoft.FeatureFlighting.Services.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Moq.Protected;
@@ -14,7 +14,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.PS.FlightingService.Services.Tests
+namespace Microsoft.FeatureFlighting.Services.Tests
 {
     [TestClass]
     public class CarbonFlightingServiceTests

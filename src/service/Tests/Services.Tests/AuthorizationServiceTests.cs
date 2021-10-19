@@ -3,10 +3,10 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
-using Microsoft.PS.FlightingService.Services;
+using Microsoft.FeatureFlighting.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.PS.FlightingService.Services.Interfaces;
-using Microsoft.PS.FlightingService.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Services.Interfaces;
+using Microsoft.FeatureFlighting.Common.AppExcpetions;
 
 namespace Services.Tests
 {   
