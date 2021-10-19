@@ -26,7 +26,7 @@ jobs:
       run: dotnet build src/service/Microsoft.PS.FlightingService.sln --no-restore
     
     - name: Test
-      run: dotnet test src/service/Tests/**/*.Tests.csproj --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
+      run: dotnet test src/service/Microsoft.PS.FlightingService.sln --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
     
     - name: Publish to coveralls
       uses: coverallsapp/github-action@master   
