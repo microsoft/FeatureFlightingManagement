@@ -20,13 +20,13 @@ jobs:
         dotnet-version: 5.0.x
     
     - name: Restore dependencies
-      run: dotnet restore **/Microsoft.PS.FlightingService.sln
+      run: dotnet restore  src/service/Microsoft.PS.FlightingService.sln
     
     - name: Build
-      run: dotnet build **/Microsoft.PS.FlightingService.sln --no-restore
+      run: dotnet build src/service/Microsoft.PS.FlightingService.sln --no-restore
     
     - name: Test
-      run: dotnet test src/Tests/**/*.Tests.csproj --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
+      run: dotnet test src/service/Tests/**/*.Tests.csproj --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
     
     - name: Publish to coveralls
       uses: coverallsapp/github-action@master   
