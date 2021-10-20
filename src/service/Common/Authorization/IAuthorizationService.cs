@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.FeatureFlighting.Common.AppExcpetions;
 
-namespace Microsoft.FeatureFlighting.Services.Interfaces
+namespace Microsoft.FeatureFlighting.Common.Authorization
 {
     /// <summary>
     /// Service for authorizing requests

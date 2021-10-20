@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
-using Microsoft.FeatureFlighting.Domain.Interfaces;
-using Microsoft.FeatureFlighting.Domain.FeatureFilters;
+using Microsoft.FeatureFlighting.Core.Spec;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
 namespace Microsoft.FeatureFlighting.Api.Controllers
 {

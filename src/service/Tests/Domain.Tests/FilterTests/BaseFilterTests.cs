@@ -1,12 +1,12 @@
 ﻿//using Microsoft.AspNetCore.Http;
 //using Microsoft.Extensions.Configuration;
 //using AppInsights.EnterpriseTelemetry;
-//using Microsoft.FeatureFlighting.Domain.FeatureFilters;
+//using Microsoft.FeatureFlighting.Core.FeatureFilters;
 //using Microsoft.VisualStudio.TestTools.UnitTesting;
 //using Moq;
 //using System;
 
-//namespace Microsoft.FeatureFlighting.Domain.Tests.FilterTests
+//namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
 //{
 //    [TestCategory("BaseFilter")]
 //    [TestClass]

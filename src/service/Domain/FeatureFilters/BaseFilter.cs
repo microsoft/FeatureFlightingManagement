@@ -11,12 +11,12 @@ using Microsoft.Extensions.Primitives;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Domain.Interfaces;
+using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.FeatureFlighting.Common.AppExcpetions;
 using static Microsoft.FeatureFlighting.Common.Constants;
-using Microsoft.FeatureFlighting.Domain.Evaluators;
+using Microsoft.FeatureFlighting.Core.Evaluators;
 
-namespace Microsoft.FeatureFlighting.Domain.FeatureFilters
+namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
     public abstract class BaseFilter
     {

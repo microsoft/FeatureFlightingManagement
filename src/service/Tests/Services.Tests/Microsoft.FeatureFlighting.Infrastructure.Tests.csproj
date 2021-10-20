@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-
     <IsPackable>false</IsPackable>
+    <LangVersion>Preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Services\Microsoft.FeatureFlighting.Services.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Microsoft.FeatureFlighting.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

@@ -8,9 +8,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
-using Microsoft.FeatureFlighting.Domain;
-using Microsoft.FeatureFlighting.Caching;
-using Microsoft.FeatureFlighting.Services;
+using Microsoft.FeatureFlighting.Core;
+using Microsoft.FeatureFlighting.Infrastructure.Cache;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement.FeatureFilters;
 using Microsoft.FeatureFlighting.Common.Caching;
@@ -18,16 +17,21 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using AppInsights.EnterpriseTelemetry.Web.Extension;
 using Microsoft.FeatureFlighting.Api.Controllers;
 using Microsoft.FeatureFlighting.Api.Middlewares;
-using Microsoft.FeatureFlighting.Domain.Evaluators;
-using Microsoft.FeatureFlighting.Domain.Interfaces;
-using Microsoft.FeatureFlighting.Services.Interfaces;
-using Microsoft.FeatureFlighting.Domain.Configuration;
+using Microsoft.FeatureFlighting.Core.Evaluators;
+using Microsoft.FeatureFlighting.Core.Spec;
+using Microsoft.FeatureFlighting.Core.Configuration;
 using Microsoft.FeatureFlighting.Api.ExceptionHandler;
-using Microsoft.FeatureFlighting.Domain.FeatureFilters;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using AppInsights.EnterpriseTelemetry.Web.Extension.Filters;
 using Microsoft.PS.Services.FlightingService.Api.Controllers;
 using Microsoft.PS.Services.FlightingService.Api.ActionFilters;
 using AppInsights.EnterpriseTelemetry.Web.Extension.Middlewares;
+using Microsoft.FeatureFlighting.Common.Authorization;
+using Microsoft.FeatureFlighting.Core.AzureAppConfiguration;
+using Microsoft.FeatureFlighting.Common.Group;
+using Microsoft.FeatureFlighting.Infrastructure.Graph;
+using Microsoft.FeatureFlighting.Infrastructure.Authorization;
+using Microsoft.FeatureFlighting.Common.Config;
 
 namespace Microsoft.PS.Services.FlightingService.Api
 {
@@ -132,18 +136,12 @@ namespace Microsoft.PS.Services.FlightingService.Api
             services.AddSingleton<IGlobalExceptionHandler, AccessForbiddenExceptionHandler>();
             services.AddSingleton<IGlobalExceptionHandler, GenericExceptionHandler>();
             services.AddEnterpriseTelemetry(Configuration);
+            services.AddSingleton<ITenantConfigurationProvider, TenantConfigurationProvider>();
             services.AddSingleton<ICacheFactory, FlightingCacheFactory>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IAuthorizationService, AuthorizationService>();
-            services.AddSingleton<IGraphApiAccessProvider, GraphApiAccessProvider>();
-
-            services.AddSingleton<IConfigurationClientProvider, ConfigurationClientProvider>();
-
-            services.AddHttpClient(Configuration.GetValue<string>("CarbonFlightingService:Name"), client =>
-            {
-                client.BaseAddress = new System.Uri(Configuration.GetValue<string>("CarbonFlightingService:BaseUrl"));
-            });
-            services.AddSingleton<IBackwardCompatibleFeatureManager, CarbonFlightingService>();
+            services.AddSingleton<IGroupVerificationService, GraphGroupVerificationService>();
+            services.AddSingleton<IAzureConfigurationClientProvider, AzureConfigurationClientProvider>();
         }
 
         private void AddFeatureManagement(IServiceCollection services)

@@ -1,21 +1,22 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Services.Interfaces;
-using Microsoft.FeatureFlighting.Domain.FeatureFilters;
+using Microsoft.Extensions.Configuration;
+using Microsoft.FeatureFlighting.Common.Group;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using static Microsoft.FeatureFlighting.Common.Constants;
 
-namespace Microsoft.FeatureFlighting.Domain.Evaluators
+namespace Microsoft.FeatureFlighting.Core.Evaluators
 {
     public class NotMemberOfSecurityGroupEvaluator : BaseOperatorEvaluator
     {
         public override Operator Operator => Operator.NotMemberOfSecurityGroup;
         public override string[] SupportedFilters => new string[] { FilterKeys.Alias, FilterKeys.UserUpn };
+        
         private readonly SecurityGroupEvaluator _securityGroupEvaluator;
 
-        public NotMemberOfSecurityGroupEvaluator(IGraphApiAccessProvider graphProvider, IConfiguration configuation)
+        public NotMemberOfSecurityGroupEvaluator(IGroupVerificationService groupVerificationService, IConfiguration configuation)
         {
-            _securityGroupEvaluator = new SecurityGroupEvaluator(graphProvider, configuation);
+            _securityGroupEvaluator = new SecurityGroupEvaluator(groupVerificationService, configuation);
         }
 
         protected override Task<EvaluationResult> Process(string configuredValue, string contextValue, string filterType, LoggerTrackingIds trackingIds)

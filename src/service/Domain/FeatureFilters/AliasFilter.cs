@@ -1,12 +1,12 @@
 ﻿using System.Threading.Tasks;
-using AppInsights.EnterpriseTelemetry;
 using Microsoft.AspNetCore.Http;
 using Microsoft.FeatureManagement;
+using AppInsights.EnterpriseTelemetry;
 using Microsoft.Extensions.Configuration;
-using Microsoft.FeatureFlighting.Domain.Interfaces;
+using Microsoft.FeatureFlighting.Core.Spec;
 using static Microsoft.FeatureFlighting.Common.Constants;
 
-namespace Microsoft.FeatureFlighting.Domain.FeatureFilters
+namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
     [FilterAlias(FilterKeys.Alias)]
     public class AliasFilter : BaseFilter, IFeatureFilter

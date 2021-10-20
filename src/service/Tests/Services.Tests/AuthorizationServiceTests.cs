@@ -1,12 +1,14 @@
 using Moq;
+using System.Threading.Tasks;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
-using Microsoft.FeatureFlighting.Services;
+using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.FeatureFlighting.Services.Interfaces;
+using Microsoft.FeatureFlighting.Common.Authorization;
 using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Infrastructure.Authorization;
 
 namespace Services.Tests
 {   
@@ -16,7 +18,8 @@ namespace Services.Tests
         private Mock<IHttpContextAccessor> httpAccessorMockWithPermissions;
         private Mock<IHttpContextAccessor> httpAccessorMockWithoutPermissions;
         private Mock<IHttpContextAccessor> httpAccessorWithSuperAdminPermissions;
-        private IConfiguration _fakeConfiguration;
+        private ITenantConfigurationProvider _tenantConfigurationProvider;
+        private IConfiguration _mockConfiguration;
 
         [TestInitialize]
         public void TestStartup()
@@ -31,14 +34,14 @@ namespace Services.Tests
         [TestMethod]
         public void Must_Authorize_When_Claims_Are_Present()
         {
-            IAuthorizationService authService = new AuthorizationService(httpAccessorMockWithPermissions.Object, _fakeConfiguration);
+            IAuthorizationService authService = new AuthorizationService(httpAccessorMockWithPermissions.Object, _tenantConfigurationProvider, _mockConfiguration);
             authService.EnsureAuthorized("TestApp", "TestOp", "CorrId");
         }
 
         [TestMethod]
         public void Must_Authorize_When_Admin_Claims_Are_Present()
         {
-            IAuthorizationService authService = new AuthorizationService(httpAccessorWithSuperAdminPermissions.Object, _fakeConfiguration);
+            IAuthorizationService authService = new AuthorizationService(httpAccessorWithSuperAdminPermissions.Object, _tenantConfigurationProvider, _mockConfiguration);
             authService.EnsureAuthorized("TestApp", "TestOp", "CorrId");
         }
 
@@ -46,14 +49,14 @@ namespace Services.Tests
         [TestMethod]
         public void Must_Authorize_When_Claims_Are_Not_Present()
         {
-            IAuthorizationService authService = new AuthorizationService(httpAccessorMockWithoutPermissions.Object, _fakeConfiguration);
+            IAuthorizationService authService = new AuthorizationService(httpAccessorMockWithoutPermissions.Object, _tenantConfigurationProvider, _mockConfiguration);
             authService.EnsureAuthorized("TestApp", "TestOp", "CorrId");
         }
 
         [TestMethod]
         public void Must_Return_Authorized_When_Having_Claims()
         {
-            IAuthorizationService authService = new AuthorizationService(httpAccessorMockWithPermissions.Object, _fakeConfiguration);
+            IAuthorizationService authService = new AuthorizationService(httpAccessorMockWithPermissions.Object, _tenantConfigurationProvider, _mockConfiguration);
             bool isAuthorized = authService.IsAuthorized("TestApp");
             Assert.IsTrue(isAuthorized);
         }
@@ -61,7 +64,7 @@ namespace Services.Tests
         [TestMethod]
         public void Must_Return_UnAuthorized_When_Not_Having_Claims()
         {
-            IAuthorizationService authService = new AuthorizationService(httpAccessorMockWithoutPermissions.Object, _fakeConfiguration);
+            IAuthorizationService authService = new AuthorizationService(httpAccessorMockWithoutPermissions.Object, _tenantConfigurationProvider, _mockConfiguration);
             bool isAuthorized = authService.IsAuthorized("TestApp");
             Assert.IsFalse(isAuthorized);
         }
@@ -71,7 +74,7 @@ namespace Services.Tests
         {
             var mockHttpContextAccessor = SetupHttpContextAccessorMock(null, false, false, null, null, "6f40053e-5319-40e5-a90b-6f714506d96d");
             var tenant = "GTA IV OPERATIONAL REPORTING";
-            IAuthorizationService authService = new AuthorizationService(mockHttpContextAccessor.Object, _fakeConfiguration);
+            IAuthorizationService authService = new AuthorizationService(mockHttpContextAccessor.Object, _tenantConfigurationProvider, _mockConfiguration);
             authService.AugmentAdminClaims(tenant);
             bool isAuthorized = authService.IsAuthorized(tenant);
             Assert.IsTrue(isAuthorized);
@@ -82,7 +85,7 @@ namespace Services.Tests
         {
             var mockHttpContextAccessor = SetupHttpContextAccessorMock(null, false, false, null, null, "admin@microsoft.com");
             var tenant = "GTA IV OPERATIONAL REPORTING";
-            IAuthorizationService authService = new AuthorizationService(mockHttpContextAccessor.Object, _fakeConfiguration);
+            IAuthorizationService authService = new AuthorizationService(mockHttpContextAccessor.Object, _tenantConfigurationProvider, _mockConfiguration);
             authService.AugmentAdminClaims(tenant);
             bool isAuthorized = authService.IsAuthorized(tenant);
             Assert.IsTrue(isAuthorized);
@@ -93,7 +96,7 @@ namespace Services.Tests
         {
             var mockHttpContextAccessor = SetupHttpContextAccessorMock(null, false, false, null, null, "NON_ADMIN_ID");
             var tenant = "GTA IV OPERATIONAL REPORTING";
-            IAuthorizationService authService = new AuthorizationService(mockHttpContextAccessor.Object, _fakeConfiguration);
+            IAuthorizationService authService = new AuthorizationService(mockHttpContextAccessor.Object, _tenantConfigurationProvider, _mockConfiguration);
             authService.AugmentAdminClaims(tenant);
             bool isAuthorized = authService.IsAuthorized(tenant);
             Assert.IsFalse(isAuthorized);
@@ -154,7 +157,17 @@ namespace Services.Tests
         [DeploymentItem(@"appsettings.test.json", @"")]
         private void SetMockConfig()
         {
-            _fakeConfiguration = new ConfigurationBuilder().AddJsonFile(@"appsettings.test.json").Build();
+            TenantConfiguration mockConfiguration = TenantConfiguration.GetDefault();
+            mockConfiguration.Authorization = new()
+            {
+                Type = "Configuration",
+                Administrators = "tester-001@microsoft.com,appid-001,6f40053e-5319-40e5-a90b-6f714506d96d,admin@microsoft.com"
+            };
+            Mock<ITenantConfigurationProvider> mockProvider = new();
+            mockProvider.Setup(provider => provider.Get(It.IsAny<string>()))
+                .Returns(Task.FromResult(mockConfiguration));
+            _tenantConfigurationProvider = mockProvider.Object;
+            _mockConfiguration = new ConfigurationBuilder().AddJsonFile(@"appsettings.test.json").Build();
         }
     }
 }

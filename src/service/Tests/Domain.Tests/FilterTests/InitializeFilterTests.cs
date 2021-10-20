@@ -5,11 +5,11 @@ using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.FeatureFlighting.Domain.Interfaces;
-using Microsoft.FeatureFlighting.Domain.Evaluators;
-using Microsoft.FeatureFlighting.Domain.FeatureFilters;
+using Microsoft.FeatureFlighting.Core.Spec;
+using Microsoft.FeatureFlighting.Core.Evaluators;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
-namespace Microsoft.FeatureFlighting.Domain.Tests.FilterTests
+namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
 {
     [TestClass]
     public class InitializeFilterTests

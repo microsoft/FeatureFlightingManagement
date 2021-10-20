@@ -1,8 +1,8 @@
 ﻿using System;
 using Newtonsoft.Json;
-using Microsoft.FeatureFlighting.Domain.FeatureFilters;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
-namespace Microsoft.FeatureFlighting.Domain.Configuration
+namespace Microsoft.FeatureFlighting.Core
 {
     [Serializable]
     public class FeatureFlag

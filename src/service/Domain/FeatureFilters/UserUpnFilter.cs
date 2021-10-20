@@ -3,10 +3,10 @@ using AppInsights.EnterpriseTelemetry;
 using Microsoft.AspNetCore.Http;
 using Microsoft.FeatureManagement;
 using Microsoft.Extensions.Configuration;
-using Microsoft.FeatureFlighting.Domain.Interfaces;
+using Microsoft.FeatureFlighting.Core.Spec;
 using static Microsoft.FeatureFlighting.Common.Constants;
 
-namespace Microsoft.FeatureFlighting.Domain.FeatureFilters
+namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
     [FilterAlias(FilterKeys.UserUpn)]
     public class UserUpnFilter : BaseFilter, IFeatureFilter

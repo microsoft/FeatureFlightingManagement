@@ -6,8 +6,7 @@ using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Common.AppExcpetions;
 using Microsoft.FeatureFlighting.Common.Caching;
-using Microsoft.FeatureFlighting.Domain.Configuration;
-using Microsoft.FeatureFlighting.Domain.Interfaces;
+using Microsoft.FeatureFlighting.Core.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Newtonsoft.Json;
@@ -15,18 +14,19 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.FeatureFlighting.Core.AzureAppConfiguration;
 
-namespace Microsoft.FeatureFlighting.Domain.Tests.ConfigurationTests
+namespace Microsoft.FeatureFlighting.Core.Tests.ConfigurationTests
 {
     [TestClass]
     [TestCategory("FeatureFlagManagerTests")]
     public class FeatureFlagManagerTests
     {
         #region variables
-        private readonly Mock<IConfiguration> config = new Mock<IConfiguration>();
-        private readonly Mock<IConfigurationClientProvider> configClientProvider = new Mock<IConfigurationClientProvider>();
-        private readonly Mock<ILogger> logger = new Mock<ILogger>();
-        private readonly Mock<ICacheFactory> mockCacheFactory = new Mock<ICacheFactory>();
+        private readonly Mock<IConfiguration> config = new();
+        private readonly Mock<IAzureConfigurationClientProvider> configClientProvider = new();
+        private readonly Mock<ILogger> logger = new();
+        private readonly Mock<ICacheFactory> mockCacheFactory = new();
         private LoggerTrackingIds loggerTrackingIds;
         private FeatureFlagManager featureFlagManager;
         private const string str = @"

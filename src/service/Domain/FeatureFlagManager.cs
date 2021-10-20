@@ -4,31 +4,33 @@ using System.Linq;
 using Newtonsoft.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
-using AppInsights.EnterpriseTelemetry;
 using System.Collections.Generic;
 using Azure.Data.AppConfiguration;
-using AppInsights.EnterpriseTelemetry.Context;
-using Microsoft.Extensions.Configuration;
+using AppInsights.EnterpriseTelemetry;
 using Microsoft.FeatureFlighting.Common;
+using Microsoft.Extensions.Configuration;
+using Microsoft.FeatureFlighting.Core.Spec;
+using AppInsights.EnterpriseTelemetry.Context;
+using Microsoft.FeatureFlighting.Common.Model;
 using Microsoft.FeatureFlighting.Common.Caching;
-using Microsoft.FeatureFlighting.Domain.Interfaces;
 using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Core.AzureAppConfiguration;
 
-namespace Microsoft.FeatureFlighting.Domain.Configuration
+namespace Microsoft.FeatureFlighting.Core.Configuration
 {
     public class FeatureFlagManager : IFeatureFlagManager
     {
-        private readonly IConfiguration _configuration;
-        private readonly IConfigurationClientProvider _configurationClientProvider;
+        private readonly IAzureConfigurationClientProvider _configurationClientProvider;
         private readonly ICacheFactory _cacheFactory;
         private readonly ILogger _logger;
         private readonly string _featureFlagContenetType = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8";
         private readonly string _featureFlagPrefix = ".appconfig.featureflag/";
-        private readonly JsonSerializerOptions _defaultSerializationOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        private readonly string _envLabel;
+        private readonly JsonSerializerOptions _defaultSerializationOptions = new() { PropertyNameCaseInsensitive = true };
 
-        public FeatureFlagManager(IConfiguration configuration, IConfigurationClientProvider configurationClientProvider, ICacheFactory cacheFactory, ILogger logger)
+        public FeatureFlagManager(IConfiguration configuration, IAzureConfigurationClientProvider configurationClientProvider, ICacheFactory cacheFactory, ILogger logger)
         {
-            _configuration = configuration;
+            _envLabel = configuration.GetValue<string>("Env:Label");
             _configurationClientProvider = configurationClientProvider;
             _cacheFactory = cacheFactory;
             _logger = logger;
@@ -40,16 +42,16 @@ namespace Microsoft.FeatureFlighting.Domain.Configuration
             {
                 ValidateFeatureFlag(featureFlag, "UNKNOWN", appName, envName);
                 featureFlag.Environment = envName;
-                featureFlag.Id = Utility.GetFeatureFlagId(appName, envName, featureFlag.Name);
+                featureFlag.Id = FlagUtilities.GetFeatureFlagId(appName, envName, featureFlag.Name);
                 var value = JsonConvert.SerializeObject(featureFlag);
 
                 // Create a Configuration Setting to be stored in the Configuration Store.
-                var setting = new ConfigurationSetting(_featureFlagPrefix + featureFlag.Id, value, _configuration["Env:Label"])
+                var setting = new ConfigurationSetting(_featureFlagPrefix + featureFlag.Id, value, _envLabel)
                 {
                     ContentType = _featureFlagContenetType
                 };
 
-                var client = _configurationClientProvider.GetConfigurationClient();
+                ConfigurationClient client = _configurationClientProvider.GetConfigurationClient();
                 await client.SetConfigurationSettingAsync(setting);
                 await DeleteCachedFeatureFlags(appName, envName, trackingIds);
             }
@@ -76,12 +78,12 @@ namespace Microsoft.FeatureFlighting.Domain.Configuration
             {
                 ValidateFeatureFlag(featureFlag, featureFlag?.Name, appName, envName);
                 featureFlag.Environment = envName;
-                featureFlag.Id = Utility.GetFeatureFlagId(appName, envName, featureFlag.Name);
+                featureFlag.Id = FlagUtilities.GetFeatureFlagId(appName, envName, featureFlag.Name);
 
                 var value = JsonConvert.SerializeObject(featureFlag);
 
                 // Create a Configuration Setting to be stored in the Configuration Store.
-                var setting = new ConfigurationSetting(_featureFlagPrefix + featureFlag.Id, value, _configuration["Env:Label"])
+                var setting = new ConfigurationSetting(_featureFlagPrefix + featureFlag.Id, value, _envLabel)
                 {
                     ContentType = _featureFlagContenetType
                 };
@@ -106,11 +108,12 @@ namespace Microsoft.FeatureFlighting.Domain.Configuration
         {
             try
             {
-                var key = Utility.GetFeatureFlagId(appName, envName, name);
-                var client = _configurationClientProvider.GetConfigurationClient();
-                var res = await client.GetConfigurationSettingAsync(_featureFlagPrefix + key, _configuration["Env:Label"]);
+                string key = FlagUtilities.GetFeatureFlagId(appName, envName, name);
+                ConfigurationClient client = _configurationClientProvider.GetConfigurationClient();
+                var res = await client.GetConfigurationSettingAsync(_featureFlagPrefix + key, _envLabel);
                 var featureflag = JsonConvert.DeserializeObject<FeatureFlag>(res.Value.Value);
-
+                featureflag.Name = !string.IsNullOrWhiteSpace(featureflag.Name) ? featureflag.Name : FlagUtilities.GetFeatureFlagName(appName, envName, featureflag.Id);
+                featureflag.Environment = !string.IsNullOrWhiteSpace(featureflag.Environment) ? featureflag.Environment : envName.ToLowerInvariant();
                 return featureflag;
             }
             catch (RequestFailedException rex)
@@ -145,7 +148,7 @@ namespace Microsoft.FeatureFlighting.Domain.Configuration
             var selector = new SettingSelector()
             {
                 KeyFilter = _featureFlagPrefix + appName.ToLowerInvariant() + "_" + envName.ToLowerInvariant() + "*",
-                LabelFilter = _configuration["Env:Label"]
+                LabelFilter = _envLabel
             };
 
             var client = _configurationClientProvider.GetConfigurationClient();
@@ -158,9 +161,9 @@ namespace Microsoft.FeatureFlighting.Domain.Configuration
                 var dto = new FeatureFlagDto()
                 {
                     Id = featureFlag.Id,
-                    Environment = featureFlag.Environment,
+                    Environment = !string.IsNullOrWhiteSpace(featureFlag.Environment) ? featureFlag.Environment : envName.ToLowerInvariant(),
                     Enabled = featureFlag.Enabled,
-                    Name = featureFlag.Name,
+                    Name = !string.IsNullOrWhiteSpace(featureFlag.Name) ? featureFlag.Name : FlagUtilities.GetFeatureFlagName(appName, envName, featureFlag.Id),
                 };
 
                 if (featureFlag.Conditions != null && featureFlag.Conditions.Client_Filters != null && featureFlag.Conditions.Client_Filters.Any())
@@ -251,11 +254,11 @@ namespace Microsoft.FeatureFlighting.Domain.Configuration
         {
             try
             {
-                var featureFlag = await GetFeatureFlag(appName, envName, featureName, trackingIds);
+                FeatureFlag featureFlag = await GetFeatureFlag(appName, envName, featureName, trackingIds);
                 ValidateFeatureFlag(featureFlag, featureName, appName, envName);
                 var featureId = featureFlag.Id;
                 var client = _configurationClientProvider.GetConfigurationClient();
-                await client.DeleteConfigurationSettingAsync(_featureFlagPrefix + featureId, _configuration["Env:Label"]);
+                await client.DeleteConfigurationSettingAsync(_featureFlagPrefix + featureId, _envLabel);
                 await DeleteCachedFeatureFlags(appName, envName, trackingIds);
             }
             catch (RequestFailedException rex)
@@ -332,7 +335,7 @@ namespace Microsoft.FeatureFlighting.Domain.Configuration
                 await secondaryCache.Delete(cacheKey, trackingIds.CorrelationId, trackingIds.TransactionId);
         }
 
-        private string GetFeatureFlagsCacheKey(string appName, string environment) => $"Flags:{Utility.GetFormattedTenantName(appName)}:{environment.ToUpperInvariant()}";
+        private string GetFeatureFlagsCacheKey(string appName, string environment) => $"Flags:{appName.ToUpperInvariant()}:{environment.ToUpperInvariant()}";
         #endregion Private::Cache
 
         private void ValidateFeatureFlag(FeatureFlag featureFlag, string flagName, string appName, string envName)

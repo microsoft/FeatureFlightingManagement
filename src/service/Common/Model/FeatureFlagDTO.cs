@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Microsoft.FeatureFlighting.Domain.Configuration
+namespace Microsoft.FeatureFlighting.Common.Model
 {
     public class FeatureFlagDto
     {

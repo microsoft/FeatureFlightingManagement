@@ -5,9 +5,6 @@ using AppInsights.EnterpriseTelemetry;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Common.AppExcpetions;
-using Microsoft.FeatureFlighting.Domain.Configuration;
-using Microsoft.FeatureFlighting.Domain.Interfaces;
-using Microsoft.FeatureFlighting.Services.Interfaces;
 using Microsoft.PS.Services.FlightingService.Api.ActionFilters;
 using Microsoft.PS.Services.FlightingService.Api.Controllers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -17,6 +14,10 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.FeatureFlighting.Common.Model;
+using Microsoft.FeatureFlighting.Core;
+using Microsoft.FeatureFlighting.Core.Spec;
+using Microsoft.FeatureFlighting.Common.Authorization;
 
 namespace Microsoft.FeatureFlighting.Api.Tests.ControllerTests
 {
@@ -626,12 +627,13 @@ namespace Microsoft.FeatureFlighting.Api.Tests.ControllerTests
         public Mock<IFeatureFlagEvaluator> SetFeatureFlagEvaluatorMock()
         {
             var mockfeatureflagEvaluator = new Mock<IFeatureFlagEvaluator>();
-            var mockResults = new Dictionary<string, bool>()
+            IDictionary<string, bool> mockResults = new Dictionary<string, bool>()
             {
                 { "Flag", true }
             };
             mockfeatureflagEvaluator.Setup(m => m.Evaluate(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<List<string>>()))
                 .Returns(Task.FromResult(mockResults));
+
             return mockfeatureflagEvaluator;
         }
 
