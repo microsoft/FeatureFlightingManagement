@@ -1,10 +1,10 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Domain.FeatureFilters;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using static Microsoft.FeatureFlighting.Common.Constants;
 
-namespace Microsoft.FeatureFlighting.Domain.Evaluators
+namespace Microsoft.FeatureFlighting.Core.Evaluators
 {
     public class InEvaluator : BaseOperatorEvaluator
     {

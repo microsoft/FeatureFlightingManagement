@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Microsoft.FeatureFlighting.Domain.Evaluators
+namespace Microsoft.FeatureFlighting.Core.Evaluators
 {
     public class EvaluationResult
     {

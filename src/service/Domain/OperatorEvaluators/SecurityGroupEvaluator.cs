@@ -1,22 +1,22 @@
 ﻿using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Services.Interfaces;
-using Microsoft.FeatureFlighting.Domain.FeatureFilters;
+using Microsoft.Extensions.Configuration;
+using Microsoft.FeatureFlighting.Common.Group;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using static Microsoft.FeatureFlighting.Common.Constants;
 
-namespace Microsoft.FeatureFlighting.Domain.Evaluators
+namespace Microsoft.FeatureFlighting.Core.Evaluators
 {
     public class SecurityGroupEvaluator
     {
-        private readonly IGraphApiAccessProvider _graphProvider;
+        private readonly IGroupVerificationService _groupVerificationService;
         private readonly IConfiguration _configuration;
 
-        public SecurityGroupEvaluator(IGraphApiAccessProvider graphProvider, IConfiguration configuation)
+        public SecurityGroupEvaluator(IGroupVerificationService graphProvider, IConfiguration configuation)
         {
-            _graphProvider = graphProvider;
+            _groupVerificationService = graphProvider;
             _configuration = configuation;
         }
 
@@ -36,11 +36,12 @@ namespace Microsoft.FeatureFlighting.Domain.Evaluators
                 if (!IsValidUpn(contextValue))
                     return new EvaluationResult(false, "The UPN is incorrect. Check the format and allowed domains");
 
-                isUserPartOfSecurityGroup = await _graphProvider.IsUserUpnPartOfSecurityGroup(contextValue, securityGroupIds, trackingIds).ConfigureAwait(false);
+                isUserPartOfSecurityGroup = await _groupVerificationService.IsMember(contextValue, securityGroupIds, trackingIds).ConfigureAwait(false);
             }
             else
             {
-                isUserPartOfSecurityGroup = await _graphProvider.IsUserAliasPartOfSecurityGroup(contextValue, securityGroupIds, trackingIds).ConfigureAwait(false);
+                //OBOSOLETE: Check by alias needs to be removed
+                isUserPartOfSecurityGroup = await _groupVerificationService.IsUserAliasPartOfSecurityGroup(contextValue, securityGroupIds, trackingIds).ConfigureAwait(false);
             }
             return new EvaluationResult(op == Operator.MemberOfSecurityGroup ? isUserPartOfSecurityGroup : !isUserPartOfSecurityGroup);
         }
@@ -53,7 +54,9 @@ namespace Microsoft.FeatureFlighting.Domain.Evaluators
             var upnDomain = upnParts.Last();
 
             var allowedUpnDomains = _configuration.GetValue<string>("Authentication:AllowedUpnDomains")?.Split(',');
-            return allowedUpnDomains.Any(allowedDomain =>
+            return allowedUpnDomains == null || 
+                !allowedUpnDomains.Any() || 
+                allowedUpnDomains.Any(allowedDomain =>
                 allowedDomain.ToLowerInvariant() == Flighting.ALL.ToLowerInvariant() ||
                 allowedDomain.ToLowerInvariant() == upnDomain.ToLowerInvariant());
         }

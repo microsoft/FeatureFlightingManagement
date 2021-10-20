@@ -38,9 +38,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Cache\Microsoft.FeatureFlighting.Cache.csproj" />
-    <ProjectReference Include="..\Domain\Microsoft.FeatureFlighting.Domain.csproj" />
-    <ProjectReference Include="..\Services\Microsoft.FeatureFlighting.Services.csproj" />
+    <ProjectReference Include="..\Domain\Microsoft.FeatureFlighting.Core.csproj" />
+    <ProjectReference Include="..\Infrastructure\Microsoft.FeatureFlighting.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

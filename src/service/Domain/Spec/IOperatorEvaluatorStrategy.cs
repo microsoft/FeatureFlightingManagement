@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using Microsoft.FeatureFlighting.Domain.Evaluators;
-using Microsoft.FeatureFlighting.Domain.FeatureFilters;
+using Microsoft.FeatureFlighting.Core.Evaluators;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
-namespace Microsoft.FeatureFlighting.Domain.Interfaces
+namespace Microsoft.FeatureFlighting.Core.Spec
 {
     public interface IOperatorEvaluatorStrategy
     {

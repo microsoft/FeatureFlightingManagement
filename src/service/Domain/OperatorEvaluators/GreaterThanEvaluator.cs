@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Domain.FeatureFilters;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using static Microsoft.FeatureFlighting.Common.Constants;
 
-namespace Microsoft.FeatureFlighting.Domain.Evaluators
+namespace Microsoft.FeatureFlighting.Core.Evaluators
 {
     public class GreaterThanEvaluator : BaseOperatorEvaluator
     {
@@ -16,30 +16,24 @@ namespace Microsoft.FeatureFlighting.Domain.Evaluators
             if (filterType.ToLowerInvariant() == FilterKeys.Date.ToLowerInvariant())
                 return Task.FromResult(EvaluateDate(configuredValue, contextValue));
 
-            if (int.TryParse(configuredValue, out int _) && int.TryParse(contextValue, out int _))
-                return Task.FromResult(EvaluateNumber(configuredValue, contextValue));
+            if (int.TryParse(configuredValue, out int configuredNumber) && int.TryParse(contextValue, out int contextNumber))
+                return Task.FromResult(EvaluateNumber(configuredNumber, contextNumber));
 
             return Task.FromResult(new EvaluationResult(string.Compare(contextValue, configuredValue) > 0));
         }
 
         private EvaluationResult EvaluateDate(string configuredValue, string contextValue)
         {
-            DateTime date = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            DateTime date = new(1970, 1, 1, 0, 0, 0, 0);
             DateTime configuredDate = date.AddMilliseconds(Convert.ToDouble(configuredValue)).ToLocalTime();
             DateTime contextDate = date.AddMilliseconds(Convert.ToDouble(contextValue)).ToLocalTime();
-           
-            
-                return new EvaluationResult(contextDate > configuredDate);
-            
+            return new EvaluationResult(contextDate > configuredDate);
+
         }
 
-        private EvaluationResult EvaluateNumber(string configuredValue, string contextValue)
+        private EvaluationResult EvaluateNumber(double configuredValue, double contextValue)
         {
-            if (int.TryParse(configuredValue, out int configuredNumber) && int.TryParse(contextValue, out int contextNumber))
-            {
-                return new EvaluationResult(contextNumber > configuredNumber);
-            }
-            return new EvaluationResult(false, "Either the context or the configured value is not an integer");
+            return new EvaluationResult(contextValue > configuredValue);
         }
     }
 }

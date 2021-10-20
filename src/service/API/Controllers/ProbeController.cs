@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
+using System.Linq;
+using Microsoft.FeatureFlighting.Common.Config;
 
 namespace Microsoft.FeatureFlighting.Api.Controllers
 {
@@ -25,6 +27,17 @@ namespace Microsoft.FeatureFlighting.Api.Controllers
         [Route("ping")]
         public IActionResult Ping([FromQuery]string configKey)
         {
+            var configSection = _config.GetSection("Tenants");
+            var children = configSection.GetChildren();
+            var f = children.FirstOrDefault();
+
+            foreach(var tenant in children)
+            {
+                var auth = tenant.GetValue<AuthorizationConfiguration>("Authorization");
+                var cache = tenant.GetValue<AuthorizationConfiguration>("Cache");
+
+                var tenC = configSection.GetValue<TenantConfiguration>(tenant.Key);
+            }
             if (string.IsNullOrWhiteSpace(configKey))
                 return new OkObjectResult("Pong");
             

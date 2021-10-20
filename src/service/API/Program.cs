@@ -41,7 +41,7 @@ namespace Microsoft.PS.Services.FlightingService.Api
                         config.AddAzureAppConfiguration(options =>
                         {
                             options
-                                .Connect(builtConfig["AppConfigConString"])
+                                .Connect(builtConfig["AzureAppConfigurationConnectionString"])
                                 .UseFeatureFlags(configure =>
                                 {
                                     configure.Label = builtConfig["Env:Label"];

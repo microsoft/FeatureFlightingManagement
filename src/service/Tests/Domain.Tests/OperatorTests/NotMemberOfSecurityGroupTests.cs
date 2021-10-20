@@ -1,17 +1,14 @@
 ﻿using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Domain.Evaluators;
-using Microsoft.FeatureFlighting.Domain.FeatureFilters;
-using Microsoft.FeatureFlighting.Domain.Interfaces;
+using Microsoft.FeatureFlighting.Core.Evaluators;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.FeatureFlighting.Services.Interfaces;
-using Microsoft.FeatureFlighting.Services;
 using System;
 using System.Collections.Generic;
+using Microsoft.FeatureFlighting.Common.Group;
 
-namespace Microsoft.FeatureFlighting.Domain.Tests.OperatorTests
+namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
 {
     [TestClass]
     public class NotMemberOfSecurityGroupEvaluatorTests
@@ -19,25 +16,25 @@ namespace Microsoft.FeatureFlighting.Domain.Tests.OperatorTests
         private NotMemberOfSecurityGroupEvaluator evaluator;
 
         private Mock<IConfiguration> mockConfig;
-        private Mock<IGraphApiAccessProvider> mockGraphApiProviderWithUpnInSG, mockGraphApiProviderWithUpnNotInSG, mockGraphApiProviderWithAliasNotInSG, mockGraphApiProviderWithAliasInSG;
+        private Mock<IGroupVerificationService> mockGraphApiProviderWithUpnInSG, mockGraphApiProviderWithUpnNotInSG, mockGraphApiProviderWithAliasNotInSG, mockGraphApiProviderWithAliasInSG;
 
         [TestInitialize]
         public void TestStartup()
         {
 
             mockConfig = setconfig();
-            mockGraphApiProviderWithUpnInSG = setGraphApiAccessProvider(true, false);
-            mockGraphApiProviderWithUpnNotInSG = setGraphApiAccessProvider(false, false);
-            mockGraphApiProviderWithAliasNotInSG = setGraphApiAccessProvider(false, false);
-            mockGraphApiProviderWithAliasInSG = setGraphApiAccessProvider(false, true);
+            mockGraphApiProviderWithUpnInSG = SetGroupVerificationService(true, false);
+            mockGraphApiProviderWithUpnNotInSG = SetGroupVerificationService(false, false);
+            mockGraphApiProviderWithAliasNotInSG = SetGroupVerificationService(false, false);
+            mockGraphApiProviderWithAliasInSG = SetGroupVerificationService(false, true);
 
 
         }
 
-        private Mock<IGraphApiAccessProvider> setGraphApiAccessProvider(bool upnInSG, bool aliasInSG)
+        private Mock<IGroupVerificationService> SetGroupVerificationService(bool upnInSG, bool aliasInSG)
         {
-            var mockApiProvider = new Mock<IGraphApiAccessProvider>();
-            mockApiProvider.Setup(x => x.IsUserUpnPartOfSecurityGroup(It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<LoggerTrackingIds>())).
+            var mockApiProvider = new Mock<IGroupVerificationService>();
+            mockApiProvider.Setup(x => x.IsMember(It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<LoggerTrackingIds>())).
                 Returns(Task.FromResult(upnInSG));
             mockApiProvider.Setup(x => x.IsUserAliasPartOfSecurityGroup(It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<LoggerTrackingIds>())).
                Returns(Task.FromResult(aliasInSG));

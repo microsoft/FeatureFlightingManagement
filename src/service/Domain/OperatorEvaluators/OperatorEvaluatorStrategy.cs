@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Domain.Interfaces;
-using Microsoft.FeatureFlighting.Domain.FeatureFilters;
+using Microsoft.FeatureFlighting.Core.Spec;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
-namespace Microsoft.FeatureFlighting.Domain.Evaluators
+namespace Microsoft.FeatureFlighting.Core.Evaluators
 {
     public class OperatorEvaluatorStrategy: IOperatorEvaluatorStrategy
     {

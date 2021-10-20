@@ -1,160 +1,81 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using AppInsights.EnterpriseTelemetry;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using Microsoft.FeatureManagement;
 using System.Collections.Concurrent;
-using AppInsights.EnterpriseTelemetry.Context;
-using Microsoft.Extensions.Configuration;
+using AppInsights.EnterpriseTelemetry;
 using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Domain.Interfaces;
-using Microsoft.FeatureFlighting.Services.Interfaces;
+using Microsoft.FeatureFlighting.Core.Spec;
+using AppInsights.EnterpriseTelemetry.Context;
+using Microsoft.FeatureFlighting.Common.Config;
 
-namespace Microsoft.FeatureFlighting.Domain
+namespace Microsoft.FeatureFlighting.Core
 {
+    // <inheritdoc>
     public class FeatureFlagEvaluator : IFeatureFlagEvaluator
     {
         private readonly IFeatureManager _featureManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IBackwardCompatibleFeatureManager _backwardCompatibleFeatureManager;
-        private readonly IConfiguration _configuration;
+        private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
         private readonly ILogger _logger;
 
-        public FeatureFlagEvaluator(IFeatureManager featureManager, IBackwardCompatibleFeatureManager backwardCompatibleFeatureManager, IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ILogger logger)
+        public FeatureFlagEvaluator(IFeatureManager featureManager, IHttpContextAccessor httpContextAccessor, ITenantConfigurationProvider tenantConfigurationProvider, ILogger logger)
         {
             _featureManager = featureManager;
-            _backwardCompatibleFeatureManager = backwardCompatibleFeatureManager;
             _httpContextAccessor = httpContextAccessor;
-            _configuration = configuration;
+            _tenantConfigurationProvider = tenantConfigurationProvider;
             _logger = logger;
         }
 
-        public async Task<Dictionary<string, bool>> Evaluate(string applicationName, string environment, List<string> featureFlags)
+        // <inheritdoc>
+        public async Task<IDictionary<string, bool>> Evaluate(string applicationName, string environment, List<string> featureFlags)
         {
-            var performanceContext = new HighPrecisionPerformanceContext("Feature Flag Evaluation Time");
-            featureFlags = featureFlags.Distinct().ToList();
-            var componentName = GetComponentName(applicationName);
-            var incompatibleFeatureFlags = featureFlags
-                .Where(feature => _backwardCompatibleFeatureManager.IsBackwardCompatibityRequired(componentName, environment, feature))
-                .Distinct()
-                .ToList();
-            var compatibleFeatureFlags = featureFlags
-                .Except(incompatibleFeatureFlags)
-                .ToList();
-            var context =
-                _httpContextAccessor.HttpContext.Request.Headers.Any(header => header.Key.ToLowerInvariant() == Constants.Flighting.FLIGHT_CONTEXT_HEADER.ToLowerInvariant())
-                ? _httpContextAccessor.HttpContext.Request.Headers.First(header => header.Key.ToLowerInvariant() == Constants.Flighting.FLIGHT_CONTEXT_HEADER.ToLowerInvariant()).Value.FirstOrDefault()
-                : null;
-
-            var compatibleFeatureResults = await EvaluateCompatibleFlags(componentName, environment, compatibleFeatureFlags, context);
-            var incompatibleFeatureResults = await EvaluateIncompatibleFlags(componentName, environment, incompatibleFeatureFlags, context);
-
-            var results = new Dictionary<string, bool>();
-            foreach (var result in compatibleFeatureResults)
-                results[result.Key] = result.Value;
-            foreach (var result in incompatibleFeatureResults)
-                results[result.Key] = result.Value;
-
-            performanceContext.Stop();
-            _logger.Log(performanceContext);
-            return results;
-        }
-
-        private string GetComponentName(string appName)
-        {
-            var compatibleHeaderKey = $"BackwardCompatibleFlags:ReverseTenantMapping:{appName.ToUpperInvariant()}";
-            var componentName = _configuration[compatibleHeaderKey];
-            if (!string.IsNullOrWhiteSpace(componentName))
-            {
-                var message = new MessageContext()
-                {
-                    Message = "Incompatible App Name",
-                    TraceLevel = TraceLevel.Warning
-                };
-                message.AddProperty("IncompatibleAppName", appName);
-                message.AddProperty("ConvertedComponentName", componentName);
-                _logger.Log(message);
-                return componentName;
-            }
-            return appName;
-        }
-
-        private async Task<IDictionary<string, bool>> EvaluateCompatibleFlags(string componentName, string environment, List<string> compatibleFeatureFlags, string context)
-        {
-            var performanceContext = new HighPrecisionPerformanceContext("Compatible Feature Flags (Azure) Evaluation Time");
-            performanceContext.AddProperty("FlagsCount", compatibleFeatureFlags.Count.ToString());
-            var @event = CreateFeatureFlagsEvaluatedEvent(componentName, environment, context, "Azure", compatibleFeatureFlags.Count);
-
-            if (compatibleFeatureFlags == null || !compatibleFeatureFlags.Any())
+            if (featureFlags == null || !featureFlags.Any())
                 return new Dictionary<string, bool>();
 
-            var result = new ConcurrentDictionary<string, bool>();
-            _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ENV_PARAM] = environment;
-            _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_APP_PARAM] = componentName;
+            PerformanceContext performanceContext = new("Feature Flag Evaluation Time");
+            featureFlags = featureFlags.Distinct().ToList();
+            TenantConfiguration tenantConfiguration = await _tenantConfigurationProvider.Get(applicationName);
+            string context = GetContext();
+            var @event = CreateFeatureFlagsEvaluatedEvent(tenantConfiguration.Name, environment, context, "Azure", featureFlags.Count);
 
-            @event.AddProperty("DataSource", "Azure");
+            ConcurrentDictionary<string, bool> result = new();
+            _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ENV_PARAM] = environment;
+            _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_APP_PARAM] = tenantConfiguration.Name;
             var evaluationTasks = new List<Task>();
 
-            foreach (var feature in compatibleFeatureFlags)
+            foreach (string featureFlag in featureFlags)
             {
                 evaluationTasks.Add(Task.Run(async () =>
                 {
                     var startedAt = DateTime.UtcNow;
-                    var isEnabled = await _featureManager.IsEnabledAsync(Utility.GetFeatureFlagId(componentName.ToLowerInvariant(), environment.ToLowerInvariant(), feature)).ConfigureAwait(false);
+                    bool isEnabled = await _featureManager.IsEnabledAsync(FlagUtilities.GetFeatureFlagId(tenantConfiguration.Name.ToLowerInvariant(), environment.ToLowerInvariant(), featureFlag));
                     var completedAt = DateTime.UtcNow;
-                    @event.AddProperty(feature, isEnabled.ToString());
-                    @event.AddProperty($"{feature}:TimeTaken", (completedAt - startedAt).TotalMilliseconds.ToString());
-                    result.AddOrUpdate(feature, isEnabled, (feature, eval) => eval);
+                    @event.AddProperty(featureFlag, isEnabled.ToString());
+                    @event.AddProperty($"{featureFlag}:TimeTaken", (completedAt - startedAt).TotalMilliseconds.ToString());
+                    result.AddOrUpdate(featureFlag, isEnabled, (feature, eval) => eval);
                 }));
             }
             await Task.WhenAll(evaluationTasks).ConfigureAwait(false);
 
             performanceContext.Stop();
-            @event.AddProperty("TotalTimeTaken", performanceContext.GetEllapsedMilliseconds().ToString());
-            _logger.Log(@event);
             _logger.Log(performanceContext);
-
+            _logger.Log(@event);
             return result;
         }
-
-        private async Task<IDictionary<string, bool>> EvaluateIncompatibleFlags(string componentName, string environment, List<string> incompatibleFeatureFlags, string context)
+        
+        private string GetContext()
         {
-            var performanceContext = new PerformanceContext("Incompatible Feature Flags (Carbon) Evaluation Time");
-            performanceContext.AddProperty("FlagsCount", incompatibleFeatureFlags.Count.ToString());
-            var @event = CreateFeatureFlagsEvaluatedEvent(componentName, environment, context, "Carbon", incompatibleFeatureFlags.Count);
-
-            var result = new Dictionary<string, bool>();
-            if (incompatibleFeatureFlags == null || !incompatibleFeatureFlags.Any())
-                return result;
-
-            var responses = await _backwardCompatibleFeatureManager.IsEnabledAsync(
-                componentName,
-                environment,
-                incompatibleFeatureFlags,
-                context);
-            if (responses != null && responses.Any())
-            {
-                var timeTaken = performanceContext.GetCurrentEllapsedMilliSeconds / incompatibleFeatureFlags.Count;
-                foreach (var response in responses)
-                {
-                    result.Add(response.Key, response.Value);
-                    @event.AddProperty(response.Key, response.Value.ToString());
-                    @event.AddProperty($"{response.Key}:TimeTaken", timeTaken.ToString());
-                }
-            }
-
-            performanceContext.Stop();
-            @event.AddProperty("TotalTimeTaken", performanceContext.GetEllapsedMilliseconds().ToString());
-            _logger.Log(@event);
-            _logger.Log(performanceContext);
-            return result;
+            return _httpContextAccessor.HttpContext.Request.Headers.Any(header => header.Key.ToLowerInvariant() == Constants.Flighting.FLIGHT_CONTEXT_HEADER.ToLowerInvariant())
+                ? _httpContextAccessor.HttpContext.Request.Headers.First(header => header.Key.ToLowerInvariant() == Constants.Flighting.FLIGHT_CONTEXT_HEADER.ToLowerInvariant()).Value.FirstOrDefault()
+                : null;
         }
 
         private EventContext CreateFeatureFlagsEvaluatedEvent(string componentName, string environment, string context, string dataSource, int flagCount)
         {
-            var @event = new EventContext()
+            EventContext @event = new()
             {
                 EventName = "Flighting:FeatureFlags:Evaluated"
             };

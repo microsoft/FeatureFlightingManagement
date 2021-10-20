@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using Microsoft.FeatureFlighting.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Domain.Interfaces;
-using Microsoft.FeatureFlighting.Services.Interfaces;
-using Microsoft.FeatureFlighting.Domain.Configuration;
+using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Common.Authorization;
 using Microsoft.PS.Services.FlightingService.Api.ActionFilters;
 
 namespace Microsoft.PS.Services.FlightingService.Api.Controllers

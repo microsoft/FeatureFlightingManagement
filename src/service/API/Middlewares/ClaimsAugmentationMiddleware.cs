@@ -2,9 +2,8 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
-using Microsoft.Extensions.Configuration;
-using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Services.Interfaces;
+using Microsoft.FeatureFlighting.Common.Config;
+using Microsoft.FeatureFlighting.Common.Authorization;
 using static Microsoft.FeatureFlighting.Common.Constants.Authorization;
 
 namespace Microsoft.FeatureFlighting.Api.Middlewares
@@ -18,10 +17,10 @@ namespace Microsoft.FeatureFlighting.Api.Middlewares
             _next = next;
         }
 
-        public async Task Invoke(HttpContext context, IConfiguration configuration, IAuthorizationService authorizationService)
+        public async Task Invoke(HttpContext context, IAuthorizationService authorizationService, ITenantConfigurationProvider tenantConfigurationProvider)
         {
             string tenant = context.Request.Headers.GetOrDefault("X-Application", "Default");
-            AuthorizationTypes authorizationType = GetAuthorizationType(tenant, configuration);
+            AuthorizationTypes authorizationType = GetAuthorizationType(tenant, tenantConfigurationProvider);
             if (authorizationType == AuthorizationTypes.Configuration)
             {
                 authorizationService.AugmentAdminClaims(tenant);
@@ -29,10 +28,10 @@ namespace Microsoft.FeatureFlighting.Api.Middlewares
             await _next.Invoke(context);
         }
 
-        private AuthorizationTypes GetAuthorizationType(string tenant, IConfiguration configuration)
+        private AuthorizationTypes GetAuthorizationType(string tenant, ITenantConfigurationProvider tenantConfigurationProvider)
         {
-            var authorizationType = configuration.GetValue<string>($"Tenants:{Utility.GetFormattedTenantName(tenant)}:Authorization:Type")
-                ?? configuration.GetValue<string>($"Tenants:Default:Authorization:Type");
+            TenantConfiguration tenantConfiguration = tenantConfigurationProvider.Get(tenant).ConfigureAwait(false).GetAwaiter().GetResult();
+            var authorizationType = tenantConfiguration.Authorization.Type;
             return Enum.Parse<AuthorizationTypes>(authorizationType);
         }
     }

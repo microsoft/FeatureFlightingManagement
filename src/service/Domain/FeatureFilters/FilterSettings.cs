@@ -1,4 +1,4 @@
-﻿namespace Microsoft.FeatureFlighting.Domain.FeatureFilters
+﻿namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
     public class FilterSettings
     {

@@ -10,9 +10,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.FeatureFlighting.Common.AppExcpetions;
-using Microsoft.FeatureFlighting.Domain.FeatureFilters;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
-namespace Microsoft.FeatureFlighting.Domain.Tests.FilterTests
+namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
 {
     [TestCategory("CountryFilter")]
     [TestClass]

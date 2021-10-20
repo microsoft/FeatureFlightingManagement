@@ -1,12 +1,12 @@
 ﻿using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Domain.Evaluators;
-using Microsoft.FeatureFlighting.Domain.FeatureFilters;
-using Microsoft.FeatureFlighting.Domain.Interfaces;
+using Microsoft.FeatureFlighting.Core.Evaluators;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
+using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Threading.Tasks;
 
-namespace Microsoft.FeatureFlighting.Domain.Tests.OperatorTests
+namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
 {
     [TestClass]
     public class LesserThanEvaluatorTest
