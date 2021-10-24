@@ -7,14 +7,14 @@ using Microsoft.FeatureFlighting.Common.Group;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using static Microsoft.FeatureFlighting.Common.Constants;
 
-namespace Microsoft.FeatureFlighting.Core.Evaluators
+namespace Microsoft.FeatureFlighting.Core.Operators
 {
-    public class SecurityGroupEvaluator
+    public class CommonSecurityGroupOperator
     {
         private readonly IGroupVerificationService _groupVerificationService;
         private readonly IConfiguration _configuration;
 
-        public SecurityGroupEvaluator(IGroupVerificationService graphProvider, IConfiguration configuation)
+        public CommonSecurityGroupOperator(IGroupVerificationService graphProvider, IConfiguration configuation)
         {
             _groupVerificationService = graphProvider;
             _configuration = configuation;
@@ -31,7 +31,7 @@ namespace Microsoft.FeatureFlighting.Core.Evaluators
                 .ToList();
 
             var isUserPartOfSecurityGroup = false;
-            if (filterType == FilterKeys.UserUpn)
+            if (filterType == FilterKeys.UserUpn || filterType == FilterKeys.RuleEngine)
             {
                 if (!IsValidUpn(contextValue))
                     return new EvaluationResult(false, "The UPN is incorrect. Check the format and allowed domains");

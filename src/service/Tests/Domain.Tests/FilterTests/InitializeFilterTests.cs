@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.FeatureFlighting.Core.Spec;
-using Microsoft.FeatureFlighting.Core.Evaluators;
+using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
 namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
@@ -39,7 +39,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
 
         protected Mock<IOperatorEvaluatorStrategy> SetupMockOperatorEvaluatorStrategy(bool evaluatePositive)
         {
-            var mockEvaluator = new Mock<BaseOperatorEvaluator>();
+            var mockEvaluator = new Mock<BaseOperator>();
             mockEvaluator.Setup(evaluator => evaluator.Evaluate(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<LoggerTrackingIds>()))
                 .Returns(Task.FromResult(new EvaluationResult(evaluatePositive)));
 

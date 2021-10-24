@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using Microsoft.FeatureManagement;
 using Exception = System.Exception;
-using Microsoft.Extensions.Primitives;
 using AppInsights.EnterpriseTelemetry;
-using Microsoft.FeatureFlighting.Common;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Extensions.Configuration;
+using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Core.Spec;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Core.Operators;
@@ -18,67 +18,63 @@ using static Microsoft.FeatureFlighting.Common.Constants;
 
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
-    public abstract class BaseFilter
+    [FilterAlias(FilterKeys.RuleEngine)]
+    public class RuleEngineFilter : IFeatureFilter
     {
-        protected readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ILogger _logger;
+        private readonly IRulesEngineManager _rulesEngineManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IConfiguration _configuration;
-        private readonly IOperatorEvaluatorStrategy _evaluatorStrategy;
+        private readonly ILogger _logger;
 
-        protected abstract string FilterType { get; }
-
-        public BaseFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorEvaluatorStrategy evaluatorStrategy)
+        public RuleEngineFilter(IRulesEngineManager ruleEngineManager, IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ILogger logger)
         {
+            _rulesEngineManager = ruleEngineManager ?? throw new ArgumentNullException(nameof(ruleEngineManager));
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _logger = logger;
-            _configuration = configuration;
-            _evaluatorStrategy = evaluatorStrategy;
         }
 
-        public async Task<bool> EvaluateFlightingContextAsync(FeatureFilterEvaluationContext featureFlag, string defaultFilterKey = null)
+        public async Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context)
         {
             LoggerTrackingIds trackingIds = _httpContextAccessor.HttpContext.Items.ContainsKey(Flighting.FLIGHT_TRACKER_PARAM)
                  ? JsonSerializer.Deserialize<LoggerTrackingIds>(_httpContextAccessor.HttpContext.Items[Flighting.FLIGHT_TRACKER_PARAM].ToString(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                  : new LoggerTrackingIds();
+
             try
             {
-                var contextValue = string.Empty;
-
-                FilterSettings settings = GetFilterSettings(featureFlag);
-                string filterKey = !string.IsNullOrWhiteSpace(settings.FlightContextKey)
-                    ? settings.FlightContextKey.ToUpperInvariant()
-                    : defaultFilterKey.ToUpperInvariant();
-
-                Dictionary<string, object> contextParams = GetFlightContext(filterKey, trackingIds);
-                if (!IsFilterKeyPresentInContext(contextParams, filterKey))
+                FilterSettings filterSettings = context.Parameters.Get<FilterSettings>() ?? new FilterSettings();
+                if (!ValidateFilterSettings(filterSettings, FilterKeys.RuleEngine, trackingIds))
                     return false;
 
-                if (!ValidateFilterSettings(settings, filterKey, trackingIds))
-                    return false;
-
-                Operator op = (Operator)Enum.Parse(typeof(Operator), settings.Operator, true);
-                contextValue = (contextParams[filterKey]!=null)? contextParams[filterKey].ToString().ToLowerInvariant() : string.Empty;
-                string settingsValue = settings.Value.ToLowerInvariant();
-                BaseOperator evaluator = _evaluatorStrategy.Get(op);
-
+                Operator op = (Operator)Enum.Parse(typeof(Operator), filterSettings.Operator, true);
+                string workflowName = filterSettings.Value;
+                string tenant = _httpContextAccessor.HttpContext.Items[Flighting.FEATURE_APP_PARAM]?.ToString();
+                IRulesEngineEvaluator evaluator = await _rulesEngineManager.Build(tenant, workflowName, trackingIds);
                 if (evaluator == null)
-                    throw new Exception($"No evaluator has been assigned for operator - {Enum.GetName(typeof(Operator), op)}");
+                    throw new RuleEngineException(workflowName, tenant, "Rule Evaluation could not be created. Ensure that BRE is enabled for the tenant", "FeatureFlighting.RuleEngineFilter.EvaluateAsync", trackingIds.CorrelationId, trackingIds.TransactionId);
 
-                EvaluationResult evaluationResult = await evaluator.Evaluate(settingsValue, contextValue, FilterType, trackingIds);
-                return evaluationResult.Result;
+                Dictionary<string, object> flightContext = GetFlightContext(trackingIds);
+                EvaluationResult evaluationResult = await evaluator.Evaluate(flightContext, trackingIds);
+                if (op == Operator.Evaluates)
+                    return evaluationResult.Result;
+                return !evaluationResult.Result;
             }
-            catch (Exception ex)
+            catch (RuleEngineException)
+            {
+                throw;
+            }
+            catch (Exception exception)
             {
                 throw new EvaluationException(
-                    message: $"There was an error in evaluating {FilterType} filter. See the inner exception for more details.",
+                    message: $"There was an error in evaluating the filter {FilterKeys.RuleEngine}. See the inner exception for more details.",
+                    innerException: exception,
                     correlationId: trackingIds.CorrelationId,
-                    transactionId: trackingIds.TransactionId,
-                    source: $"{FilterType}:EvaluateAsync",
-                    innerException: ex);
+                    source: "FeatureFlighting.RuleEngine.EvaluateAsync",
+                    transactionId: trackingIds.TransactionId);
             }
         }
 
-        private Dictionary<string, object> GetFlightContext(string filterKey, LoggerTrackingIds trackingIds)
+        private Dictionary<string, object> GetFlightContext(LoggerTrackingIds trackingIds)
         {
             Dictionary<string, object> contextParams = new(StringComparer.InvariantCultureIgnoreCase);
 
@@ -103,29 +99,13 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
                 var contextParam = contextParamPair.Split(":");
                 string key = contextParam[0].ToUpperInvariant();
                 contextParams.AddOrUpdate(key, contextParam[1]);
-
             }
 
-            if (FilterType.ToLowerInvariant() == FilterKeys.Date.ToLowerInvariant() && !contextParams.ContainsKey(filterKey.ToUpperInvariant()))
-            {
-                DateTime date = Convert.ToDateTime(DateTime.UtcNow.ToString("MM/dd/yyyy"));
-                string currentTimestamp = Convert.ToString((double)date.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, 0)).TotalMilliseconds);
-                contextParams.AddOrUpdate(filterKey.ToUpperInvariant(), currentTimestamp);
-            }
+            DateTime date = Convert.ToDateTime(DateTime.UtcNow.ToString("MM/dd/yyyy"));
+            string currentTimestamp = Convert.ToString((double)date.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, 0)).TotalMilliseconds);
+            contextParams.AddOrUpdate(FilterKeys.Date.ToUpperInvariant(), currentTimestamp);
 
             return contextParams;
-        }
-
-        private FilterSettings GetFilterSettings(FeatureFilterEvaluationContext featureFlag)
-        {
-            return featureFlag.Parameters.Get<FilterSettings>() ?? new FilterSettings();
-        }
-
-        private bool IsFilterKeyPresentInContext(Dictionary<string, object> contextParams, string key)
-        {
-            if (string.IsNullOrWhiteSpace(key))
-                return false;
-            return contextParams.Any() && contextParams.ContainsKey(key);
         }
 
         private bool ValidateFilterSettings(FilterSettings settings, string filterName, LoggerTrackingIds trackingIds)

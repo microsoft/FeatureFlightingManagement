@@ -1,7 +1,11 @@
 ﻿using System;
+using AppInsights.EnterpriseTelemetry.Exceptions;
 
-namespace Microsoft.FeatureFlighting.Common.AppExcpetions
+namespace Microsoft.FeatureFlighting.Common.AppExceptions
 {
+    /// <summary>
+    /// Exception when there is an error in evaluating a feature flag
+    /// </summary>
     [Serializable]
     public class EvaluationException : BaseAppException
     {
@@ -10,9 +14,9 @@ namespace Microsoft.FeatureFlighting.Common.AppExcpetions
         public EvaluationException(string message,
             string correlationId,
             string transactionId,
-            string failedMethod,
+            string source,
             Exception innerException)
-            : base(message, exceptionCode: Constants.Exception.EvaluationException.ExceptionCode, correlationId: correlationId, transactionId: transactionId, failedMethod: failedMethod, innerException: innerException)
+            : base(message, exceptionCode: Constants.Exception.EvaluationException.ExceptionCode, correlationId: correlationId, transactionId: transactionId, source: source, innerException: innerException)
         { }
 
         protected override string CreateDisplayMessage()

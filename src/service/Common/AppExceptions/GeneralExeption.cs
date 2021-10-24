@@ -1,6 +1,7 @@
 ﻿using System;
+using AppInsights.EnterpriseTelemetry.Exceptions;
 
-namespace Microsoft.FeatureFlighting.Common.AppExcpetions
+namespace Microsoft.FeatureFlighting.Common.AppExceptions
 {
     /// <summary>
     /// Represents any general exception in the system
@@ -11,10 +12,10 @@ namespace Microsoft.FeatureFlighting.Common.AppExcpetions
         public GeneralException(Exception innerException = null,
             string correlationId = "",
             string transactionId = "",
-            string failedMethod = "")
+            string source = "")
             : base(Constants.Exception.GeneralException.ExceptionMessage,
                  innerException: innerException,
-                 correlationId: correlationId, transactionId: transactionId, failedMethod: failedMethod,
+                 correlationId: correlationId, transactionId: transactionId, source: source,
                  exceptionCode: Constants.Exception.GeneralException.ExceptionCode)
         { }
 

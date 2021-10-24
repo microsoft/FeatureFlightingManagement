@@ -31,6 +31,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
         public CacheConfiguration Cache { get; set; }
 
         /// <summary>
+        /// Configuration for using Business Rule Engine filters
+        /// </summary>
+        public BusinessRuleEngineConfiguration BusinessRuleEngine { get; set; }
+
+        /// <summary>
         /// Gets a default <see cref="TenantConfiguration"/>
         /// </summary>
         /// <returns>Default tenant configuration</returns>
@@ -73,6 +78,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
                 Cache = defaultTenantConfiguration.Cache;
             else
                 Cache.MergeWithDefault(defaultTenantConfiguration.Cache);
+        }
+
+        public bool IsBusinessRuleEngineEnabled()
+        {
+            return BusinessRuleEngine != null && BusinessRuleEngine.Enabled && BusinessRuleEngine.Storage != null;
         }
     }
 
@@ -155,6 +165,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
         public string FeatureFlagNames { get;set; }
 
         /// <summary>
+        /// Type of cache for caching rule engine workflows
+        /// </summary>
+        public string RulesEngine { get; set; }
+
+        /// <summary>
         /// Unified Redis Platform settings
         /// </summary>
         /// <remarks>https://github.com/microsoft/UnifiedRedisPlatform.Core</remarks>
@@ -178,6 +193,9 @@ namespace Microsoft.FeatureFlighting.Common.Config
 
             if (operation.ToLowerInvariant() == nameof(Graph).ToLowerInvariant())
                 return Graph;
+
+            if (operation.ToLowerInvariant() == nameof(RulesEngine).ToLowerInvariant())
+                return RulesEngine;
 
             return Type;
         }

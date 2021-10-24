@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Microsoft.FeatureFlighting.Core.Evaluators;
+using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
@@ -8,12 +8,12 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
     [TestClass]
     public class OperatorEvaluatorStrategyTest
     {
-        private IList<BaseOperatorEvaluator> _evaluators = new List<BaseOperatorEvaluator>();
+        private IList<BaseOperator> _evaluators = new List<BaseOperator>();
         private OperatorEvaluatorStrategy operatorEvaluatorStrategy;
         [TestInitialize]
         public void TestStartUp ()
         {
-            BaseOperatorEvaluator equalOperator = new EqualEvaluator();
+            BaseOperator equalOperator = new EqualOperator();
             _evaluators.Add(equalOperator);
              operatorEvaluatorStrategy = new OperatorEvaluatorStrategy(_evaluators);
         }

@@ -1,6 +1,7 @@
 ﻿using System;
+using AppInsights.EnterpriseTelemetry.Exceptions;
 
-namespace Microsoft.FeatureFlighting.Common.AppExcpetions
+namespace Microsoft.FeatureFlighting.Common.AppExceptions
 {
     /// <summary>
     /// Exception when validation fails due to client errors
@@ -14,9 +15,9 @@ namespace Microsoft.FeatureFlighting.Common.AppExcpetions
             string exceptionCode,
             string correlationId,
             string transactionId,
-            string failedMethod,
+            string source,
             Exception innerException)
-            : base(message, exceptionCode: exceptionCode, correlationId: correlationId, transactionId: transactionId, failedMethod: failedMethod, innerException: innerException)
+            : base(message, exceptionCode: exceptionCode, correlationId: correlationId, transactionId: transactionId, source: source, innerException: innerException)
         {
         }
 
@@ -25,8 +26,8 @@ namespace Microsoft.FeatureFlighting.Common.AppExcpetions
             string suggestedFix,
             string correlationId,
             string transactionId,
-            string failedMethod)
-            : this(message, exceptionCode, correlationId, transactionId, failedMethod, innerException: null)
+            string source)
+            : this(message, exceptionCode, correlationId, transactionId, source, innerException: null)
         { }
 
         public GraphException(string message, string exceptionCode)

@@ -1,4 +1,6 @@
-﻿namespace Microsoft.FeatureFlighting.Common.AppExcpetions
+﻿using AppInsights.EnterpriseTelemetry.Exceptions;
+
+namespace Microsoft.FeatureFlighting.Common.AppExceptions
 {
     public class AccessForbiddenException: BaseAppException
     {   

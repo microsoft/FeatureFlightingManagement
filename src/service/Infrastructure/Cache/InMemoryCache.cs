@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AppInsights.EnterpriseTelemetry;
 using System.Collections.Generic;
-using AppInsights.EnterpriseTelemetry.Context;
+using AppInsights.EnterpriseTelemetry;
 using Microsoft.Extensions.Caching.Memory;
+using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common.Caching;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Cache
 {
+    /// <summary>
+    /// In Memory cache (wrapper over <see cref="IMemoryCache"/>)
+    /// </summary>
     public class InMemoryCache : ICache
     {
         private readonly IMemoryCache _memoryCache;
@@ -21,22 +24,54 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
             _logger = logger;
         }
 
-        public Task<List<string>> GetList(string key, string correlationId, string transactionId)
+        
+        /// <inheritdoc/>
+        public Task<T> Get<T>(string key, string correlationId, string transactionId)
+        {
+            key = GetTenantKey(key);
+            _memoryCache.TryGetValue(key, out T result);
+            return Task.FromResult(result);
+        }
+
+        /// <inheritdoc/>
+        public Task<IList<string>> GetList(string key, string correlationId, string transactionId)
         {
             key = GetTenantKey(key);
             // NOTE: Get calls are not logged to avoid too much logging
-            _memoryCache.TryGetValue(key, out List<string> cachedValues);
+            _memoryCache.TryGetValue(key, out IList<string> cachedValues);
             if (cachedValues != null)
                 return Task.FromResult(cachedValues);
-            return Task.FromResult<List<string>>(null);
+            return Task.FromResult<IList<string>>(null);
         }
 
-        public Task SetList(string key, List<string> values, string correlationId, string transactionId, int relativeExpirationMins = -1)
+        /// <inheritdoc/>
+        public Task Set<T>(string key, T value, string correlationId, string transactionId, int relativeExpirationMins = -1)
         {
             key = GetTenantKey(key);
-            var dependencyContext = new DependencyContext(CacheLogContext.GetMetadata("InMemory", "SET_LIST", key));
+            DependencyContext dependencyContext = new(CacheLogContext.GetMetadata("InMemory", "SET_ITEM", key));
             dependencyContext.AddProperty("Relative Expiration", relativeExpirationMins.ToString());
-            
+            dependencyContext.CorrelationId = correlationId;
+            dependencyContext.TransactionId = correlationId;
+
+            if (relativeExpirationMins > 0)
+                _memoryCache.Set<T>(key, value, TimeSpan.FromMinutes(relativeExpirationMins));
+            else
+                _memoryCache.Set<T>(key, value);
+
+            dependencyContext.CompleteDependency();
+            _logger.Log(dependencyContext);
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public Task SetList(string key, IList<string> values, string correlationId, string transactionId, int relativeExpirationMins = -1)
+        {
+            key = GetTenantKey(key);
+            DependencyContext dependencyContext = new(CacheLogContext.GetMetadata("InMemory", "SET_LIST", key));
+            dependencyContext.AddProperty("Relative Expiration", relativeExpirationMins.ToString());
+            dependencyContext.CorrelationId = correlationId;
+            dependencyContext.TransactionId = correlationId;
+
             if (relativeExpirationMins > 0)
                 _memoryCache.Set(key, values, TimeSpan.FromMinutes(relativeExpirationMins));
             else
@@ -47,6 +82,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc/>
         public Task Delete(string key, string correlationId, string transactionId)
         {
             key = GetTenantKey(key);
@@ -58,6 +94,6 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
         }
 
         private string GetTenantKey(string key) =>
-            $"{_tenant}_{key}";
+            $"{_tenant}_{key}".ToUpperInvariant();
     }
 }

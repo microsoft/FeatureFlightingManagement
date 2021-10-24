@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common;
 using AppInsights.EnterpriseTelemetry.Web.Extension.Middlewares;
-using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
 
 namespace Microsoft.FeatureFlighting.Api.ExceptionHandler
 {

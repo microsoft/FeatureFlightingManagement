@@ -4,9 +4,9 @@ using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using static Microsoft.FeatureFlighting.Common.Constants;
 
-namespace Microsoft.FeatureFlighting.Core.Evaluators
+namespace Microsoft.FeatureFlighting.Core.Operators
 {
-    public abstract class BaseOperatorEvaluator
+    public abstract class BaseOperator
     {
         public abstract Operator Operator {get;}
         public abstract string[] SupportedFilters { get; }

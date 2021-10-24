@@ -5,19 +5,19 @@ using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
-namespace Microsoft.FeatureFlighting.Core.Evaluators
+namespace Microsoft.FeatureFlighting.Core.Operators
 {
     public class OperatorEvaluatorStrategy: IOperatorEvaluatorStrategy
     {
-        private readonly IEnumerable<BaseOperatorEvaluator> _evaluators;
+        private readonly IEnumerable<BaseOperator> _evaluators;
         private static Dictionary<string, List<string>> _filterOperatorMapping = null;
         
-        public OperatorEvaluatorStrategy(IEnumerable<BaseOperatorEvaluator> evaluators)
+        public OperatorEvaluatorStrategy(IEnumerable<BaseOperator> evaluators)
         {
             _evaluators = evaluators;
         }
 
-        public BaseOperatorEvaluator Get(Operator op)
+        public BaseOperator Get(Operator op)
         {
             return _evaluators.FirstOrDefault(evaluator => evaluator.Operator == op);
         }
@@ -28,11 +28,11 @@ namespace Microsoft.FeatureFlighting.Core.Evaluators
                 return _filterOperatorMapping;
 
             var filterTypes = Enum.GetNames(typeof(Filters)).Distinct();
-            var map = new Dictionary<string, List<string>>();
+            Dictionary<string, List<string>> map = new();
 
-            foreach(var filterType in filterTypes)
+            foreach(string filterType in filterTypes)
             {
-                var supportedOperators =
+                IEnumerable<Operator> supportedOperators =
                     _evaluators
                     .Where(evaluator => evaluator.SupportedFilters.Any(supportedFilter => supportedFilter.ToLowerInvariant() == Constants.Flighting.ALL.ToLowerInvariant() || supportedFilter.ToLowerInvariant() == filterType.ToLowerInvariant()))
                     .Select(evaluator => evaluator.Operator);

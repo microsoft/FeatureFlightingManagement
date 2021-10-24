@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Net;
-using AppInsights.EnterpriseTelemetry;
 using Microsoft.AspNetCore.Http;
+using AppInsights.EnterpriseTelemetry;
 using AppInsights.EnterpriseTelemetry.Context;
+using AppInsights.EnterpriseTelemetry.Exceptions;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
 using AppInsights.EnterpriseTelemetry.Web.Extension.Middlewares;
-using Microsoft.FeatureFlighting.Common.AppExcpetions;
 
 namespace Microsoft.FeatureFlighting.Api.ExceptionHandler
 {
+    /// <summary>
+    /// Handles unhandled global exception
+    /// </summary>
     public class GenericExceptionHandler : IGlobalExceptionHandler
     {
         private readonly ILogger _logger;

@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
 
 namespace Microsoft.FeatureFlighting.Common.Authorization
 {

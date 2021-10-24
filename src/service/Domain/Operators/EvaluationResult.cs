@@ -1,12 +1,28 @@
-﻿using System;
-
-namespace Microsoft.FeatureFlighting.Core.Evaluators
+﻿namespace Microsoft.FeatureFlighting.Core.Operators
 {
+    /// <summary>
+    /// Result of evaluating a feature flag
+    /// </summary>
     public class EvaluationResult
     {
+        /// <summary>
+        /// True if feature flag is true
+        /// </summary>
         public bool Result { get; set; }
+        
+        /// <summary>
+        /// Message about the evaluation
+        /// </summary>
         public string Message { get; set; }
+        
+        /// <summary>
+        /// Indicates that evaluation faulted
+        /// </summary>
         public bool IsFaulted { get; set; }
+        
+        /// <summary>
+        /// Time taken to evaluate the feature flag
+        /// </summary>
         public double TimeTaken { get; set; }
 
         public EvaluationResult(bool result)

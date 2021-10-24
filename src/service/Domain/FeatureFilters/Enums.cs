@@ -11,7 +11,9 @@
         MemberOfCustomGroup,
         NotMemberOfCustomGroup,
         MemberOfSecurityGroup,
-        NotMemberOfSecurityGroup
+        NotMemberOfSecurityGroup,
+        Evaluates,
+        NotEvaluates
     }
 
     public enum Filters
@@ -23,6 +25,7 @@
         Region,
         Role,
         UserUpn,
+        RulesEngine,
         Generic
     }
 }

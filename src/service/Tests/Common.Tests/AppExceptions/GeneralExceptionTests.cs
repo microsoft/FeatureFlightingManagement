@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
 
 namespace Microsoft.FeatureFlighting.Common.Tests.AppExceptions
 {
@@ -16,7 +16,7 @@ namespace Microsoft.FeatureFlighting.Common.Tests.AppExceptions
             var exception = new GeneralException(innerException: new Exception(),
                     correlationId: Guid.NewGuid().ToString(),
                     transactionId: Guid.NewGuid().ToString(),
-                    failedMethod: "Test");
+                    source: "Test");
             #endregion Act
 
             #region Assert

@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Api.ExceptionHandler;
 
 namespace Microsoft.FeatureFlighting.Api.Tests.ExceptionHandlerTests

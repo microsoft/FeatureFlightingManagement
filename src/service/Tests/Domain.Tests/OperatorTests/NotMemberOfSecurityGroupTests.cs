@@ -1,5 +1,5 @@
 ﻿using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Core.Evaluators;
+using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Threading.Tasks;
@@ -11,9 +11,9 @@ using Microsoft.FeatureFlighting.Common.Group;
 namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
 {
     [TestClass]
-    public class NotMemberOfSecurityGroupEvaluatorTests
+    public class NotMemberOfSecurityGroupOperatorTests
     {
-        private NotMemberOfSecurityGroupEvaluator evaluator;
+        private NotMemberOfSecurityGroupOperator evaluator;
 
         private Mock<IConfiguration> mockConfig;
         private Mock<IGroupVerificationService> mockGraphApiProviderWithUpnInSG, mockGraphApiProviderWithUpnNotInSG, mockGraphApiProviderWithAliasNotInSG, mockGraphApiProviderWithAliasInSG;
@@ -62,7 +62,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
                 CorrelationId = "TCId",
                 TransactionId = "TTId"
             };
-            evaluator = new NotMemberOfSecurityGroupEvaluator(mockGraphApiProviderWithUpnInSG.Object, mockConfig.Object);
+            evaluator = new NotMemberOfSecurityGroupOperator(mockGraphApiProviderWithUpnInSG.Object, mockConfig.Object);
             //Act
             var evaluationResult = await evaluator.Evaluate(configuredValue, contextValue, filterType, trackingIds);
             //Assert
@@ -82,7 +82,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
                 TransactionId = "TTId"
             };
 
-            evaluator = new NotMemberOfSecurityGroupEvaluator(mockGraphApiProviderWithUpnInSG.Object, mockConfig.Object);
+            evaluator = new NotMemberOfSecurityGroupOperator(mockGraphApiProviderWithUpnInSG.Object, mockConfig.Object);
             Exception ex = null;
             //Act
             try
@@ -111,7 +111,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
                 TransactionId = "TTId"
             };
 
-            evaluator = new NotMemberOfSecurityGroupEvaluator(mockGraphApiProviderWithUpnInSG.Object, mockConfig.Object);
+            evaluator = new NotMemberOfSecurityGroupOperator(mockGraphApiProviderWithUpnInSG.Object, mockConfig.Object);
             //Act
             var evaluationResult = await evaluator.Evaluate(configuredValue, contextValue, filterType, trackingIds);
             //Assert
@@ -132,7 +132,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
                 CorrelationId = "TCId",
                 TransactionId = "TTId"
             };
-            evaluator = new NotMemberOfSecurityGroupEvaluator(mockGraphApiProviderWithUpnNotInSG.Object, mockConfig.Object);
+            evaluator = new NotMemberOfSecurityGroupOperator(mockGraphApiProviderWithUpnNotInSG.Object, mockConfig.Object);
             //Act
             var evaluationResult = await evaluator.Evaluate(configuredValue, contextValue, filterType, trackingIds);
             //Assert
@@ -151,7 +151,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
                 CorrelationId = "TCId",
                 TransactionId = "TTId"
             };
-            evaluator = new NotMemberOfSecurityGroupEvaluator(mockGraphApiProviderWithUpnInSG.Object, mockConfig.Object);
+            evaluator = new NotMemberOfSecurityGroupOperator(mockGraphApiProviderWithUpnInSG.Object, mockConfig.Object);
             //Act
             var evaluationResult = await evaluator.Evaluate(configuredValue, contextValue, filterType, trackingIds);
             //Assert
@@ -169,7 +169,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
                 CorrelationId = "TCId",
                 TransactionId = "TTId"
             };
-            evaluator = new NotMemberOfSecurityGroupEvaluator(mockGraphApiProviderWithAliasNotInSG.Object, mockConfig.Object);
+            evaluator = new NotMemberOfSecurityGroupOperator(mockGraphApiProviderWithAliasNotInSG.Object, mockConfig.Object);
             //Act
             var evaluationResult = await evaluator.Evaluate(configuredValue, contextValue, filterType, trackingIds);
             //Assert
@@ -188,7 +188,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
                 CorrelationId = "TCId",
                 TransactionId = "TTId"
             };
-            evaluator = new NotMemberOfSecurityGroupEvaluator(mockGraphApiProviderWithAliasInSG.Object, mockConfig.Object);
+            evaluator = new NotMemberOfSecurityGroupOperator(mockGraphApiProviderWithAliasInSG.Object, mockConfig.Object);
             //Act
             var evaluationResult = await evaluator.Evaluate(configuredValue, contextValue, filterType, trackingIds);
             //Assert

@@ -4,9 +4,9 @@ using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using static Microsoft.FeatureFlighting.Common.Constants;
 
-namespace Microsoft.FeatureFlighting.Core.Evaluators
+namespace Microsoft.FeatureFlighting.Core.Operators
 {
-    public class LesserThanEvaluator : BaseOperatorEvaluator
+    public class LesserThanOperator : BaseOperator
     {
         public override Operator Operator => Operator.LessThan;
         public override string[] SupportedFilters => new string[] { Flighting.ALL };

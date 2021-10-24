@@ -2,13 +2,17 @@
 using System.Linq;
 using StackExchange.Redis;
 using System.Threading.Tasks;
-using AppInsights.EnterpriseTelemetry;
 using System.Collections.Generic;
+using AppInsights.EnterpriseTelemetry;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common.Caching;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Cache
 {
+    /// <summary>
+    /// Redis cache
+    /// </summary>
+    /// <remarks>https://redis.io</remarks>
     public class RedisCache : ICache
     {
         protected readonly IConnectionMultiplexer _connectionMultiplexer;
@@ -36,8 +40,8 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
             _logger = logger;
         }
 
-#pragma warning disable CA1031 // Do not catch general exception types
-        public async Task<List<string>> GetList(string key, string correlationId, string transactionId)
+        #pragma warning disable CA1031 // Do not catch general exception types
+        public async Task<IList<string>> GetList(string key, string correlationId, string transactionId)
         {
             var dependencyContext = new DependencyContext(CacheLogContext.GetMetadata(_host, "LRANGE", key));
             try
@@ -57,7 +61,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
                 return null;
             }
         }
-#pragma warning restore CA1031 // Do not catch general exception types
+        #pragma warning restore CA1031 // Do not catch general exception types
 
         public async Task Delete(string key, string correlationId, string transactionId)
         {
@@ -78,7 +82,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
             }
         }
 
-        public async Task SetList(string key, List<string> values, string correlationId, string transactionId, int relativeExpirationMins = -1)
+        public async Task SetList(string key, IList<string> values, string correlationId, string transactionId, int relativeExpirationMins = -1)
         {
             //TODO - Use expiration value
             var dependencyContext = new DependencyContext(CacheLogContext.GetMetadata(_host, "DEL", key));
@@ -97,6 +101,16 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
                 _logger.Log(dependencyContext);
                 throw;
             }
+        }
+
+        public Task<T> Get<T>(string key, string correlationId, string transactionId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Set<T>(string key, T value, string correlationId, string transactionId, int relativeExpirationMins = -1)
+        {
+            throw new NotImplementedException();
         }
     }
 }

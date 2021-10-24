@@ -3,7 +3,7 @@
 //using AppInsights.EnterpriseTelemetry;
 //using AppInsights.EnterpriseTelemetry.Context;
 //using Microsoft.FeatureFlighting.Api.Middleware;
-//using Microsoft.FeatureFlighting.Common.AppExcpetions;
+//using Microsoft.FeatureFlighting.Common.AppExceptions;
 //using Microsoft.VisualStudio.TestTools.UnitTesting;
 //using Moq;
 //using Newtonsoft.Json;

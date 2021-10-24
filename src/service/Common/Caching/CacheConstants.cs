@@ -1,4 +1,4 @@
-﻿namespace Microsoft.FeatureFlighting.Infrastructure.Cache
+﻿namespace Microsoft.FeatureFlighting.Common.Cache
 {
     public static class CacheConstants
     {

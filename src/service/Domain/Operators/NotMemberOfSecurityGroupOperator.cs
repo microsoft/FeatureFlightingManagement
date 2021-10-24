@@ -5,18 +5,18 @@ using Microsoft.FeatureFlighting.Common.Group;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using static Microsoft.FeatureFlighting.Common.Constants;
 
-namespace Microsoft.FeatureFlighting.Core.Evaluators
+namespace Microsoft.FeatureFlighting.Core.Operators
 {
-    public class MemberOfSecurityGroupEvaluator : BaseOperatorEvaluator
+    public class NotMemberOfSecurityGroupOperator : BaseOperator
     {
-        public override Operator Operator => Operator.MemberOfSecurityGroup;
+        public override Operator Operator => Operator.NotMemberOfSecurityGroup;
         public override string[] SupportedFilters => new string[] { FilterKeys.Alias, FilterKeys.UserUpn };
         
-        private readonly SecurityGroupEvaluator _securityGroupEvaluator;
+        private readonly CommonSecurityGroupOperator _securityGroupEvaluator;
 
-        public MemberOfSecurityGroupEvaluator(IGroupVerificationService groupVerificationService, IConfiguration configuation)
+        public NotMemberOfSecurityGroupOperator(IGroupVerificationService groupVerificationService, IConfiguration configuation)
         {
-            _securityGroupEvaluator = new SecurityGroupEvaluator(groupVerificationService, configuation);
+            _securityGroupEvaluator = new CommonSecurityGroupOperator(groupVerificationService, configuation);
         }
 
         protected override Task<EvaluationResult> Process(string configuredValue, string contextValue, string filterType, LoggerTrackingIds trackingIds)

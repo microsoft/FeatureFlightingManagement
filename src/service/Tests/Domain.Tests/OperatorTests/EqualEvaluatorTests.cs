@@ -1,5 +1,5 @@
 ﻿using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Core.Evaluators;
+using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,13 +11,13 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
     [TestClass]
     public class EqualEvaluatorTests
     {
-        private EqualEvaluator evaluator;
+        private EqualOperator evaluator;
         private string[] listOfFilters;
 
         [TestInitialize]
         public void TestStartup()
         {
-            evaluator = new EqualEvaluator();
+            evaluator = new EqualOperator();
             listOfFilters = evaluator.SupportedFilters;
         }
         [TestMethod]

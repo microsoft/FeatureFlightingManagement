@@ -1,6 +1,7 @@
 ﻿using System;
+using AppInsights.EnterpriseTelemetry.Exceptions;
 
-namespace Microsoft.FeatureFlighting.Common.AppExcpetions
+namespace Microsoft.FeatureFlighting.Common.AppExceptions
 {
     public class AzureRequestException : BaseAppException
     {
@@ -10,9 +11,9 @@ namespace Microsoft.FeatureFlighting.Common.AppExcpetions
             int statusCode,
             string correlationId,
             string transactionId,
-            string failedMethod,
+            string source,
             Exception innerException)
-            : base(message, exceptionCode: statusCode.ToString(), correlationId: correlationId, transactionId: transactionId, failedMethod: failedMethod, innerException: innerException)
+            : base(message, exceptionCode: statusCode.ToString(), correlationId: correlationId, transactionId: transactionId, source: source, innerException: innerException)
         {
         }
 
@@ -20,8 +21,8 @@ namespace Microsoft.FeatureFlighting.Common.AppExcpetions
             int statusCode,
             string correlationId,
             string transactionId,
-            string failedMethod)
-            : this(message, statusCode, correlationId, transactionId, failedMethod, innerException: null)
+            string source)
+            : this(message, statusCode, correlationId, transactionId, source, innerException: null)
         { }
 
         protected override string CreateDisplayMessage()

@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common.Group;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common.Caching;
-using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Graph
 {
@@ -107,10 +107,10 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
                     return null;
 
                 var cache = _cacheFactory.Create("Default", "Graph", trackingIds.CorrelationId, trackingIds.TransactionId);
-                var cachingTasks = new List<Task<List<string>>>();
+                var cachingTasks = new List<Task<IList<string>>>();
                 foreach (var securityGroupId in securityGroupIds)
                 {
-                    var cacheKey = GetUserPrincipalNamesCacheKey(securityGroupId);
+                    string cacheKey = GetUserPrincipalNamesCacheKey(securityGroupId);
                     cachingTasks.Add(cache.GetList(cacheKey, trackingIds.CorrelationId, trackingIds.TransactionId));
                 }
                 await Task.WhenAll(cachingTasks).ConfigureAwait(false);
@@ -219,7 +219,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
                 exceptionCode: "GRAPH-GEN-001",
                 correlationId: trackingIds?.CorrelationId,
                 transactionId: trackingIds?.TransactionId,
-                failedMethod: "GraphApiAccessProvider.IsMemberOfSecurityGroup",
+                source: "GraphApiAccessProvider.IsMemberOfSecurityGroup",
                 innerException: error);
             _logger.Log(new ExceptionContext()
             {

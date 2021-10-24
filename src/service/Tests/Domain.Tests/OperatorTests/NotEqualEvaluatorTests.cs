@@ -1,5 +1,5 @@
 ﻿using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Core.Evaluators;
+using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -12,13 +12,13 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
     public class NotEqualEvaluatorTests
     {
 
-        private NotEqualEvaluator evaluator;
+        private NotEqualOperator evaluator;
         private string[] listOfFilters;
 
         [TestInitialize]
         public void TestStartup()
         {
-            evaluator = new NotEqualEvaluator();
+            evaluator = new NotEqualOperator();
             listOfFilters = evaluator.SupportedFilters;
         }
         [TestMethod]
