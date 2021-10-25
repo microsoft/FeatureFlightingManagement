@@ -51,7 +51,7 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
                 reSettings: new ReSettings() { CustomTypes = new Type[] { typeof(Operator) } },
                 logger: null);
 
-            IRulesEngineEvaluator evaluator = new RulesEngineEvaluator(ruleEngine, workflowName, tenant);
+            IRulesEngineEvaluator evaluator = new RulesEngineEvaluator(ruleEngine, workflowName, tenantConfiguration);
             await CacheRuleEvaluator((RulesEngineEvaluator)evaluator, tenant, workflowName, tenantConfiguration.BusinessRuleEngine.CacheDuration, trackingIds);
             return evaluator;
         }

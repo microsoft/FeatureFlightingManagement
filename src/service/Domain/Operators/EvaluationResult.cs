@@ -1,4 +1,6 @@
-﻿namespace Microsoft.FeatureFlighting.Core.Operators
+﻿using Microsoft.FeatureFlighting.Core.FeatureFilters;
+
+namespace Microsoft.FeatureFlighting.Core.Operators
 {
     /// <summary>
     /// Result of evaluating a feature flag
@@ -32,10 +34,24 @@
             IsFaulted = false;
         }
 
+        public EvaluationResult(bool result, Operator @operator, string filter)
+        {
+            Result = result;
+            Message = result ? "Sucess" : $"{@operator} operator failed for {filter}";
+            IsFaulted = false;
+        }
+
         public EvaluationResult(bool result, string message)
         {
             Result = result;
             Message = message;
+            IsFaulted = true;
+        }
+
+        public EvaluationResult(bool result, string message, Operator @operator, string filter)
+        {
+            Result = result;
+            Message = $"{@operator} operator failed for {filter}. Message - {message}";
             IsFaulted = true;
         }
     }

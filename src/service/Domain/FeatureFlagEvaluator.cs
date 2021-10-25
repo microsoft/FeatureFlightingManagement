@@ -44,6 +44,7 @@ namespace Microsoft.FeatureFlighting.Core
             ConcurrentDictionary<string, bool> result = new();
             _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ENV_PARAM] = environment;
             _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_APP_PARAM] = tenantConfiguration.Name;
+            _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ADD_DISABLED_CONTEXT] = tenantConfiguration.Evaluation.AddDisabledContext;
             var evaluationTasks = new List<Task>();
 
             foreach (string featureFlag in featureFlags)

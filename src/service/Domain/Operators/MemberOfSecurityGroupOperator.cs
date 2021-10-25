@@ -7,6 +7,9 @@ using static Microsoft.FeatureFlighting.Common.Constants;
 
 namespace Microsoft.FeatureFlighting.Core.Operators
 {
+    /// <summary>
+    /// Context user must be part of one of the configured Security Groups
+    /// </summary>
     public class MemberOfSecurityGroupOperator : BaseOperator
     {
         public override Operator Operator => Operator.MemberOfSecurityGroup;

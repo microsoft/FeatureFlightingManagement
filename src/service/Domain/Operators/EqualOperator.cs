@@ -5,6 +5,9 @@ using static Microsoft.FeatureFlighting.Common.Constants;
 
 namespace Microsoft.FeatureFlighting.Core.Operators
 {
+    /// <summary>
+    /// Equality operator. RHS and LHS should be equal.
+    /// </summary>
     public class EqualOperator : BaseOperator
     {
         public override Operator Operator => Operator.Equals;
@@ -13,7 +16,7 @@ namespace Microsoft.FeatureFlighting.Core.Operators
         protected override Task<EvaluationResult> Process(string configuredValue, string contextValue, string filterType, LoggerTrackingIds trackingIds)
         {
             var isEqual = contextValue.ToLowerInvariant().Equals(configuredValue.ToLowerInvariant());
-            return Task.FromResult(new EvaluationResult(isEqual));
+            return Task.FromResult(new EvaluationResult(isEqual, Operator, filterType));
         }
     }
 }

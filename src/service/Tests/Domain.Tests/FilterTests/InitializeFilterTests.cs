@@ -41,7 +41,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         {
             var mockEvaluator = new Mock<BaseOperator>();
             mockEvaluator.Setup(evaluator => evaluator.Evaluate(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<LoggerTrackingIds>()))
-                .Returns(Task.FromResult(new EvaluationResult(evaluatePositive)));
+                .Returns(Task.FromResult(new EvaluationResult(evaluatePositive, Operator.Equals, "TestFilter")));
 
             var mockOperatorEvaluatorStrategy = new Mock<IOperatorStrategy>();
             mockOperatorEvaluatorStrategy.Setup(strategy => strategy.Get(It.IsAny<Operator>()))

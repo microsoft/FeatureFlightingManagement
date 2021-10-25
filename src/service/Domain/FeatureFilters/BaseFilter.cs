@@ -15,6 +15,7 @@ using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using static Microsoft.FeatureFlighting.Common.Constants;
+using System.Text;
 
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
@@ -57,7 +58,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
                     return false;
 
                 Operator op = (Operator)Enum.Parse(typeof(Operator), settings.Operator, true);
-                contextValue = (contextParams[filterKey]!=null)? contextParams[filterKey].ToString().ToLowerInvariant() : string.Empty;
+                contextValue = (contextParams[filterKey] != null) ? contextParams[filterKey].ToString().ToLowerInvariant() : string.Empty;
                 string settingsValue = settings.Value.ToLowerInvariant();
                 BaseOperator evaluator = _evaluatorStrategy.Get(op);
 
@@ -65,6 +66,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
                     throw new Exception($"No evaluator has been assigned for operator - {Enum.GetName(typeof(Operator), op)}");
 
                 EvaluationResult evaluationResult = await evaluator.Evaluate(settingsValue, contextValue, FilterType, trackingIds);
+                AddContext(evaluationResult, featureFlag);
                 return evaluationResult.Result;
             }
             catch (Exception ex)
@@ -148,6 +150,37 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
             }
 
             return bool.TryParse(settings.IsActive, out bool isStageACtive) && isStageACtive;
+        }
+
+        private void AddContext(EvaluationResult result, FeatureFilterEvaluationContext featureFlag)
+        {
+            if (result.Result)
+                return;
+
+            bool shoudAddContext = (bool)_httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ADD_DISABLED_CONTEXT];
+            if (!shoudAddContext)
+                return;
+
+            string contextKey = $"x-{featureFlag.FeatureName}-disabed-context";
+            if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(contextKey))
+            {
+                _httpContextAccessor.HttpContext.Response.Headers[contextKey] = _httpContextAccessor.HttpContext.Response.Headers[contextKey] + " | " + result.Message;
+            }
+            else
+            {
+                string asAscii = Encoding.ASCII.GetString(
+                Encoding.Convert(
+                Encoding.UTF8,
+                Encoding.GetEncoding(
+                    Encoding.ASCII.EncodingName,
+            new EncoderReplacementFallback(string.Empty),
+            new DecoderExceptionFallback()
+            ),
+        Encoding.UTF8.GetBytes(result.Message)
+        )
+    );
+                _httpContextAccessor.HttpContext.Response.Headers.Add(contextKey, asAscii);
+            }
         }
     }
 }

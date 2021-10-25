@@ -15,6 +15,7 @@
             public const string FEATURE_NAME_PARAM = "FeatureName";
             public const string FEATURE_ENV_PARAM = "FeatureEnvironment";
             public const string FEATURE_APP_PARAM = "FeatureApplication";
+            public const string FEATURE_ADD_DISABLED_CONTEXT = "AddDisabledContext";
             public const string ALL = "*";
 
             public struct Environment

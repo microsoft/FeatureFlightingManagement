@@ -24,14 +24,14 @@ namespace Microsoft.FeatureFlighting.Core.Operators
         public async Task<EvaluationResult> Evaluate(string configuredValue, string contextValue, string filterType, LoggerTrackingIds trackingIds, Operator op)
         {
             if (string.IsNullOrWhiteSpace(configuredValue))
-                return new EvaluationResult(false, "No security groups are configured");
+                return new EvaluationResult(false, "No security groups are configured", op, filterType);
 
             List<string> securityGroupIds = GetConfiguredSecurityGroups(configuredValue).ToList();
             bool isUserPartOfSecurityGroup;
             if (filterType == FilterKeys.UserUpn || filterType == FilterKeys.RulesEngine)
             {
                 if (!IsValidUpn(contextValue))
-                    return new EvaluationResult(false, "The UPN is incorrect. Check the format and allowed domains");
+                    return new EvaluationResult(false, "The UPN is incorrect. Check the format and allowed domains", op, filterType);
 
                 isUserPartOfSecurityGroup = await _groupVerificationService.IsMember(contextValue, securityGroupIds, trackingIds).ConfigureAwait(false);
             }
@@ -40,7 +40,7 @@ namespace Microsoft.FeatureFlighting.Core.Operators
                 //OBOSOLETE: Check by alias needs to be removed
                 isUserPartOfSecurityGroup = await _groupVerificationService.IsUserAliasPartOfSecurityGroup(contextValue, securityGroupIds, trackingIds).ConfigureAwait(false);
             }
-            return new EvaluationResult(op == Operator.MemberOfSecurityGroup ? isUserPartOfSecurityGroup : !isUserPartOfSecurityGroup);
+            return new EvaluationResult(op == Operator.MemberOfSecurityGroup ? isUserPartOfSecurityGroup : !isUserPartOfSecurityGroup, op, filterType);
         }
 
         private IEnumerable<string> GetConfiguredSecurityGroups(string configuredValue)

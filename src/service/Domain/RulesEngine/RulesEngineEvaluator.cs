@@ -8,6 +8,7 @@ using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
+using Microsoft.FeatureFlighting.Common.Config;
 
 namespace Microsoft.FeatureFlighting.Core.RulesEngine
 {   
@@ -16,13 +17,13 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
     {
         private readonly IRulesEngine _ruleEngine;
         private readonly string _workflowName;
-        private readonly string _tenant;
+        private readonly TenantConfiguration _tenantConfiguration;
 
-        public RulesEngineEvaluator(IRulesEngine ruleEngine, string workflowName, string tenant)
+        public RulesEngineEvaluator(IRulesEngine ruleEngine, string workflowName, TenantConfiguration tenantConfiguration)
         {
             _ruleEngine = ruleEngine ?? throw new ArgumentNullException(nameof(ruleEngine));
             _workflowName = workflowName ?? throw new ArgumentNullException(nameof(workflowName));
-            _tenant = tenant;
+            _tenantConfiguration = tenantConfiguration ?? throw new ArgumentNullException(nameof(tenantConfiguration));
         }
 
         /// <inheritdoc/>
@@ -48,7 +49,7 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
             }
             catch (Exception exception)
             {
-                throw new RuleEngineException(_workflowName, _tenant, exception, "FeatureFlighting.RulesEngineEvaluator.Evaluate", trackingIds.CorrelationId, trackingIds.TransactionId);
+                throw new RuleEngineException(_workflowName, _tenantConfiguration.Name, exception, "FeatureFlighting.RulesEngineEvaluator.Evaluate", trackingIds.CorrelationId, trackingIds.TransactionId);
             }
         }
     }

@@ -6,6 +6,9 @@ using static Microsoft.FeatureFlighting.Common.Constants;
 
 namespace Microsoft.FeatureFlighting.Core.Operators
 {
+    /// <summary>
+    /// Greater than operator. Context value must be greater than configured value.
+    /// </summary>
     public class GreaterThanOperator : BaseOperator
     {
         public override Operator Operator => Operator.GreaterThan;
@@ -17,9 +20,9 @@ namespace Microsoft.FeatureFlighting.Core.Operators
                 return Task.FromResult(EvaluateDate(configuredValue, contextValue));
 
             if (int.TryParse(configuredValue, out int configuredNumber) && int.TryParse(contextValue, out int contextNumber))
-                return Task.FromResult(EvaluateNumber(configuredNumber, contextNumber));
+                return Task.FromResult(EvaluateNumber(configuredNumber, contextNumber, filterType));
 
-            return Task.FromResult(new EvaluationResult(string.Compare(contextValue, configuredValue) > 0));
+            return Task.FromResult(new EvaluationResult(string.Compare(contextValue, configuredValue) > 0, Operator, filterType));
         }
 
         private EvaluationResult EvaluateDate(string configuredValue, string contextValue)
@@ -27,13 +30,13 @@ namespace Microsoft.FeatureFlighting.Core.Operators
             DateTime date = new(1970, 1, 1, 0, 0, 0, 0);
             DateTime configuredDate = date.AddMilliseconds(Convert.ToDouble(configuredValue)).ToLocalTime();
             DateTime contextDate = date.AddMilliseconds(Convert.ToDouble(contextValue)).ToLocalTime();
-            return new EvaluationResult(contextDate > configuredDate);
+            return new EvaluationResult(contextDate > configuredDate, Operator, FilterKeys.Date);
 
         }
 
-        private EvaluationResult EvaluateNumber(double configuredValue, double contextValue)
+        private EvaluationResult EvaluateNumber(double configuredValue, double contextValue, string filterType)
         {
-            return new EvaluationResult(contextValue > configuredValue);
+            return new EvaluationResult(contextValue > configuredValue, Operator, filterType);
         }
     }
 }
