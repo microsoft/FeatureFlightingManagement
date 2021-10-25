@@ -37,9 +37,9 @@ namespace Microsoft.FeatureFlighting.Api.Controllers
         [Route("filters")]
         public async Task<IActionResult> GetFilters()
         {
-            string tenant = Request.Headers.GetOrDefault(Constants.Flighting.APP_HEADER, "Default").ToString();
-            string correlationId = Request.Headers.GetOrDefault("x-CorrelationId", Guid.NewGuid().ToString()).ToString();
-            string transactionId = Request.Headers.GetOrDefault("x-MessageId", Guid.NewGuid().ToString()).ToString();
+            string tenant = Request?.Headers.GetOrDefault(Constants.Flighting.APP_HEADER, "Default").ToString() ?? "Default";
+            string correlationId = Request?.Headers.GetOrDefault("x-CorrelationId", Guid.NewGuid().ToString()).ToString();
+            string transactionId = Request?.Headers.GetOrDefault("x-MessageId", Guid.NewGuid().ToString()).ToString();
             IDictionary<string, List<string>> map = await _operatorEvaluatorStrategy.GetFilterOperatorMapping(tenant, correlationId, transactionId);
             return Ok(map.Keys);
         }
@@ -49,9 +49,9 @@ namespace Microsoft.FeatureFlighting.Api.Controllers
         [Route("filters/operators/map")]
         public async Task<IActionResult> GetFilterOperatorMapping()
         {
-            string tenant = Request.Headers.GetOrDefault(Constants.Flighting.APP_HEADER, "Default").ToString();
-            string correlationId = Request.Headers.GetOrDefault("x-CorrelationId", Guid.NewGuid().ToString()).ToString();
-            string transactionId = Request.Headers.GetOrDefault("x-MessageId", Guid.NewGuid().ToString()).ToString();
+            string tenant = Request?.Headers.GetOrDefault(Constants.Flighting.APP_HEADER, "Default").ToString() ?? "Default";
+            string correlationId = Request?.Headers.GetOrDefault("x-CorrelationId", Guid.NewGuid().ToString()).ToString();
+            string transactionId = Request?.Headers.GetOrDefault("x-MessageId", Guid.NewGuid().ToString()).ToString();
             IDictionary<string, List<string>> map = await _operatorEvaluatorStrategy.GetFilterOperatorMapping(tenant, correlationId, transactionId);
             return Ok(map);
         }

@@ -23,7 +23,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
         {
             BaseOperator equalOperator = new EqualOperator();
             _evaluators.Add(equalOperator);
-            var mockTenantConfigurationProvider = new Mock<TenantConfigurationProvider>();
+            var mockTenantConfigurationProvider = new Mock<ITenantConfigurationProvider>();
             mockTenantConfigurationProvider.Setup(provider => provider.Get(It.IsAny<string>()))
                 .Returns(Task.FromResult(new TenantConfiguration()));
             _tenantConfigurationProvider = mockTenantConfigurationProvider.Object;

@@ -32,8 +32,8 @@ namespace Microsoft.FeatureFlighting.Api.Tests.ControllerTests
         public async Task Get_Filters_Must_Return_List_Of_Filters()
         {
             var configMock = SetConfigurationMock();
-
-            ConfigurationController controller = new ConfigurationController(configMock, null);
+            var mockOperatorevaluatorStrategy = SetOpeartorEvaluationStrategy();
+            ConfigurationController controller = new ConfigurationController(configMock, mockOperatorevaluatorStrategy.Object);
 
 
             var operators = (await controller.GetFilters()) as OkObjectResult;

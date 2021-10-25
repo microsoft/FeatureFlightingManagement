@@ -74,34 +74,6 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
             Assert.AreEqual(evaluationResult.Result, false);
             Assert.AreEqual(evaluationResult.Message, "No security groups are configured");
         }
-        [TestMethod]
-        public async Task evaluate_sg_operator_throws_exception_for_incorrect_filter_value_without_sgID_for_upn()
-        {
-            //Arrange
-            string contextValue = "twsharma@microsoft.com";
-            string configuredValue = "fxpswe";
-            string filterType = "Userupn";
-            LoggerTrackingIds trackingIds = new LoggerTrackingIds()
-            {
-                CorrelationId = "TCId",
-                TransactionId = "TTId"
-            };
-            
-            evaluator = new MemberOfSecurityGroupOperator(mockGraphApiProviderWithUpnInSG.Object, mockConfig.Object);
-            Exception ex=null;
-            //Act
-            try
-            {
-                var evaluationResult = await evaluator.Evaluate(configuredValue, contextValue, filterType, trackingIds);
-            }
-            catch (Exception e)
-            {
-                ex = e;
-            }
-            //Assert
-            Assert.IsNotNull(ex);
-           
-        }
         
         [TestMethod]
         public async Task evaluate_sg_operator_returns_false_for_invalid_upn_value_for_upn()
