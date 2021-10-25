@@ -23,11 +23,11 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
         protected readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
-        private readonly IOperatorEvaluatorStrategy _evaluatorStrategy;
+        private readonly IOperatorStrategy _evaluatorStrategy;
 
         protected abstract string FilterType { get; }
 
-        public BaseFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorEvaluatorStrategy evaluatorStrategy)
+        public BaseFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorStrategy evaluatorStrategy)
         {
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             _logger = logger;

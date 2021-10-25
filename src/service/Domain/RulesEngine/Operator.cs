@@ -6,9 +6,9 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
 {
     public static class Operator
     {
-        private static IOperatorEvaluatorStrategy _operatorEvaluatorStrategy;
+        private static IOperatorStrategy _operatorEvaluatorStrategy;
         
-        public static void Initialize(IOperatorEvaluatorStrategy operatorEvaluatorStrategy)
+        public static void Initialize(IOperatorStrategy operatorEvaluatorStrategy)
         {
             _operatorEvaluatorStrategy = operatorEvaluatorStrategy;
         }

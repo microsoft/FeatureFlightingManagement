@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Newtonsoft.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
@@ -14,7 +15,6 @@ using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using static Microsoft.FeatureFlighting.Common.Constants;
-using Newtonsoft.Json;
 
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
@@ -25,6 +25,8 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
+
+        public static List<string> SupportedOperators = new() { Operator.Evaluates.ToString(), Operator.NotEvaluates.ToString() };
 
         public RulesEngineFilter(IRulesEngineManager ruleEngineManager, IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ILogger logger)
         {

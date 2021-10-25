@@ -41,7 +41,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
                 if (_cacheContainer.Keys.Contains(cacheContainerKey))
                     return _cacheContainer[cacheContainerKey];
 
-                string cacheType = GetCacheType(tenant, operation);
+                string? cacheType = GetCacheType(tenant, operation);
                 ICache cache = Create(cacheType, tenant);
                 _cacheContainer.Add(cacheContainerKey, cache);
                 return cache;
@@ -49,21 +49,21 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
         }
 
         /// <inheritdoc/>
-        private ICache Create(string cacheType, string tenant)
+        private ICache Create(string? cacheType, string tenant)
         {   
-            if (string.IsNullOrEmpty(cacheType))
-                return null;
+            if (cacheType == null || string.IsNullOrEmpty(cacheType))
+                return new NoCache();
 
             return Enum.Parse<CacheType>(cacheType) switch
             {
-                CacheType.NoCache => null,
+                CacheType.NoCache => new NoCache(),
                 CacheType.InMemory => CreateInMemoryCache(tenant),
                 CacheType.Redis => CreateRedisCache(tenant),
                 _ => CreateUnifiedRedisCache(tenant),
             };
         }
 
-        private string GetCacheType(string tenant, string operation)
+        private string? GetCacheType(string tenant, string operation)
         {
             TenantConfiguration tenantConfiguration = _tenantConfigurationProvider.Get(tenant).ConfigureAwait(false).GetAwaiter().GetResult();
             if (tenantConfiguration.Cache == null || string.IsNullOrWhiteSpace(tenantConfiguration.Cache.Type))

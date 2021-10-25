@@ -25,7 +25,11 @@
         Region,
         Role,
         UserUpn,
-        RulesEngine,
         Generic
+    }
+
+    public enum ComplexFilters
+    {
+        RulesEngine
     }
 }

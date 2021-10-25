@@ -12,7 +12,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
     public class AliasFilter : BaseFilter, IFeatureFilter
     {
         protected override string FilterType => FilterKeys.Alias;
-        public AliasFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorEvaluatorStrategy evaluatorStrategy) : base(configuration ,httpContextAccessor, logger, evaluatorStrategy)
+        public AliasFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorStrategy evaluatorStrategy) : base(configuration ,httpContextAccessor, logger, evaluatorStrategy)
         {
         }
 

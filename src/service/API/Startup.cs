@@ -159,8 +159,8 @@ namespace Microsoft.PS.Services.FlightingService.Api
             services.AddSingleton<BaseOperator, GreaterThanOperator>();
             services.AddSingleton<BaseOperator, MemberOfSecurityGroupOperator>();
             services.AddSingleton<BaseOperator, NotMemberOfSecurityGroupOperator>();
-            services.AddSingleton<IOperatorEvaluatorStrategy>(factory =>
-                new OperatorEvaluatorStrategy(factory.GetServices<BaseOperator>()));
+            services.AddSingleton<IOperatorStrategy>(sp =>
+                new OperatorStrategy(sp.GetServices<BaseOperator>(), sp.GetService<ITenantConfigurationProvider>(), sp.GetService<ICacheFactory>()));
 
             services.AddSingleton<IRulesEngineManager, RulesEngineManager>();
 

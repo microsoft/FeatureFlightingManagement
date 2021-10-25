@@ -19,7 +19,7 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
         private readonly IBlobProviderFactory _blobProviderFactory;
         private readonly ICacheFactory _cacheFactory;
 
-        public RulesEngineManager(IOperatorEvaluatorStrategy operatorEvaluatorStrategy, ITenantConfigurationProvider tenantConfigurationProvider, IBlobProviderFactory blobProviderFactory, ICacheFactory cacheFactory)
+        public RulesEngineManager(IOperatorStrategy operatorEvaluatorStrategy, ITenantConfigurationProvider tenantConfigurationProvider, IBlobProviderFactory blobProviderFactory, ICacheFactory cacheFactory)
         {
             if (operatorEvaluatorStrategy == null)
                 throw new ArgumentNullException(nameof(operatorEvaluatorStrategy));

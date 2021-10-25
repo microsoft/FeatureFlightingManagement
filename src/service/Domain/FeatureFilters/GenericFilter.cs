@@ -12,7 +12,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
     public class GenericFilter : BaseFilter, IFeatureFilter
     {
         protected override string FilterType => FilterKeys.Generic;
-        public GenericFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorEvaluatorStrategy evaluatorStrategy) : base(configuration, httpContextAccessor, logger, evaluatorStrategy)
+        public GenericFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorStrategy evaluatorStrategy) : base(configuration, httpContextAccessor, logger, evaluatorStrategy)
         {
         }
 

@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Domain\Microsoft.FeatureFlighting.Core.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Microsoft.FeatureFlighting.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

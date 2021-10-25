@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace Microsoft.FeatureFlighting.Api.Tests.ControllerTests
 {
@@ -28,25 +29,25 @@ namespace Microsoft.FeatureFlighting.Api.Tests.ControllerTests
         }
 
         [TestMethod]
-        public void Get_Filters_Must_Return_List_Of_Filters()
+        public async Task Get_Filters_Must_Return_List_Of_Filters()
         {
             var configMock = SetConfigurationMock();
 
             ConfigurationController controller = new ConfigurationController(configMock, null);
 
 
-            var operators = controller.GetFilters() as OkObjectResult;
+            var operators = (await controller.GetFilters()) as OkObjectResult;
             Assert.IsNotNull(operators);
         }
         [TestMethod]
-        public void Get_Filter_Operator_Mapping_Must_Return_List_Of_Filter_Operator_Mapping()
+        public async Task Get_Filter_Operator_Mapping_Must_Return_List_Of_Filter_Operator_Mapping()
         {
             var configMock = SetConfigurationMock();
             var mockOperatorevaluatorStrategy = SetOpeartorEvaluationStrategy();
             ConfigurationController controller = new ConfigurationController(configMock, mockOperatorevaluatorStrategy.Object);
 
 
-            var mapping = controller.GetFilterOperatorMapping() as OkObjectResult;
+            var mapping = (await controller.GetFilterOperatorMapping()) as OkObjectResult;
             Assert.IsNotNull(mapping);
         }
 
@@ -60,12 +61,13 @@ namespace Microsoft.FeatureFlighting.Api.Tests.ControllerTests
 
             return configuration;
         }
-        public Mock<IOperatorEvaluatorStrategy> SetOpeartorEvaluationStrategy()
+        public Mock<IOperatorStrategy> SetOpeartorEvaluationStrategy()
         {
             List<string> listOfOps = new List<string>() { "equals" };
-            Dictionary<string, List<string>> mapping = new Dictionary<string, List<string>>() { { "alais", listOfOps } };
-            Mock<IOperatorEvaluatorStrategy> mockOperatorevaluatorStrategy = new Mock<IOperatorEvaluatorStrategy>();
-            mockOperatorevaluatorStrategy.Setup(m => m.GetFilterOperatorMapping()).Returns(mapping);
+            IDictionary<string, List<string>> mapping = new Dictionary<string, List<string>>() { { "alais", listOfOps } };
+            Mock<IOperatorStrategy> mockOperatorevaluatorStrategy = new Mock<IOperatorStrategy>();
+            mockOperatorevaluatorStrategy.Setup(m => m.GetFilterOperatorMapping(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(mapping));
             
             return mockOperatorevaluatorStrategy;
         }

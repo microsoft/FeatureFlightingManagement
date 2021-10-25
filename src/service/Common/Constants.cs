@@ -5,6 +5,7 @@
         public struct Flighting
         {
             public const string FLIGHT_CONTEXT_HEADER = "X-FlightContext";
+            public const string APP_HEADER = "X-Application";
             public const string FEATUREFLAG_CONVENTION = "{0}_{1}_{2}";
             public const string FLIGHTING_AUTH_PERM = "manageexperimentation";
             public const string FLIGHTING_ADMIN_RESOURCE = "Experimentation";

@@ -165,6 +165,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
         public string FeatureFlagNames { get;set; }
 
         /// <summary>
+        /// Type of cache for caching the filters and operator mapping
+        /// </summary>
+        public string OperatorMapping { get; set; }
+
+        /// <summary>
         /// Type of cache for caching rule engine workflows
         /// </summary>
         public string RulesEngine { get; set; }
@@ -197,6 +202,9 @@ namespace Microsoft.FeatureFlighting.Common.Config
             if (operation.ToLowerInvariant() == nameof(RulesEngine).ToLowerInvariant())
                 return RulesEngine;
 
+            if (operation.ToLowerInvariant() == nameof(OperatorMapping).ToLowerInvariant())
+                return OperatorMapping;
+
             return Type;
         }
 
@@ -213,6 +221,8 @@ namespace Microsoft.FeatureFlighting.Common.Config
             FeatureFlags = !string.IsNullOrWhiteSpace(FeatureFlags) ? FeatureFlags : defaultConfiguration.FeatureFlags;
             Graph = !string.IsNullOrWhiteSpace(Graph) ? Graph : defaultConfiguration.Graph;
             FeatureFlagNames = !string.IsNullOrWhiteSpace(FeatureFlagNames) ? FeatureFlagNames : defaultConfiguration.FeatureFlagNames;
+            RulesEngine = !string.IsNullOrWhiteSpace(RulesEngine) ? RulesEngine : defaultConfiguration.RulesEngine;
+            OperatorMapping = !string.IsNullOrWhiteSpace(OperatorMapping) ? OperatorMapping : defaultConfiguration.OperatorMapping;
             URP ??= defaultConfiguration.URP;
         }
     }
