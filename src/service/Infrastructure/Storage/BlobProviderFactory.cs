@@ -34,7 +34,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Storage
                 return null;
 
             BlobServiceClient blobServiceClient = new(tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionString);
-            BlobContainerClient blobContainerClient = await blobServiceClient.CreateBlobContainerAsync(tenantConfiguration.BusinessRuleEngine.Storage.ContainerName);
+            BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(tenantConfiguration.BusinessRuleEngine.Storage.ContainerName);
             IBlobProvider blobProvider = new BlobProvider(blobContainerClient, _logger);
             _blobProviderCache.Add(tenantName, blobProvider);
             return blobProvider;

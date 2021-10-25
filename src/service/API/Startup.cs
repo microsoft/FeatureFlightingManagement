@@ -175,7 +175,7 @@ namespace Microsoft.PS.Services.FlightingService.Api
                 .AddFeatureFilter<RoleFilter>()
                 .AddFeatureFilter<UserUpnFilter>()
                 .AddFeatureFilter<GenericFilter>()
-                .AddFeatureFilter<RuleEngineFilter>();
+                .AddFeatureFilter<RulesEngineFilter>();
 
             services.AddSingleton<IFeatureFlagEvaluator, FeatureFlagEvaluator>();
             services.AddSingleton<IFeatureFlagManager, FeatureFlagManager>();

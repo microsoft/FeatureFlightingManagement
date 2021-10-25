@@ -120,7 +120,7 @@
             public const string Role = "Role";
             public const string Date = "Date";
             public const string UserUpn = "Userupn";
-            public const string RuleEngine = "RuleEngine";
+            public const string RulesEngine = "RulesEngine";
         }
 
         public struct FlightingContextParams

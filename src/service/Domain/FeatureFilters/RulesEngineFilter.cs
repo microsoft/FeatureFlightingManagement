@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
@@ -15,18 +14,19 @@ using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using static Microsoft.FeatureFlighting.Common.Constants;
+using Newtonsoft.Json;
 
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
-    [FilterAlias(FilterKeys.RuleEngine)]
-    public class RuleEngineFilter : IFeatureFilter
+    [FilterAlias(FilterKeys.RulesEngine)]
+    public class RulesEngineFilter : IFeatureFilter
     {
         private readonly IRulesEngineManager _rulesEngineManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
 
-        public RuleEngineFilter(IRulesEngineManager ruleEngineManager, IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ILogger logger)
+        public RulesEngineFilter(IRulesEngineManager ruleEngineManager, IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ILogger logger)
         {
             _rulesEngineManager = ruleEngineManager ?? throw new ArgumentNullException(nameof(ruleEngineManager));
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
@@ -37,13 +37,13 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
         public async Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context)
         {
             LoggerTrackingIds trackingIds = _httpContextAccessor.HttpContext.Items.ContainsKey(Flighting.FLIGHT_TRACKER_PARAM)
-                 ? JsonSerializer.Deserialize<LoggerTrackingIds>(_httpContextAccessor.HttpContext.Items[Flighting.FLIGHT_TRACKER_PARAM].ToString(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                 ? JsonConvert.DeserializeObject<LoggerTrackingIds>(_httpContextAccessor.HttpContext.Items[Flighting.FLIGHT_TRACKER_PARAM].ToString())
                  : new LoggerTrackingIds();
 
             try
             {
                 FilterSettings filterSettings = context.Parameters.Get<FilterSettings>() ?? new FilterSettings();
-                if (!ValidateFilterSettings(filterSettings, FilterKeys.RuleEngine, trackingIds))
+                if (!ValidateFilterSettings(filterSettings, FilterKeys.RulesEngine, trackingIds))
                     return false;
 
                 Operator op = (Operator)Enum.Parse(typeof(Operator), filterSettings.Operator, true);
@@ -66,7 +66,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
             catch (Exception exception)
             {
                 throw new EvaluationException(
-                    message: $"There was an error in evaluating the filter {FilterKeys.RuleEngine}. See the inner exception for more details.",
+                    message: $"There was an error in evaluating the filter {FilterKeys.RulesEngine}. See the inner exception for more details.",
                     innerException: exception,
                     correlationId: trackingIds.CorrelationId,
                     source: "FeatureFlighting.RuleEngine.EvaluateAsync",
@@ -80,7 +80,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 
             if (_httpContextAccessor.HttpContext.Request.Headers.TryGetValue(Flighting.FLIGHT_CONTEXT_HEADER, out StringValues flightContext))
             {
-                contextParams = JsonSerializer.Deserialize<Dictionary<string, object>>(flightContext);
+                contextParams = JsonConvert.DeserializeObject<Dictionary<string, object>>(flightContext);
             }
             else
             {

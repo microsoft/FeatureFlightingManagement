@@ -13,40 +13,40 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
             _operatorEvaluatorStrategy = operatorEvaluatorStrategy;
         }
 
-        public static bool In(string value, string contextValue)
+        public static bool In(string contextValue, string configuredValue)
         {
             BaseOperator op = _operatorEvaluatorStrategy.Get(FeatureFilters.Operator.In);
-            EvaluationResult result = op.Evaluate(value, contextValue, FilterKeys.RuleEngine, new Common.LoggerTrackingIds())
+            EvaluationResult result = op.Evaluate(configuredValue, contextValue, FilterKeys.RulesEngine, new Common.LoggerTrackingIds())
                 .ConfigureAwait(false)
                 .GetAwaiter()
                 .GetResult();
             return result.Result;
         }
 
-        public static bool NotIn(string value, string contextValue)
+        public static bool NotIn(string contextValue, string configuredValue)
         {
             BaseOperator op = _operatorEvaluatorStrategy.Get(FeatureFilters.Operator.NotIn);
-            EvaluationResult result = op.Evaluate(value, contextValue, FilterKeys.RuleEngine, new Common.LoggerTrackingIds())
+            EvaluationResult result = op.Evaluate(configuredValue, contextValue, FilterKeys.RulesEngine, new Common.LoggerTrackingIds())
                 .ConfigureAwait(false)
                 .GetAwaiter()
                 .GetResult();
             return result.Result;
         }
 
-        public static bool IsMember(string value, string contextValue)
+        public static bool IsMember(string contextValue, string configuredValue)
         {
             BaseOperator op = _operatorEvaluatorStrategy.Get(FeatureFilters.Operator.MemberOfSecurityGroup);
-            EvaluationResult result = op.Evaluate(value, contextValue, FilterKeys.RuleEngine, new Common.LoggerTrackingIds())
+            EvaluationResult result = op.Evaluate(configuredValue, contextValue, FilterKeys.RulesEngine, new Common.LoggerTrackingIds())
                 .ConfigureAwait(false)
                 .GetAwaiter()
                 .GetResult();
             return result.Result;
         }
 
-        public static bool IsNotMember(string value, string contextValue)
+        public static bool IsNotMember(string contextValue, string configuredValue)
         {
             BaseOperator op = _operatorEvaluatorStrategy.Get(FeatureFilters.Operator.NotMemberOfSecurityGroup);
-            EvaluationResult result = op.Evaluate(value, contextValue, FilterKeys.RuleEngine, new Common.LoggerTrackingIds())
+            EvaluationResult result = op.Evaluate(configuredValue, contextValue, FilterKeys.RulesEngine, new Common.LoggerTrackingIds())
                 .ConfigureAwait(false)
                 .GetAwaiter()
                 .GetResult();

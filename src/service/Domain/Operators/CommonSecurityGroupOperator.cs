@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.FeatureFlighting.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common.Group;
@@ -25,13 +26,9 @@ namespace Microsoft.FeatureFlighting.Core.Operators
             if (string.IsNullOrWhiteSpace(configuredValue))
                 return new EvaluationResult(false, "No security groups are configured");
 
-            var securityGroupIds =
-                JsonSerializer.Deserialize<SecurityGroup[]>(configuredValue, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })
-                .Select(group => group.ObjectId)
-                .ToList();
-
-            var isUserPartOfSecurityGroup = false;
-            if (filterType == FilterKeys.UserUpn || filterType == FilterKeys.RuleEngine)
+            List<string> securityGroupIds = GetConfiguredSecurityGroups(configuredValue).ToList();
+            bool isUserPartOfSecurityGroup;
+            if (filterType == FilterKeys.UserUpn || filterType == FilterKeys.RulesEngine)
             {
                 if (!IsValidUpn(contextValue))
                     return new EvaluationResult(false, "The UPN is incorrect. Check the format and allowed domains");
@@ -44,6 +41,20 @@ namespace Microsoft.FeatureFlighting.Core.Operators
                 isUserPartOfSecurityGroup = await _groupVerificationService.IsUserAliasPartOfSecurityGroup(contextValue, securityGroupIds, trackingIds).ConfigureAwait(false);
             }
             return new EvaluationResult(op == Operator.MemberOfSecurityGroup ? isUserPartOfSecurityGroup : !isUserPartOfSecurityGroup);
+        }
+
+        private IEnumerable<string> GetConfiguredSecurityGroups(string configuredValue)
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<SecurityGroup[]>(configuredValue, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })
+                .Select(group => group.ObjectId)
+                .ToList();
+            }
+            catch (System.Exception)
+            {
+                return configuredValue.Split(",");
+            }
         }
 
         private bool IsValidUpn(string contextValue)

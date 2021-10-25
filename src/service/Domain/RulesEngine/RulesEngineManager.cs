@@ -42,7 +42,7 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
                 return cachedRuleEngine;
 
             IBlobProvider blobProvider = await _blobProviderFactory.CreateBreWorkflowProvider(tenant);
-            string workflowJson = await blobProvider.Get(workflowName, trackingIds);
+            string workflowJson = await blobProvider.Get($"{workflowName}.json", trackingIds);
             if (string.IsNullOrWhiteSpace(workflowJson))
                 throw new RuleEngineException(workflowName, tenant, "Rule engine not found in the configured storage location", "FeatureFlighting.RuleEngineManager.Build", trackingIds.CorrelationId, trackingIds.TransactionId);
 

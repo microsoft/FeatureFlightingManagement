@@ -10,7 +10,7 @@ namespace Microsoft.FeatureFlighting.Core.Operators
     public class MemberOfSecurityGroupOperator : BaseOperator
     {
         public override Operator Operator => Operator.MemberOfSecurityGroup;
-        public override string[] SupportedFilters => new string[] { FilterKeys.Alias, FilterKeys.UserUpn, FilterKeys.RuleEngine };
+        public override string[] SupportedFilters => new string[] { FilterKeys.Alias, FilterKeys.UserUpn, FilterKeys.RulesEngine };
         
         private readonly CommonSecurityGroupOperator _securityGroupOperator;
 

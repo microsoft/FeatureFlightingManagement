@@ -9,7 +9,7 @@ namespace Microsoft.FeatureFlighting.Core.Operators
     public class InOperator : BaseOperator
     {
         public override Operator Operator => Operator.In;
-        public override string[] SupportedFilters => new string[] { FilterKeys.Alias, FilterKeys.Country, FilterKeys.Region, FilterKeys.Role, FilterKeys.RoleGroup, FilterKeys.UserUpn, FilterKeys.Generic, FilterKeys.RuleEngine };
+        public override string[] SupportedFilters => new string[] { FilterKeys.Alias, FilterKeys.Country, FilterKeys.Region, FilterKeys.Role, FilterKeys.RoleGroup, FilterKeys.UserUpn, FilterKeys.Generic, FilterKeys.RulesEngine };
 
         protected override Task<EvaluationResult> Process(string configuredValue, string contextValue, string filterType, LoggerTrackingIds trackingIds)
         {

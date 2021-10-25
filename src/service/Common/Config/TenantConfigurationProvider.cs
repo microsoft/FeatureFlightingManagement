@@ -64,7 +64,7 @@ namespace Microsoft.FeatureFlighting.Common.Config
                 if (string.IsNullOrWhiteSpace(tenantConfiguration.ShortName))
                     tenantConfiguration.ShortName = tenantConfiguration.Name;
 
-                if (tenantConfiguration.BusinessRuleEngine != null && !tenantConfiguration.BusinessRuleEngine.Enabled)
+                if (tenantConfiguration.BusinessRuleEngine != null && tenantConfiguration.BusinessRuleEngine.Enabled)
                 {
                     if (tenantConfiguration.BusinessRuleEngine.Storage == null)
                     {
@@ -73,8 +73,8 @@ namespace Microsoft.FeatureFlighting.Common.Config
                     else
                     {
                         string storageKeyLocation = tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionStringKey;
-                        string storageKey = _configuration.GetValue<string>(storageKeyLocation);
-                        tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionString = storageKey;
+                        string storageConnectionString = _configuration.GetValue<string>(storageKeyLocation);
+                        tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionString = storageConnectionString;
                     }
                 }
 
