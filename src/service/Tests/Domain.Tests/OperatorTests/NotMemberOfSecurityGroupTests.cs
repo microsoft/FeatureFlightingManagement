@@ -67,7 +67,6 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
             var evaluationResult = await evaluator.Evaluate(configuredValue, contextValue, filterType, trackingIds);
             //Assert
             Assert.AreEqual(evaluationResult.Result, false);
-            Assert.AreEqual(evaluationResult.Message, "No security groups are configured");
         }
         
         [TestMethod]
@@ -88,7 +87,6 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
             var evaluationResult = await evaluator.Evaluate(configuredValue, contextValue, filterType, trackingIds);
             //Assert
             Assert.AreEqual(evaluationResult.Result, false);
-            Assert.AreEqual(evaluationResult.Message, "The UPN is incorrect. Check the format and allowed domains");
         }
 
 

@@ -41,8 +41,8 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
             LoggerTrackingIds trackingIds = _httpContextAccessor.HttpContext.Items.ContainsKey(Flighting.FLIGHT_TRACKER_PARAM)
                  ? JsonSerializer.Deserialize<LoggerTrackingIds>(_httpContextAccessor.HttpContext.Items[Flighting.FLIGHT_TRACKER_PARAM].ToString(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                  : new LoggerTrackingIds();
-            string tenant = _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_APP_PARAM].ToString();
-            string env = _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ENV_PARAM].ToString();
+            string tenant = _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_APP_PARAM]?.ToString();
+            string env = _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ENV_PARAM]?.ToString();
             try
             {
                 var contextValue = string.Empty;

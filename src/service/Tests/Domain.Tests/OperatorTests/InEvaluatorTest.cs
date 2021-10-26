@@ -37,7 +37,6 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
             var evaluationResult = await evaluator.Evaluate(configuredValue, contextValue, filterType, trackingIds);
             //Assert
             Assert.AreEqual(evaluationResult.Result, false);
-            Assert.AreEqual(evaluationResult.Message, "Configured Value is empty");
         }
         [TestMethod]
         public async Task evaluate_in_operator_returns_true_for_correct_value_for_alias()
