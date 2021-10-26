@@ -8,7 +8,7 @@ using Microsoft.FeatureFlighting.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Core.Spec;
-using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Common.Authorization;
 using Microsoft.PS.Services.FlightingService.Api.ActionFilters;
 

@@ -11,7 +11,9 @@
         MemberOfCustomGroup,
         NotMemberOfCustomGroup,
         MemberOfSecurityGroup,
-        NotMemberOfSecurityGroup
+        NotMemberOfSecurityGroup,
+        Evaluates,
+        NotEvaluates
     }
 
     public enum Filters
@@ -24,5 +26,10 @@
         Role,
         UserUpn,
         Generic
+    }
+
+    public enum ComplexFilters
+    {
+        RulesEngine
     }
 }

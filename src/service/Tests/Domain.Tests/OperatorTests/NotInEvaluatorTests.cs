@@ -1,9 +1,6 @@
 ﻿using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Core.Evaluators;
-using Microsoft.FeatureFlighting.Core.FeatureFilters;
-using Microsoft.FeatureFlighting.Core.Spec;
+using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using System.Threading.Tasks;
 
 namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
@@ -12,13 +9,13 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
     public class NotInEvaluatorTests
     {
 
-        private NotInEvaluator evaluator;
+        private NotInOperator evaluator;
         private string[] listOfFilters;
 
         [TestInitialize]
         public void TestStartup()
         {
-            evaluator = new NotInEvaluator();
+            evaluator = new NotInOperator();
             listOfFilters = evaluator.SupportedFilters;
         }
         [TestMethod]
@@ -38,7 +35,6 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
             var evaluationResult = await evaluator.Evaluate(configuredValue, contextValue, filterType, trackingIds);
             //Assert
             Assert.AreEqual(evaluationResult.Result, true);
-            Assert.AreEqual(evaluationResult.Message, "Configured Value is empty");
         }
         [TestMethod]
         public async Task evaluate_not_in_operator_returns_false_for_incorrect_value_for_alias()

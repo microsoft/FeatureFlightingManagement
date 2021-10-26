@@ -13,7 +13,7 @@ using Microsoft.FeatureFlighting.Core.Spec;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common.Model;
 using Microsoft.FeatureFlighting.Common.Caching;
-using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Core.AzureAppConfiguration;
 
 namespace Microsoft.FeatureFlighting.Core.Configuration
@@ -67,7 +67,7 @@ namespace Microsoft.FeatureFlighting.Core.Configuration
                    statusCode: rex.Status,
                    correlationId: trackingIds.CorrelationId,
                    transactionId: trackingIds.TransactionId,
-                   failedMethod: "FeatureFlagManger.CreateFeatureFlag",
+                   source: "FeatureFlagManger.CreateFeatureFlag",
                    innerException: rex);
             }
         }
@@ -99,7 +99,7 @@ namespace Microsoft.FeatureFlighting.Core.Configuration
                    statusCode: rex.Status,
                    correlationId: trackingIds.CorrelationId,
                    transactionId: trackingIds.TransactionId,
-                   failedMethod: "FeatureFlagManger.UpdateFeatureFlag",
+                   source: "FeatureFlagManger.UpdateFeatureFlag",
                    innerException: rex);
             }
         }
@@ -268,7 +268,7 @@ namespace Microsoft.FeatureFlighting.Core.Configuration
                    statusCode: rex.Status,
                    correlationId: trackingIds.CorrelationId,
                    transactionId: trackingIds.TransactionId,
-                   failedMethod: "FeatureFlagManger.DeleteFeatureFlag",
+                   source: "FeatureFlagManger.DeleteFeatureFlag",
                    innerException: rex);
             }
         }

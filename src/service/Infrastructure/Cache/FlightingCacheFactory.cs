@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using AppInsights.EnterpriseTelemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.FeatureFlighting.Common.Caching;
 using Microsoft.FeatureFlighting.Common.Config;
+using Microsoft.FeatureFlighting.Common.Caching;
+using static Microsoft.FeatureFlighting.Common.Cache.CacheConstants;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Cache
 {
@@ -40,27 +41,36 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
                 if (_cacheContainer.Keys.Contains(cacheContainerKey))
                     return _cacheContainer[cacheContainerKey];
 
-                var cacheType = GetCacheType(tenant, operation);
-                var cache = cacheType switch
-                {
-                    CacheConstants.CacheType.NoCache => null,
-                    CacheConstants.CacheType.InMemory => CreateInMemoryCache(tenant),
-                    CacheConstants.CacheType.Redis => CreateRedisCache(tenant),
-                    _ => CreateUnifiedRedisCache(tenant),
-                };
+                string? cacheType = GetCacheType(tenant, operation);
+                ICache cache = Create(cacheType, tenant);
                 _cacheContainer.Add(cacheContainerKey, cache);
                 return cache;
             }
         }
 
-        private CacheConstants.CacheType GetCacheType(string tenant, string operation)
+        /// <inheritdoc/>
+        private ICache Create(string? cacheType, string tenant)
+        {   
+            if (cacheType == null || string.IsNullOrEmpty(cacheType))
+                return new NoCache();
+
+            return Enum.Parse<CacheType>(cacheType) switch
+            {
+                CacheType.NoCache => new NoCache(),
+                CacheType.InMemory => CreateInMemoryCache(tenant),
+                CacheType.Redis => CreateRedisCache(tenant),
+                _ => CreateUnifiedRedisCache(tenant),
+            };
+        }
+
+        private string? GetCacheType(string tenant, string operation)
         {
             TenantConfiguration tenantConfiguration = _tenantConfigurationProvider.Get(tenant).ConfigureAwait(false).GetAwaiter().GetResult();
             if (tenantConfiguration.Cache == null || string.IsNullOrWhiteSpace(tenantConfiguration.Cache.Type))
-                return CacheConstants.CacheType.NoCache;
+                return null;
 
             string cacheType = tenantConfiguration.Cache.GetCacheType(operation);
-            return Enum.Parse<CacheConstants.CacheType>(cacheType);
+            return cacheType;
         }
 
         private ICache CreateInMemoryCache(string tenant) =>

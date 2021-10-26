@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Common.Authorization;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Authorization

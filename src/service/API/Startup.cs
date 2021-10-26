@@ -17,7 +17,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using AppInsights.EnterpriseTelemetry.Web.Extension;
 using Microsoft.FeatureFlighting.Api.Controllers;
 using Microsoft.FeatureFlighting.Api.Middlewares;
-using Microsoft.FeatureFlighting.Core.Evaluators;
+using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.FeatureFlighting.Core.Configuration;
 using Microsoft.FeatureFlighting.Api.ExceptionHandler;
@@ -32,6 +32,9 @@ using Microsoft.FeatureFlighting.Common.Group;
 using Microsoft.FeatureFlighting.Infrastructure.Graph;
 using Microsoft.FeatureFlighting.Infrastructure.Authorization;
 using Microsoft.FeatureFlighting.Common.Config;
+using Microsoft.FeatureFlighting.Core.RulesEngine;
+using Microsoft.FeatureFlighting.Common.Storage;
+using Microsoft.FeatureFlighting.Infrastructure.Storage;
 
 namespace Microsoft.PS.Services.FlightingService.Api
 {
@@ -142,21 +145,24 @@ namespace Microsoft.PS.Services.FlightingService.Api
             services.AddSingleton<IAuthorizationService, AuthorizationService>();
             services.AddSingleton<IGroupVerificationService, GraphGroupVerificationService>();
             services.AddSingleton<IAzureConfigurationClientProvider, AzureConfigurationClientProvider>();
+            services.AddSingleton<IBlobProviderFactory, BlobProviderFactory>();
         }
 
         private void AddFeatureManagement(IServiceCollection services)
         {
             services.AddAzureAppConfiguration();
-            services.AddSingleton<BaseOperatorEvaluator, EqualEvaluator>();
-            services.AddSingleton<BaseOperatorEvaluator, NotEqualEvaluator>();
-            services.AddSingleton<BaseOperatorEvaluator, InEvaluator>();
-            services.AddSingleton<BaseOperatorEvaluator, NotInEvaluator>();
-            services.AddSingleton<BaseOperatorEvaluator, LesserThanEvaluator>();
-            services.AddSingleton<BaseOperatorEvaluator, GreaterThanEvaluator>();
-            services.AddSingleton<BaseOperatorEvaluator, MemberOfSecurityGroupEvaluator>();
-            services.AddSingleton<BaseOperatorEvaluator, NotMemberOfSecurityGroupEvaluator>();
-            services.AddSingleton<IOperatorEvaluatorStrategy>(factory =>
-                new OperatorEvaluatorStrategy(factory.GetServices<BaseOperatorEvaluator>()));
+            services.AddSingleton<BaseOperator, EqualOperator>();
+            services.AddSingleton<BaseOperator, NotEqualOperator>();
+            services.AddSingleton<BaseOperator, InOperator>();
+            services.AddSingleton<BaseOperator, NotInOperator>();
+            services.AddSingleton<BaseOperator, LesserThanOperator>();
+            services.AddSingleton<BaseOperator, GreaterThanOperator>();
+            services.AddSingleton<BaseOperator, MemberOfSecurityGroupOperator>();
+            services.AddSingleton<BaseOperator, NotMemberOfSecurityGroupOperator>();
+            services.AddSingleton<IOperatorStrategy>(sp =>
+                new OperatorStrategy(sp.GetServices<BaseOperator>(), sp.GetService<ITenantConfigurationProvider>(), sp.GetService<ICacheFactory>()));
+
+            services.AddSingleton<IRulesEngineManager, RulesEngineManager>();
 
             services.AddFeatureManagement()
                 .AddFeatureFilter<AliasFilter>()
@@ -168,7 +174,8 @@ namespace Microsoft.PS.Services.FlightingService.Api
                 .AddFeatureFilter<RegionFilter>()
                 .AddFeatureFilter<RoleFilter>()
                 .AddFeatureFilter<UserUpnFilter>()
-                .AddFeatureFilter<GenericFilter>();
+                .AddFeatureFilter<GenericFilter>()
+                .AddFeatureFilter<RulesEngineFilter>();
 
             services.AddSingleton<IFeatureFlagEvaluator, FeatureFlagEvaluator>();
             services.AddSingleton<IFeatureFlagManager, FeatureFlagManager>();

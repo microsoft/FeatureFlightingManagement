@@ -5,7 +5,7 @@ using AppInsights.EnterpriseTelemetry;
 using Microsoft.AspNetCore.Http;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Api.ExceptionHandler;
 
 namespace Microsoft.FeatureFlighting.Api.Tests.ExceptionHandlerTests

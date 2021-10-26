@@ -1,9 +1,6 @@
 ﻿using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Core.Evaluators;
-using Microsoft.FeatureFlighting.Core.FeatureFilters;
-using Microsoft.FeatureFlighting.Core.Spec;
+using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using System.Threading.Tasks;
 
 namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
@@ -11,15 +8,16 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
     [TestClass]
     public class LesserThanEvaluatorTest
     {
-        private LesserThanEvaluator evaluator;
+        private LesserThanOperator evaluator;
         private string[] listOfFilters;
 
         [TestInitialize]
         public void TestStartup()
         {
-            evaluator = new LesserThanEvaluator();
+            evaluator = new LesserThanOperator();
             listOfFilters = evaluator.SupportedFilters;
         }
+
         [TestMethod]
         public async Task evaluate_less_than_operator_returns_true_for_correct_value_for_alias()
         {

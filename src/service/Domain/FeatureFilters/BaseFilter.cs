@@ -2,19 +2,20 @@
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using AppInsights.EnterpriseTelemetry;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using Microsoft.FeatureManagement;
 using Exception = System.Exception;
 using Microsoft.Extensions.Primitives;
-using AppInsights.EnterpriseTelemetry.Context;
-using Microsoft.Extensions.Configuration;
+using AppInsights.EnterpriseTelemetry;
 using Microsoft.FeatureFlighting.Common;
+using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Core.Spec;
-using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using AppInsights.EnterpriseTelemetry.Context;
+using Microsoft.FeatureFlighting.Core.Operators;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
 using static Microsoft.FeatureFlighting.Common.Constants;
-using Microsoft.FeatureFlighting.Core.Evaluators;
+using System.Text;
 
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
@@ -23,11 +24,11 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
         protected readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
-        private readonly IOperatorEvaluatorStrategy _evaluatorStrategy;
+        private readonly IOperatorStrategy _evaluatorStrategy;
 
         protected abstract string FilterType { get; }
 
-        public BaseFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorEvaluatorStrategy evaluatorStrategy)
+        public BaseFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorStrategy evaluatorStrategy)
         {
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             _logger = logger;
@@ -37,9 +38,11 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 
         public async Task<bool> EvaluateFlightingContextAsync(FeatureFilterEvaluationContext featureFlag, string defaultFilterKey = null)
         {
-            var trackingIds = _httpContextAccessor.HttpContext.Items.ContainsKey(Flighting.FLIGHT_TRACKER_PARAM)
+            LoggerTrackingIds trackingIds = _httpContextAccessor.HttpContext.Items.ContainsKey(Flighting.FLIGHT_TRACKER_PARAM)
                  ? JsonSerializer.Deserialize<LoggerTrackingIds>(_httpContextAccessor.HttpContext.Items[Flighting.FLIGHT_TRACKER_PARAM].ToString(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                  : new LoggerTrackingIds();
+            string tenant = _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_APP_PARAM]?.ToString();
+            string env = _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ENV_PARAM]?.ToString();
             try
             {
                 var contextValue = string.Empty;
@@ -57,30 +60,31 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
                     return false;
 
                 Operator op = (Operator)Enum.Parse(typeof(Operator), settings.Operator, true);
-                contextValue = (contextParams[filterKey]!=null)? contextParams[filterKey].ToString().ToLowerInvariant() : string.Empty;
+                contextValue = (contextParams[filterKey] != null) ? contextParams[filterKey].ToString().ToLowerInvariant() : string.Empty;
                 string settingsValue = settings.Value.ToLowerInvariant();
-                BaseOperatorEvaluator evaluator = _evaluatorStrategy.Get(op);
+                BaseOperator evaluator = _evaluatorStrategy.Get(op);
 
                 if (evaluator == null)
                     throw new Exception($"No evaluator has been assigned for operator - {Enum.GetName(typeof(Operator), op)}");
 
                 EvaluationResult evaluationResult = await evaluator.Evaluate(settingsValue, contextValue, FilterType, trackingIds);
+                AddContext(evaluationResult, featureFlag, tenant, env);
                 return evaluationResult.Result;
             }
             catch (Exception ex)
             {
                 throw new EvaluationException(
-                    message: ex.Message,
+                    message: $"There was an error in evaluating {FilterType} filter. See the inner exception for more details.",
                     correlationId: trackingIds.CorrelationId,
                     transactionId: trackingIds.TransactionId,
-                    failedMethod: $"{FilterType}-EvaluateAsync",
+                    source: $"{FilterType}:EvaluateAsync",
                     innerException: ex);
             }
         }
 
         private Dictionary<string, object> GetFlightContext(string filterKey, LoggerTrackingIds trackingIds)
         {
-            var contextParams = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
+            Dictionary<string, object> contextParams = new(StringComparer.InvariantCultureIgnoreCase);
 
             if (_httpContextAccessor.HttpContext.Request.Headers.TryGetValue(Flighting.FLIGHT_CONTEXT_HEADER, out StringValues flightContext))
             {
@@ -116,8 +120,6 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
             return contextParams;
         }
 
-        
-
         private FilterSettings GetFilterSettings(FeatureFilterEvaluationContext featureFlag)
         {
             return featureFlag.Parameters.Get<FilterSettings>() ?? new FilterSettings();
@@ -150,6 +152,44 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
             }
 
             return bool.TryParse(settings.IsActive, out bool isStageACtive) && isStageACtive;
+        }
+
+        private void AddContext(EvaluationResult result, FeatureFilterEvaluationContext featureFlag, string tenant, string env)
+        {
+            try
+            {
+                bool shoudAddEnabledContext = (bool)_httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ADD_ENABLED_CONTEXT];
+                bool shoudAddDisabledContext = (bool)_httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ADD_DISABLED_CONTEXT];
+
+                if (!(shoudAddEnabledContext || shoudAddDisabledContext))
+                    return;
+
+                string disabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-disabed-context";
+                string enabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-enabled-context";
+
+                if (result.Result)
+                {
+                    if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(disabledContextKey))
+                        _httpContextAccessor.HttpContext.Response.Headers.Remove(disabledContextKey);
+
+                    _httpContextAccessor.HttpContext.Response.Headers.AddOrUpdate(enabledContextKey.RemoveSpecialCharacters(), result.Message.RemoveSpecialCharacters());
+                    return;
+                }
+
+                if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(disabledContextKey))
+                {
+                    _httpContextAccessor.HttpContext.Response.Headers[disabledContextKey] = _httpContextAccessor.HttpContext.Response.Headers[disabledContextKey] + " | " + result.Message;
+                }
+                else
+                {
+                    _httpContextAccessor.HttpContext.Response.Headers.Add(disabledContextKey.RemoveSpecialCharacters(), result.Message.RemoveSpecialCharacters());
+                }
+            }
+            catch (Exception ex)
+            {
+                // DONT throw error if context writing fails
+                _logger.Log(ex);
+            }
         }
     }
 }

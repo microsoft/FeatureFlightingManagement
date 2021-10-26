@@ -12,7 +12,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
     public class DateFilter : BaseFilter, IFeatureFilter
     {
         protected override string FilterType => FilterKeys.Date;
-        public DateFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorEvaluatorStrategy evaluatorStrategy) : base(configuration, httpContextAccessor, logger, evaluatorStrategy)
+        public DateFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorStrategy evaluatorStrategy) : base(configuration, httpContextAccessor, logger, evaluatorStrategy)
         {
         }
 

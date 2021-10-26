@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.FeatureFlighting.Common.Authorization;
-using Microsoft.FeatureFlighting.Common.AppExcpetions;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Infrastructure.Authorization;
 
 namespace Services.Tests

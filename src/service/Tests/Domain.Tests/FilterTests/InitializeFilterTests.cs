@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.FeatureFlighting.Core.Spec;
-using Microsoft.FeatureFlighting.Core.Evaluators;
+using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
 namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
@@ -14,8 +14,8 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
     [TestClass]
     public class InitializeFilterTests
     {
-        protected Mock<IOperatorEvaluatorStrategy> successfullMockEvaluatorStrategy;
-        protected Mock<IOperatorEvaluatorStrategy> failureMockEvaluatorStrategy;
+        protected Mock<IOperatorStrategy> successfullMockEvaluatorStrategy;
+        protected Mock<IOperatorStrategy> failureMockEvaluatorStrategy;
 
         protected Mock<ILogger> SetLoggerMock(Mock<ILogger> logger)
         {
@@ -37,13 +37,13 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
             return configMock;
         }
 
-        protected Mock<IOperatorEvaluatorStrategy> SetupMockOperatorEvaluatorStrategy(bool evaluatePositive)
+        protected Mock<IOperatorStrategy> SetupMockOperatorEvaluatorStrategy(bool evaluatePositive)
         {
-            var mockEvaluator = new Mock<BaseOperatorEvaluator>();
+            var mockEvaluator = new Mock<BaseOperator>();
             mockEvaluator.Setup(evaluator => evaluator.Evaluate(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<LoggerTrackingIds>()))
-                .Returns(Task.FromResult(new EvaluationResult(evaluatePositive)));
+                .Returns(Task.FromResult(new EvaluationResult(evaluatePositive, Operator.Equals, "TestFilter")));
 
-            var mockOperatorEvaluatorStrategy = new Mock<IOperatorEvaluatorStrategy>();
+            var mockOperatorEvaluatorStrategy = new Mock<IOperatorStrategy>();
             mockOperatorEvaluatorStrategy.Setup(strategy => strategy.Get(It.IsAny<Operator>()))
                 .Returns(mockEvaluator.Object);
             return mockOperatorEvaluatorStrategy;
