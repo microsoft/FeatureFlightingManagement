@@ -34,7 +34,7 @@ namespace Microsoft.FeatureFlighting.Common.AppExceptions
         { }
 
         protected override string CreateDisplayMessage()
-        {
+        {   
             return string.Format(Constants.Exception.DomainException.DisplayMessage, Message, CorrelationId);
         }
     }

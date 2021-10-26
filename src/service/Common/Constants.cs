@@ -16,6 +16,8 @@
             public const string FEATURE_ENV_PARAM = "FeatureEnvironment";
             public const string FEATURE_APP_PARAM = "FeatureApplication";
             public const string FEATURE_ADD_DISABLED_CONTEXT = "AddDisabledContext";
+            public const string FEATURE_ADD_ENABLED_CONTEXT = "AddEnabledContext";
+            public const string FLIGHT_ADD_RESULT_CONTEXT_HEADER = "X-add-result-context";
             public const string ALL = "*";
 
             public struct Environment
@@ -75,7 +77,7 @@
 
             public struct EvaluationException
             {
-                public const string DisplayMessage = "Feature Falge Evaluation Failed: {0}.\nCorrelation ID - {1}";
+                public const string DisplayMessage = "Feature Flag Evaluation Failed: {0}.\nCorrelation ID - {1}";
                 public const string ExceptionCode = "DOM-EVAL-10001";
             }
 

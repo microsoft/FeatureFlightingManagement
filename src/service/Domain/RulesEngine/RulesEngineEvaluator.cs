@@ -45,7 +45,10 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
                             .Select(failedRule => failedRule.ExceptionMessage ?? failedRule.Rule.ErrorMessage).ToArray());
                     return new EvaluationResult(result: false, failureMessage);
                 }
-                return new EvaluationResult(result: true);
+                return new EvaluationResult(result: true)
+                {
+                    Message = $"{_workflowName} rule engine passsed"
+                };
             }
             catch (Exception exception)
             {

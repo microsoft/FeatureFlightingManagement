@@ -37,7 +37,7 @@ namespace Microsoft.FeatureFlighting.Core.Operators
         public EvaluationResult(bool result, Operator @operator, string filter)
         {
             Result = result;
-            Message = result ? "Sucess" : $"{@operator} operator failed for {filter}";
+            Message = result ? $"{@operator} operator passed for {filter}" : $"{@operator} operator failed for {filter}";
             IsFaulted = false;
         }
 

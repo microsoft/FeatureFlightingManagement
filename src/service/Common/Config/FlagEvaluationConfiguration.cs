@@ -9,7 +9,12 @@
         /// Flag to indicate if exceptions should be ignored when evaluating feature flags
         /// </summary>
         public bool IgnoreException { get; set; }
-        
+
+        /// <summary>
+        /// Flag to indicate if additional messages should be added when feature flag is enabled
+        /// </summary>
+        public bool AddEnabledContext { get; set; }
+
         /// <summary>
         /// Flag to indicate if additional messages should be added when feature flag is disabled
         /// </summary>
@@ -24,7 +29,8 @@
             return new FlagEvaluationConfiguration()
             {
                 IgnoreException = false,
-                AddDisabledContext = false
+                AddDisabledContext = false,
+                AddEnabledContext = false
             };
         }
     }

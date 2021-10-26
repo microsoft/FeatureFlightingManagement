@@ -48,7 +48,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
                 if (!ValidateFilterSettings(filterSettings, FilterKeys.RulesEngine, trackingIds))
                     return false;
 
-                Operator op = (Operator)Enum.Parse(typeof(Operator), filterSettings.Operator, true);
+                Operator @operator = (Operator)Enum.Parse(typeof(Operator), filterSettings.Operator, true);
                 string workflowName = filterSettings.Value;
                 string tenant = _httpContextAccessor.HttpContext.Items[Flighting.FEATURE_APP_PARAM]?.ToString();
                 IRulesEngineEvaluator evaluator = await _rulesEngineManager.Build(tenant, workflowName, trackingIds);
@@ -57,9 +57,9 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 
                 Dictionary<string, object> flightContext = GetFlightContext(trackingIds);
                 EvaluationResult evaluationResult = await evaluator.Evaluate(flightContext, trackingIds);
-                if (op == Operator.Evaluates)
-                    return evaluationResult.Result;
-                return !evaluationResult.Result;
+                bool isEnabled = @operator == Operator.Evaluates && evaluationResult.Result;
+                AddContext(isEnabled, context, evaluationResult, @operator);
+                return isEnabled;
             }
             catch (RuleEngineException)
             {
@@ -73,6 +73,36 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
                     correlationId: trackingIds.CorrelationId,
                     source: "FeatureFlighting.RuleEngine.EvaluateAsync",
                     transactionId: trackingIds.TransactionId);
+            }
+        }
+
+        private void AddContext(bool isEnabled, FeatureFilterEvaluationContext featureFlag, EvaluationResult result, Operator @operator)
+        {   
+            bool shoudAddEnabledContext = (bool)_httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ADD_ENABLED_CONTEXT];
+            bool shoudAddDisabledContext = (bool)_httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ADD_DISABLED_CONTEXT];
+            if (!(shoudAddEnabledContext || shoudAddDisabledContext))
+                return;
+
+            string tenant = _httpContextAccessor.HttpContext.Items[Flighting.FEATURE_APP_PARAM].ToString();
+            string env = _httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ENV_PARAM].ToString();
+
+            if (isEnabled && shoudAddEnabledContext)
+            {   
+                string enabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-enabled-context";
+                _httpContextAccessor.HttpContext.Response.Headers.AddOrUpdate(enabledContextKey.RemoveSpecialCharacters(), result.Message);
+            }
+
+            if (!isEnabled && shoudAddDisabledContext)
+            {
+                string disabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-disabled-context";
+                if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(disabledContextKey))
+                {
+                    _httpContextAccessor.HttpContext.Response.Headers[disabledContextKey] = _httpContextAccessor.HttpContext.Response.Headers[disabledContextKey] + " | " + result.Message;
+                }
+                else
+                {
+                    _httpContextAccessor.HttpContext.Response.Headers.Add(disabledContextKey.RemoveSpecialCharacters(), result.Message.RemoveSpecialCharacters());
+                }
             }
         }
 
