@@ -130,6 +130,9 @@ namespace Microsoft.FeatureFlighting.Core
                 context.AddProperty("TenantShortName", tenantConfiguration.ShortName);
                 _logger.Log(context);
 
+                string disabledContextKey = $"x-flag-{featureFlag.ToLowerInvariant()}-disabled-context";
+                _httpContextAccessor.HttpContext.Response.Headers.AddOrUpdate(disabledContextKey.RemoveSpecialCharacters(), appException.Message.RemoveSpecialCharacters());
+
                 return false;
             }   
         }

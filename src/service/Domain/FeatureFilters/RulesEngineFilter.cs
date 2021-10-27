@@ -61,14 +61,14 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
                 AddContext(isEnabled, context, evaluationResult, @operator);
                 return isEnabled;
             }
-            catch (RuleEngineException)
-            {
-                throw;
-            }
             catch (Exception exception)
             {
+                string message = $"There was an error in evaluating the filter {FilterKeys.RulesEngine}. See the inner exception for more details.";
+                if (exception is RuleEngineException)
+                    message = ((RuleEngineException)exception).Message;
+
                 throw new EvaluationException(
-                    message: $"There was an error in evaluating the filter {FilterKeys.RulesEngine}. See the inner exception for more details.",
+                    message: message,
                     innerException: exception,
                     correlationId: trackingIds.CorrelationId,
                     source: "FeatureFlighting.RuleEngine.EvaluateAsync",
