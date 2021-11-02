@@ -12,6 +12,7 @@ using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common.Config;
 using AppInsights.EnterpriseTelemetry.Exceptions;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
 namespace Microsoft.FeatureFlighting.Core
 {
@@ -19,32 +20,33 @@ namespace Microsoft.FeatureFlighting.Core
     public class FeatureFlagEvaluator : IFeatureFlagEvaluator
     {
         private readonly IFeatureManager _featureManager;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
         private readonly ILogger _logger;
 
-        public FeatureFlagEvaluator(IFeatureManager featureManager, IHttpContextAccessor httpContextAccessor, ITenantConfigurationProvider tenantConfigurationProvider, ILogger logger)
+        public FeatureFlagEvaluator(IFeatureManager featureManager, ITenantConfigurationProvider tenantConfigurationProvider, ILogger logger)
         {
             _featureManager = featureManager;
-            _httpContextAccessor = httpContextAccessor;
             _tenantConfigurationProvider = tenantConfigurationProvider;
             _logger = logger;
         }
 
         // <inheritdoc>
-        public async Task<IDictionary<string, bool>> Evaluate(string applicationName, string environment, List<string> featureFlags)
+        public async Task<IDictionary<string, bool>> Evaluate(List<string> featureFlags,EvaluationContext evaluationContext)
         {
+            string applicationName = evaluationContext.FlightingApplication;
+            string environment = evaluationContext.FlightingEnvironment;
+
             if (featureFlags == null || !featureFlags.Any())
                 return new Dictionary<string, bool>();
 
             PerformanceContext performanceContext = new("Feature Flag Evaluation Time");
             featureFlags = featureFlags.Distinct().ToList();
             TenantConfiguration tenantConfiguration = await _tenantConfigurationProvider.Get(applicationName);
-            string context = GetContext();
+            Dictionary<string, object> context = evaluationContext.FlagContext;
             var @event = CreateFeatureFlagsEvaluatedEvent(tenantConfiguration.Name, environment, context, "Azure", featureFlags.Count);
 
             ConcurrentDictionary<string, bool> result = new();
-            AddHttpContext(environment, tenantConfiguration);
+           // AddHttpContext(environment, tenantConfiguration);
             var evaluationTasks = new List<Task>();
 
             foreach (string featureFlag in featureFlags)
@@ -52,7 +54,7 @@ namespace Microsoft.FeatureFlighting.Core
                 evaluationTasks.Add(Task.Run(async () =>
                 {
                     var startedAt = DateTime.UtcNow;
-                    bool isEnabled = await IsEnabled(featureFlag, tenantConfiguration, environment);
+                    bool isEnabled = await IsEnabled(featureFlag, tenantConfiguration, environment,evaluationContext);
                     var completedAt = DateTime.UtcNow;
                     @event.AddProperty(featureFlag, isEnabled.ToString());
                     @event.AddProperty($"{featureFlag}:TimeTaken", (completedAt - startedAt).TotalMilliseconds.ToString());
@@ -66,15 +68,8 @@ namespace Microsoft.FeatureFlighting.Core
             _logger.Log(@event);
             return result;
         }
-        
-        private string GetContext()
-        {
-            return _httpContextAccessor.HttpContext.Request.Headers.Any(header => header.Key.ToLowerInvariant() == Constants.Flighting.FLIGHT_CONTEXT_HEADER.ToLowerInvariant())
-                ? _httpContextAccessor.HttpContext.Request.Headers.First(header => header.Key.ToLowerInvariant() == Constants.Flighting.FLIGHT_CONTEXT_HEADER.ToLowerInvariant()).Value.FirstOrDefault()
-                : null;
-        }
 
-        private EventContext CreateFeatureFlagsEvaluatedEvent(string componentName, string environment, string context, string dataSource, int flagCount)
+        private EventContext CreateFeatureFlagsEvaluatedEvent(string componentName, string environment, Dictionary<string, object> context, string dataSource, int flagCount)
         {
             EventContext @event = new()
             {
@@ -88,31 +83,31 @@ namespace Microsoft.FeatureFlighting.Core
             return @event;
         }
 
-        private void AddHttpContext(string environment, TenantConfiguration tenantConfiguration)
-        {
-            _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ENV_PARAM] = environment;
-            _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_APP_PARAM] = tenantConfiguration.Name;
-            _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ADD_DISABLED_CONTEXT] = 
-                tenantConfiguration.Evaluation.AddDisabledContext
-                || _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault(Constants.Flighting.FLIGHT_ADD_RESULT_CONTEXT_HEADER, bool.FalseString).ToString().ToLowerInvariant() == bool.TrueString.ToLowerInvariant();
-            _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ADD_ENABLED_CONTEXT] = 
-                tenantConfiguration.Evaluation.AddEnabledContext
-                || _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault(Constants.Flighting.FLIGHT_ADD_RESULT_CONTEXT_HEADER, bool.FalseString).ToString().ToLowerInvariant() == bool.TrueString.ToLowerInvariant();
-        }
+        //private void AddHttpContext(string environment, TenantConfiguration tenantConfiguration)
+        //{
+        //    _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ENV_PARAM] = environment;
+        //    _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_APP_PARAM] = tenantConfiguration.Name;
+        //    _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ADD_DISABLED_CONTEXT] = 
+        //        tenantConfiguration.Evaluation.AddDisabledContext
+        //        || _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault(Constants.Flighting.FLIGHT_ADD_RESULT_CONTEXT_HEADER, bool.FalseString).ToString().ToLowerInvariant() == bool.TrueString.ToLowerInvariant();
+        //    _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ADD_ENABLED_CONTEXT] = 
+        //        tenantConfiguration.Evaluation.AddEnabledContext
+          //     || _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault(Constants.Flighting.FLIGHT_ADD_RESULT_CONTEXT_HEADER, bool.FalseString).ToString().ToLowerInvariant() == bool.TrueString.ToLowerInvariant();
+        //}
 
-        private async Task<bool> IsEnabled(string featureFlag, TenantConfiguration tenantConfiguration, string environment)
+        private async Task<bool> IsEnabled(string featureFlag, TenantConfiguration tenantConfiguration, string environment,EvaluationContext evaluationContext)
         {
             try
             {
-                return await _featureManager.IsEnabledAsync(FlagUtilities.GetFeatureFlagId(tenantConfiguration.Name.ToLowerInvariant(), environment.ToLowerInvariant(), featureFlag));
+                return await _featureManager.IsEnabledAsync(FlagUtilities.GetFeatureFlagId(tenantConfiguration.Name.ToLowerInvariant(), environment.ToLowerInvariant(), featureFlag),evaluationContext);
             }
             catch (Exception exception)
             {
                 if (!tenantConfiguration.Evaluation.IgnoreException)
                     throw;
 
-                string correlationId = _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault("x-correlationId", Guid.NewGuid().ToString()).ToString();
-                string transactionId = _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault("x-messageId", Guid.NewGuid().ToString()).ToString();
+                string correlationId = evaluationContext.TrackingIds.CorrelationId;
+                string transactionId = evaluationContext.TrackingIds.TransactionId;
 
                 BaseAppException appException;
                 if (exception is not EvaluationException)
@@ -130,8 +125,9 @@ namespace Microsoft.FeatureFlighting.Core
                 context.AddProperty("TenantShortName", tenantConfiguration.ShortName);
                 _logger.Log(context);
 
-                string disabledContextKey = $"x-flag-{featureFlag.ToLowerInvariant()}-disabled-context";
-                _httpContextAccessor.HttpContext.Response.Headers.AddOrUpdate(disabledContextKey.RemoveSpecialCharacters(), appException.Message.RemoveSpecialCharacters());
+                // TODO: Check Later
+                //string disabledContextKey = $"x-flag-{featureFlag.ToLowerInvariant()}-disabled-context";
+                //_httpContextAccessor.HttpContext.Response.Headers.AddOrUpdate(disabledContextKey.RemoveSpecialCharacters(), appException.Message.RemoveSpecialCharacters());
 
                 return false;
             }   

@@ -3,23 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31717.71
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.API", "API\Microsoft.FeatureFlighting.API.csproj", "{D403DF68-A444-4A71-AB6D-B9385861CBFA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.API", "service\API\Microsoft.FeatureFlighting.API.csproj", "{D403DF68-A444-4A71-AB6D-B9385861CBFA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.Common", "Common\Microsoft.FeatureFlighting.Common.csproj", "{5C4E5752-FC65-4B2B-BA9E-1DB3425AB33F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.Common", "service\Common\Microsoft.FeatureFlighting.Common.csproj", "{5C4E5752-FC65-4B2B-BA9E-1DB3425AB33F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.Core", "Domain\Microsoft.FeatureFlighting.Core.csproj", "{AF6D1713-2BEA-4CA2-88D5-72B82D9DA486}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.Core", "service\Domain\Microsoft.FeatureFlighting.Core.csproj", "{AF6D1713-2BEA-4CA2-88D5-72B82D9DA486}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D22B9BC0-ABA2-4DBD-98D3-B4EA074D7110}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.API.Tests", "Tests\Api.Tests\Microsoft.FeatureFlighting.API.Tests.csproj", "{11EEE271-00A5-4B2D-B963-0FF6544A4002}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.API.Tests", "service\Tests\Api.Tests\Microsoft.FeatureFlighting.API.Tests.csproj", "{11EEE271-00A5-4B2D-B963-0FF6544A4002}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.Common.Tests", "Tests\Common.Tests\Microsoft.FeatureFlighting.Common.Tests.csproj", "{5318FF62-1025-4A06-8DDA-091F07863684}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.Common.Tests", "service\Tests\Common.Tests\Microsoft.FeatureFlighting.Common.Tests.csproj", "{5318FF62-1025-4A06-8DDA-091F07863684}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.PS.FlightingService.Core.Tests", "Tests\Domain.Tests\Microsoft.PS.FlightingService.Core.Tests.csproj", "{6A2A7BDD-AD7E-4498-A6DB-1269F72F8E03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.PS.FlightingService.Core.Tests", "service\Tests\Domain.Tests\Microsoft.PS.FlightingService.Core.Tests.csproj", "{6A2A7BDD-AD7E-4498-A6DB-1269F72F8E03}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.Infrastructure.Tests", "Tests\Services.Tests\Microsoft.FeatureFlighting.Infrastructure.Tests.csproj", "{72D35524-2600-4954-B70D-55AA53C66E76}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.Infrastructure.Tests", "service\Tests\Services.Tests\Microsoft.FeatureFlighting.Infrastructure.Tests.csproj", "{72D35524-2600-4954-B70D-55AA53C66E76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.FeatureFlighting.Infrastructure", "Infrastructure\Microsoft.FeatureFlighting.Infrastructure.csproj", "{CE568167-2150-4BBC-A559-81517C4C14B9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.FeatureFlighting.Infrastructure", "service\Infrastructure\Microsoft.FeatureFlighting.Infrastructure.csproj", "{CE568167-2150-4BBC-A559-81517C4C14B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

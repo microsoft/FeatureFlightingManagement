@@ -11,6 +11,10 @@ using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Common.Authorization;
 using Microsoft.PS.Services.FlightingService.Api.ActionFilters;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
+using System.Text.Json;
+using static Microsoft.FeatureFlighting.Common.Constants;
+using Microsoft.FeatureFlighting.Common.Config;
 
 namespace Microsoft.PS.Services.FlightingService.Api.Controllers
 {
@@ -24,14 +28,16 @@ namespace Microsoft.PS.Services.FlightingService.Api.Controllers
         private readonly IAuthorizationService _authService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IConfiguration _config;
+        private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
 
-        public FeatureFlagsController(IFeatureFlagEvaluator featureFlagEvaluator, IFeatureFlagManager featureFlagManager, IAuthorizationService authService, IHttpContextAccessor httpContextAccesor, IConfiguration config)
+        public FeatureFlagsController(IFeatureFlagEvaluator featureFlagEvaluator, IFeatureFlagManager featureFlagManager, IAuthorizationService authService, IHttpContextAccessor httpContextAccesor, IConfiguration config, ITenantConfigurationProvider tenantConfigurationProvider)
         {
             _featureFlagManager = featureFlagManager;
             _featureFlagEvaluator = featureFlagEvaluator;
             _authService = authService;
             _httpContextAccessor = httpContextAccesor;
             _config = config;
+            _tenantConfigurationProvider = tenantConfigurationProvider;
         }
 
         [HttpGet]
@@ -69,7 +75,8 @@ namespace Microsoft.PS.Services.FlightingService.Api.Controllers
                 featureList = featureNames.Split(',').ToList();
             }
 
-            var flightResponse = await _featureFlagEvaluator.Evaluate(appName, envName, featureList.ToList());
+            EvaluationContext evaluationContext = await GetEvaluationContext(envName,appName,trackingIds);
+            var flightResponse = await _featureFlagEvaluator.Evaluate(featureList.ToList(),evaluationContext);
             return Ok(flightResponse);
         }
 
@@ -173,7 +180,21 @@ namespace Microsoft.PS.Services.FlightingService.Api.Controllers
             await _featureFlagManager.DeleteFeatureFlag(appName, envName, featureName, trackingIds);
             return NoContent();
         }
+        private async Task<EvaluationContext> GetEvaluationContext(string envName, string appName , LoggerTrackingIds trackingIds)
+        {
+            TenantConfiguration tenantConfiguration = await _tenantConfigurationProvider.Get(appName);
+            string context = _httpContextAccessor.HttpContext.Request.Headers.Any(header => header.Key.ToLowerInvariant() == Constants.Flighting.FLIGHT_CONTEXT_HEADER.ToLowerInvariant())
+                ? _httpContextAccessor.HttpContext.Request.Headers.First(header => header.Key.ToLowerInvariant() == Constants.Flighting.FLIGHT_CONTEXT_HEADER.ToLowerInvariant()).Value.FirstOrDefault()
+                : null;
+            Dictionary<string, object> flightContext = JsonSerializer.Deserialize<Dictionary<string, object>>(context);
+            bool shoudAddEnabledContext = tenantConfiguration.Evaluation.AddEnabledContext
+                || (bool)_httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ADD_ENABLED_CONTEXT];
+            bool shoudAddDisabledContext = tenantConfiguration.Evaluation.AddDisabledContext
+                || (bool)_httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ADD_DISABLED_CONTEXT];
 
+           return new EvaluationContext(flightContext, envName, appName, trackingIds.CorrelationId, trackingIds.TransactionId, shoudAddEnabledContext, shoudAddDisabledContext);
+             
+        }
         private void ValidateHeaders(string appName, string envName)
         {
             if (string.IsNullOrEmpty(appName))

@@ -21,28 +21,25 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
     public abstract class BaseFilter
     {
-        protected readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
         private readonly IOperatorStrategy _evaluatorStrategy;
 
         protected abstract string FilterType { get; }
 
-        public BaseFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorStrategy evaluatorStrategy)
+        public BaseFilter(IConfiguration configuration, ILogger logger, IOperatorStrategy evaluatorStrategy)
         {
-            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            
             _logger = logger;
             _configuration = configuration;
             _evaluatorStrategy = evaluatorStrategy;
         }
 
-        public async Task<bool> EvaluateFlightingContextAsync(FeatureFilterEvaluationContext featureFlag, string defaultFilterKey = null)
+        public async Task<bool> EvaluateFlightingContextAsync(FeatureFilterEvaluationContext featureFlag, EvaluationContext evaluationContext, string defaultFilterKey = null)
         {
-            LoggerTrackingIds trackingIds = _httpContextAccessor.HttpContext.Items.ContainsKey(Flighting.FLIGHT_TRACKER_PARAM)
-                 ? JsonSerializer.Deserialize<LoggerTrackingIds>(_httpContextAccessor.HttpContext.Items[Flighting.FLIGHT_TRACKER_PARAM].ToString(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-                 : new LoggerTrackingIds();
-            string tenant = _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_APP_PARAM]?.ToString();
-            string env = _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ENV_PARAM]?.ToString();
+            LoggerTrackingIds trackingIds = evaluationContext.TrackingIds;
+            string tenant = evaluationContext.FlightingApplication;
+            string env = evaluationContext.FlightingEnvironment;
             try
             {
                 var contextValue = string.Empty;
@@ -52,11 +49,11 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
                     ? settings.FlightContextKey.ToUpperInvariant()
                     : defaultFilterKey.ToUpperInvariant();
 
-                Dictionary<string, object> contextParams = GetFlightContext(filterKey, trackingIds);
+                Dictionary<string, object> contextParams = GetFlightContext(filterKey, trackingIds,evaluationContext.FlagContext);
                 if (!IsFilterKeyPresentInContext(contextParams, filterKey))
                     return false;
 
-                if (!ValidateFilterSettings(settings, filterKey, trackingIds))
+                if (!ValidateFilterSettings(settings, filterKey, evaluationContext))
                     return false;
 
                 Operator op = (Operator)Enum.Parse(typeof(Operator), settings.Operator, true);
@@ -68,7 +65,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
                     throw new Exception($"No evaluator has been assigned for operator - {Enum.GetName(typeof(Operator), op)}");
 
                 EvaluationResult evaluationResult = await evaluator.Evaluate(settingsValue, contextValue, FilterType, trackingIds);
-                AddContext(evaluationResult, featureFlag, tenant, env);
+                //AddContext(evaluationResult, featureFlag, tenant, env);
                 return evaluationResult.Result;
             }
             catch (Exception ex)
@@ -82,13 +79,13 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
             }
         }
 
-        private Dictionary<string, object> GetFlightContext(string filterKey, LoggerTrackingIds trackingIds)
+        private Dictionary<string, object> GetFlightContext(string filterKey, LoggerTrackingIds trackingIds, Dictionary<string, object> flagContext)
         {
             Dictionary<string, object> contextParams = new(StringComparer.InvariantCultureIgnoreCase);
 
-            if (_httpContextAccessor.HttpContext.Request.Headers.TryGetValue(Flighting.FLIGHT_CONTEXT_HEADER, out StringValues flightContext))
+            if (flagContext!=null && flagContext.Count!=0)
             {
-                contextParams = JsonSerializer.Deserialize<Dictionary<string, object>>(flightContext);
+                contextParams = flagContext;
             }
             else
             {
@@ -132,7 +129,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
             return contextParams.Any() && contextParams.ContainsKey(key);
         }
 
-        private bool ValidateFilterSettings(FilterSettings settings, string filterName, LoggerTrackingIds trackingIds)
+        private bool ValidateFilterSettings(FilterSettings settings, string filterName, EvaluationContext evaluationContext)
         {
             if (string.IsNullOrWhiteSpace(settings.Value) ||
                 string.IsNullOrWhiteSpace(settings.Operator) ||
@@ -141,55 +138,56 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
                 var context = new ExceptionContext()
                 {
                     Exception = new Exception(Logging.InvalidFilterSettings),
-                    CorrelationId = trackingIds.CorrelationId,
-                    TransactionId = trackingIds.TransactionId
+                    CorrelationId = evaluationContext.TrackingIds.CorrelationId,
+                    TransactionId = evaluationContext.TrackingIds.TransactionId
                 };
                 context.AddProperty(Flighting.FEATURE_FILTER_PARAM, filterName);
-                context.AddProperty(Flighting.FEATURE_ENV_PARAM, _httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ENV_PARAM]?.ToString());
-                context.AddProperty(Flighting.FEATURE_APP_PARAM, _httpContextAccessor.HttpContext.Items[Flighting.FEATURE_APP_PARAM]?.ToString());
+                context.AddProperty(Flighting.FEATURE_ENV_PARAM, evaluationContext.FlightingEnvironment);
+                context.AddProperty(Flighting.FEATURE_APP_PARAM, evaluationContext.FlightingApplication);
                 _logger.Log(context);
                 return false;
             }
 
             return bool.TryParse(settings.IsActive, out bool isStageACtive) && isStageACtive;
         }
+        // TODO : check later as this one is adding response headers using _httpContextAccessor
 
-        private void AddContext(EvaluationResult result, FeatureFilterEvaluationContext featureFlag, string tenant, string env)
-        {
-            try
-            {
-                bool shoudAddEnabledContext = (bool)_httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ADD_ENABLED_CONTEXT];
-                bool shoudAddDisabledContext = (bool)_httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ADD_DISABLED_CONTEXT];
+        //    private void AddContext(EvaluationResult result, FeatureFilterEvaluationContext featureFlag, string tenant, string env)
+        //    {
+        //        try
+        //        {
+        //            bool shoudAddEnabledContext = (bool)_httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ADD_ENABLED_CONTEXT];
+        //            bool shoudAddDisabledContext = (bool)_httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ADD_DISABLED_CONTEXT];
 
-                if (!(shoudAddEnabledContext || shoudAddDisabledContext))
-                    return;
+        //            if (!(shoudAddEnabledContext || shoudAddDisabledContext))
+        //                return;
 
-                string disabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-disabed-context";
-                string enabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-enabled-context";
+        //            string disabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-disabed-context";
+        //            string enabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-enabled-context";
 
-                if (result.Result)
-                {
-                    if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(disabledContextKey))
-                        _httpContextAccessor.HttpContext.Response.Headers.Remove(disabledContextKey);
+        //            if (result.Result)
+        //            {
+        //                if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(disabledContextKey))
+        //                    _httpContextAccessor.HttpContext.Response.Headers.Remove(disabledContextKey);
 
-                    _httpContextAccessor.HttpContext.Response.Headers.AddOrUpdate(enabledContextKey.RemoveSpecialCharacters(), result.Message.RemoveSpecialCharacters());
-                    return;
-                }
+        //                _httpContextAccessor.HttpContext.Response.Headers.AddOrUpdate(enabledContextKey.RemoveSpecialCharacters(), result.Message.RemoveSpecialCharacters());
+        //                return;
+        //            }
 
-                if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(disabledContextKey))
-                {
-                    _httpContextAccessor.HttpContext.Response.Headers[disabledContextKey] = _httpContextAccessor.HttpContext.Response.Headers[disabledContextKey] + " | " + result.Message;
-                }
-                else
-                {
-                    _httpContextAccessor.HttpContext.Response.Headers.Add(disabledContextKey.RemoveSpecialCharacters(), result.Message.RemoveSpecialCharacters());
-                }
-            }
-            catch (Exception ex)
-            {
-                // DONT throw error if context writing fails
-                _logger.Log(ex);
-            }
-        }
+        //            if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(disabledContextKey))
+        //            {
+        //                _httpContextAccessor.HttpContext.Response.Headers[disabledContextKey] = _httpContextAccessor.HttpContext.Response.Headers[disabledContextKey] + " | " + result.Message;
+        //            }
+        //            else
+        //            {
+        //                _httpContextAccessor.HttpContext.Response.Headers.Add(disabledContextKey.RemoveSpecialCharacters(), result.Message.RemoveSpecialCharacters());
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            // DONT throw error if context writing fails
+        //            _logger.Log(ex);
+        //        }
+        //    }
     }
 }

@@ -9,15 +9,15 @@ using static Microsoft.FeatureFlighting.Common.Constants;
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
     [FilterAlias(FilterKeys.UserUpn)]
-    public class UserUpnFilter : BaseFilter, IFeatureFilter
+    public class UserUpnFilter : BaseFilter, IContextualFeatureFilter<EvaluationContext>
     {
         protected override string FilterType => FilterKeys.UserUpn;
-        public UserUpnFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorStrategy evaluatorStrategy) : base(configuration, httpContextAccessor, logger, evaluatorStrategy)
+        public UserUpnFilter(IConfiguration configuration, ILogger logger, IOperatorStrategy evaluatorStrategy) : base(configuration, logger, evaluatorStrategy)
         { }
 
-        public Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context)
+        public Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context, EvaluationContext evaluationContext)
         {
-            return EvaluateFlightingContextAsync(context, FlightingContextParams.Upn);
+            return EvaluateFlightingContextAsync(context, evaluationContext,FlightingContextParams.Upn);
         }
     }
 }

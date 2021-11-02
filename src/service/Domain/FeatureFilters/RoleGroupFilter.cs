@@ -9,16 +9,16 @@ using static Microsoft.FeatureFlighting.Common.Constants;
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
     [FilterAlias(FilterKeys.RoleGroup)]
-    public class RoleGroupFilter : BaseFilter, IFeatureFilter
+    public class RoleGroupFilter : BaseFilter, IContextualFeatureFilter<EvaluationContext>
     {
         protected override string FilterType => FilterKeys.RoleGroup;
-        public RoleGroupFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorStrategy evaluatorStrategy) : base(configuration, httpContextAccessor, logger, evaluatorStrategy)
+        public RoleGroupFilter(IConfiguration configuration, ILogger logger, IOperatorStrategy evaluatorStrategy) : base(configuration, logger, evaluatorStrategy)
         {
         }
 
-        public Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context)
+        public Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context, EvaluationContext evaluationContext)
         {
-            return EvaluateFlightingContextAsync(context, FlightingContextParams.Rolegroup);
+            return EvaluateFlightingContextAsync(context, evaluationContext,FlightingContextParams.Rolegroup);
         }
     }
 }

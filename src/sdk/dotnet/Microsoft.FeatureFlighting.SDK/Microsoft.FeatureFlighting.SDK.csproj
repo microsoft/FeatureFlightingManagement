@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AppInsights.EnterpriseTelemetry.AspNetCore.Extension" Version="1.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0-preview.1.21102.12" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.AzureAppConfiguration" Version="4.5.0" />
+    <PackageReference Include="Microsoft.FeatureManagement" Version="2.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\service\Common\Microsoft.FeatureFlighting.Common.csproj" />
+    <ProjectReference Include="..\..\..\service\Domain\Microsoft.FeatureFlighting.Core.csproj" />
+    <ProjectReference Include="..\..\..\service\Infrastructure\Microsoft.FeatureFlighting.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
