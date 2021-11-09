@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
 namespace Microsoft.FeatureFlighting.Core.Spec
 {
@@ -15,6 +16,6 @@ namespace Microsoft.FeatureFlighting.Core.Spec
         /// <param name="environment">Environment</param>
         /// <param name="featureFlags">List of feature flags</param>
         /// <returns>Dictionary of results</returns>
-        Task<IDictionary<string, bool>> Evaluate(string applicationName, string environment, List<string> featureFlags);
+        Task<IDictionary<string, bool>> Evaluate(List<string> featureFlags,EvaluationContext evaluationContext);
     }
 }

@@ -9,16 +9,16 @@ using static Microsoft.FeatureFlighting.Common.Constants;
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
     [FilterAlias(FilterKeys.Country)]
-    public class CountryFilter : BaseFilter, IFeatureFilter
+    public class CountryFilter : BaseFilter, IContextualFeatureFilter<EvaluationContext>
     {
         protected override string FilterType => FilterKeys.Country;
-        public CountryFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorStrategy evaluatorStrategy) : base(configuration, httpContextAccessor, logger, evaluatorStrategy)
+        public CountryFilter(IConfiguration configuration, ILogger logger, IOperatorStrategy evaluatorStrategy) : base(configuration, logger, evaluatorStrategy)
         {
         }
 
-        public Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context)
+        public Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context, EvaluationContext evaluationContext)
         {
-            return EvaluateFlightingContextAsync(context, FlightingContextParams.Country);
+            return EvaluateFlightingContextAsync(context,evaluationContext, FlightingContextParams.Country);
         }
     }
 }

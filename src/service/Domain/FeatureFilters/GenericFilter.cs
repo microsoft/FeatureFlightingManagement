@@ -9,16 +9,16 @@ using static Microsoft.FeatureFlighting.Common.Constants;
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
     [FilterAlias(FilterKeys.Generic)]
-    public class GenericFilter : BaseFilter, IFeatureFilter
+    public class GenericFilter : BaseFilter, IContextualFeatureFilter<EvaluationContext>
     {
         protected override string FilterType => FilterKeys.Generic;
-        public GenericFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorStrategy evaluatorStrategy) : base(configuration, httpContextAccessor, logger, evaluatorStrategy)
+        public GenericFilter(IConfiguration configuration, ILogger logger, IOperatorStrategy evaluatorStrategy) : base(configuration, logger, evaluatorStrategy)
         {
         }
 
-        public Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context)
+        public Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context, EvaluationContext evaluationContext)
         {
-            return EvaluateFlightingContextAsync(context);
+            return EvaluateFlightingContextAsync(context, evaluationContext);
         }
     }
 }

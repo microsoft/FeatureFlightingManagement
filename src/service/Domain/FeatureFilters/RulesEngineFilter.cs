@@ -18,6 +18,7 @@ using static Microsoft.FeatureFlighting.Common.Constants;
 
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
+    // TODO Later : this one is using httpcontext accessor
     [FilterAlias(FilterKeys.RulesEngine)]
     public class RulesEngineFilter : IFeatureFilter
     {
