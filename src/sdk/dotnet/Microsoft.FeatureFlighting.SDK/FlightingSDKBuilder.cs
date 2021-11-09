@@ -20,16 +20,15 @@ using Microsoft.FeatureFlighting.Infrastructure.Cache;
 using Microsoft.FeatureFlighting.Infrastructure.Authorization;
 using Microsoft.FeatureFlighting.Infrastructure.Storage;
 using Microsoft.FeatureFlighting.Common.Authorization;
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+using Microsoft.Azure.WebJobs;
+
 namespace Microsoft.FeatureFlighting.SDK
 {
     public static class FlightingSDKBuilder
     {
 
         public static IConfigurationBuilder AddAppConfiguration(this IConfigurationBuilder config, string AppConfigConString, string EnvironmentLabel)
-        {
-            return AddAzureAppConfig(config, AppConfigConString, EnvironmentLabel);
-        }
-        private static IConfigurationBuilder AddAzureAppConfig(IConfigurationBuilder config, string AppConfigConString, string EnvironmentLabel)
         {
             var configuration = config.Build();
 
@@ -43,6 +42,27 @@ namespace Microsoft.FeatureFlighting.SDK
                     });
             }));
             return config;
+        }
+        public static IFunctionsConfigurationBuilder AddAppConfiguration(this IFunctionsConfigurationBuilder builder, string AppConfigConString, string EnvironmentLabel)
+        {
+
+            builder.ConfigurationBuilder.AddAzureAppConfiguration((options =>
+            {
+                options
+                    .Connect(AppConfigConString)
+                    .UseFeatureFlags(configure =>
+                    {
+                        configure.Label = (EnvironmentLabel);
+                    });
+            }));
+            return builder;
+        }
+        public static IWebJobsBuilder AddFeatureConfiguration(this IWebJobsBuilder builder, IConfiguration configuration)
+        {
+            builder.Services.AddSingleton<IFlightingSDKFlagEvaluator, FlightingSDKFlagEvaluator>();
+            AddInfrastructure(builder.Services, configuration);
+            AddFeatureManagement(builder.Services);
+            return builder;
         }
         public static IServiceCollection AddFeatureConfiguration(this IServiceCollection services, IConfiguration configuration)
         {

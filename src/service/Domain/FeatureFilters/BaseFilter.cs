@@ -65,7 +65,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
                     throw new Exception($"No evaluator has been assigned for operator - {Enum.GetName(typeof(Operator), op)}");
 
                 EvaluationResult evaluationResult = await evaluator.Evaluate(settingsValue, contextValue, FilterType, trackingIds);
-                //AddContext(evaluationResult, featureFlag, tenant, env);
+                //AddContext(evaluationResult, featureFlag, evaluationContext);
                 return evaluationResult.Result;
             }
             catch (Exception ex)
@@ -150,44 +150,45 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 
             return bool.TryParse(settings.IsActive, out bool isStageACtive) && isStageACtive;
         }
-        // TODO : check later as this one is adding response headers using _httpContextAccessor
+        //TODO : check later as this one is adding response headers using _httpContextAccessor
 
-        //    private void AddContext(EvaluationResult result, FeatureFilterEvaluationContext featureFlag, string tenant, string env)
+        //private void AddContext(EvaluationResult result, FeatureFilterEvaluationContext featureFlag, EvaluationContext evaluationContext)
+        //{
+        //    var _httpContextAccessor;
+        //    try
         //    {
-        //        try
+        //        bool shoudAddEnabledContext = evaluationContext.AddEnabledContext;
+        //        bool shoudAddDisabledContext = evaluationContext.AddDisabledContext;
+
+        //        if (!(shoudAddEnabledContext || shoudAddDisabledContext))
+        //            return;
+
+        //        string disabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(evaluationContext.FlightingApplication, evaluationContext.FlightingEnvironment, featureFlag.FeatureName).ToLowerInvariant()}-disabed-context";
+        //        string enabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(evaluationContext.FlightingApplication, evaluationContext.FlightingEnvironment, featureFlag.FeatureName).ToLowerInvariant()}-enabled-context";
+
+        //        if (result.Result)
         //        {
-        //            bool shoudAddEnabledContext = (bool)_httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ADD_ENABLED_CONTEXT];
-        //            bool shoudAddDisabledContext = (bool)_httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ADD_DISABLED_CONTEXT];
-
-        //            if (!(shoudAddEnabledContext || shoudAddDisabledContext))
-        //                return;
-
-        //            string disabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-disabed-context";
-        //            string enabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-enabled-context";
-
-        //            if (result.Result)
-        //            {
-        //                if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(disabledContextKey))
+        //            if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(disabledContextKey))
         //                    _httpContextAccessor.HttpContext.Response.Headers.Remove(disabledContextKey);
 
-        //                _httpContextAccessor.HttpContext.Response.Headers.AddOrUpdate(enabledContextKey.RemoveSpecialCharacters(), result.Message.RemoveSpecialCharacters());
-        //                return;
-        //            }
-
-        //            if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(disabledContextKey))
-        //            {
-        //                _httpContextAccessor.HttpContext.Response.Headers[disabledContextKey] = _httpContextAccessor.HttpContext.Response.Headers[disabledContextKey] + " | " + result.Message;
-        //            }
-        //            else
-        //            {
-        //                _httpContextAccessor.HttpContext.Response.Headers.Add(disabledContextKey.RemoveSpecialCharacters(), result.Message.RemoveSpecialCharacters());
-        //            }
+        //            _httpContextAccessor.HttpContext.Response.Headers.AddOrUpdate(enabledContextKey.RemoveSpecialCharacters(), result.Message.RemoveSpecialCharacters());
+        //            return;
         //        }
-        //        catch (Exception ex)
+
+        //        if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(disabledContextKey))
         //        {
-        //            // DONT throw error if context writing fails
-        //            _logger.Log(ex);
+        //            _httpContextAccessor.HttpContext.Response.Headers[disabledContextKey] = _httpContextAccessor.HttpContext.Response.Headers[disabledContextKey] + " | " + result.Message;
+        //        }
+        //        else
+        //        {
+        //            _httpContextAccessor.HttpContext.Response.Headers.Add(disabledContextKey.RemoveSpecialCharacters(), result.Message.RemoveSpecialCharacters());
         //        }
         //    }
+        //    catch (Exception ex)
+        //    {
+        //        // DONT throw error if context writing fails
+        //        _logger.Log(ex);
+        //    }
+        //}
     }
 }

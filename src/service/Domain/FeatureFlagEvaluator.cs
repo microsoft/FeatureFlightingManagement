@@ -46,7 +46,6 @@ namespace Microsoft.FeatureFlighting.Core
             var @event = CreateFeatureFlagsEvaluatedEvent(tenantConfiguration.Name, environment, context, "Azure", featureFlags.Count);
 
             ConcurrentDictionary<string, bool> result = new();
-           // AddHttpContext(environment, tenantConfiguration);
             var evaluationTasks = new List<Task>();
 
             foreach (string featureFlag in featureFlags)
@@ -83,17 +82,7 @@ namespace Microsoft.FeatureFlighting.Core
             return @event;
         }
 
-        //private void AddHttpContext(string environment, TenantConfiguration tenantConfiguration)
-        //{
-        //    _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ENV_PARAM] = environment;
-        //    _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_APP_PARAM] = tenantConfiguration.Name;
-        //    _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ADD_DISABLED_CONTEXT] = 
-        //        tenantConfiguration.Evaluation.AddDisabledContext
-        //        || _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault(Constants.Flighting.FLIGHT_ADD_RESULT_CONTEXT_HEADER, bool.FalseString).ToString().ToLowerInvariant() == bool.TrueString.ToLowerInvariant();
-        //    _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ADD_ENABLED_CONTEXT] = 
-        //        tenantConfiguration.Evaluation.AddEnabledContext
-          //     || _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault(Constants.Flighting.FLIGHT_ADD_RESULT_CONTEXT_HEADER, bool.FalseString).ToString().ToLowerInvariant() == bool.TrueString.ToLowerInvariant();
-        //}
+       
 
         private async Task<bool> IsEnabled(string featureFlag, TenantConfiguration tenantConfiguration, string environment,EvaluationContext evaluationContext)
         {
