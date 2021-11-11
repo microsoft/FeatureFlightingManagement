@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Configuration.AzureKeyVault;
+using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 
 namespace Microsoft.PS.Services.FlightingService.Api
 {
@@ -23,38 +24,48 @@ namespace Microsoft.PS.Services.FlightingService.Api
                 {
                     webBuilder.ConfigureAppConfiguration((context, config) =>
                     {
-                        var builtConfig = config.Build();
-                        var azureTokenProvider = new AzureServiceTokenProvider();
-                        var tokenCallback = new KeyVaultClient.AuthenticationCallback(azureTokenProvider.KeyVaultTokenCallback);
-                        var keyVaultClient = new KeyVaultClient(tokenCallback);
-
-                        config.AddAzureKeyVault(new AzureKeyVaultConfigurationOptions()
-                        {
-                            Vault = builtConfig["KeyVault:EndpointUrl"],
-                            Client = keyVaultClient,
-                            Manager = new DefaultKeyVaultSecretManager(),
-                            ReloadInterval = TimeSpan.FromHours(int.Parse(builtConfig["KeyVault:PollingIntervalInHours"]))
-                        });
-
-                        // TODO: Add azure app configuration
-                        builtConfig = config.Build();
-                        config.AddAzureAppConfiguration(options =>
-                        {
-                            options
-                                .Connect(builtConfig["AzureAppConfigurationConnectionString"])
-                                .UseFeatureFlags(configure =>
-                                {
-                                    configure.Label = builtConfig["Env:Label"];
-                                });
-                        });
-                        //string azureAppConfigurationConnectionString = builtConfig["AzureAppConfigConnectionstring"];
-                        //config.AddAzureAppConfiguration(options =>
-                        //    options
-                        //        .Connect(azureAppConfigurationConnectionString)
-                        //        .Select(KeyFilter.Any, builtConfig["AzureAppConfiguration:CommonLabel"])
-                        //        .Select(KeyFilter.Any, builtConfig["AzureAppConfiguration:WebNotificationApiLabel"]));
+                        AddKeyVault(config);
+                        AddAzureAppConfiguration(config);
                     });
                     webBuilder.UseStartup<Startup>();
                 });
+
+        private static void AddKeyVault(IConfigurationBuilder config)
+        {
+            var builtConfig = config.Build();
+            var azureTokenProvider = new AzureServiceTokenProvider();
+            var tokenCallback = new KeyVaultClient.AuthenticationCallback(azureTokenProvider.KeyVaultTokenCallback);
+            var keyVaultClient = new KeyVaultClient(tokenCallback);
+
+            config.AddAzureKeyVault(new AzureKeyVaultConfigurationOptions()
+            {
+                Vault = builtConfig["KeyVault:EndpointUrl"],
+                Client = keyVaultClient,
+                Manager = new DefaultKeyVaultSecretManager(),
+                ReloadInterval = TimeSpan.FromHours(int.Parse(builtConfig["KeyVault:PollingIntervalInHours"]))
+            });
+        }
+
+        private static void AddAzureAppConfiguration(IConfigurationBuilder config)
+        {
+            IConfigurationRoot builtConfig = config.Build();
+            string appConfigurationConnectionStringLocation = builtConfig["AppConfiguration:ConnectionStringLocation"];
+            string appConfigurationConnectionString = builtConfig[appConfigurationConnectionStringLocation];
+            string flightingAppConfigLabel = builtConfig["AppConfiguration:FeatureFlightsLabel"];
+            string configurationCommonLabel = builtConfig["AppConfiguration:ConfigurationCommonLabel"];
+            string configurationEnvLabel = builtConfig["AppConfiguration:ConfigurationEnvLabel"];
+
+            config.AddAzureAppConfiguration(options =>
+            {
+                options
+                    .Connect(appConfigurationConnectionString)
+                    .UseFeatureFlags(configure =>
+                    {
+                        configure.Label = flightingAppConfigLabel;
+                    })
+                    .Select(KeyFilter.Any, configurationCommonLabel)
+                    .Select(KeyFilter.Any, configurationEnvLabel);
+            });
+        }
     }
 }
