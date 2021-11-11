@@ -15,7 +15,8 @@ using Microsoft.FeatureFlighting.Common.Caching;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Graph
-{
+{   
+    /// <inheritdoc>/>
     public class GraphGroupVerificationService: IGroupVerificationService
     {
         private readonly IGraphServiceClient _graphServiceClient;
@@ -33,6 +34,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
             _graphServiceClient = CreateGraphClient(configuration);
         }
 
+        /// <inheritdoc>/>
         public async Task<bool> IsMember(string userUpn, List<string> groupOids, LoggerTrackingIds trackingIds)
         {
             try
@@ -56,6 +58,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
             }
         }
 
+        /// <inheritdoc>/>
         [Obsolete("Checking graph by Alias has issues. Use IsMember and pass the User UPN")]
         public async Task<bool> IsUserAliasPartOfSecurityGroup(string userAlias, List<string> securityGroupIds, LoggerTrackingIds trackingIds)
         {
@@ -188,11 +191,13 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
                 string tenant = configuration.GetValue<string>("Graph:Tenant");
                 string authority = string.Format(configuration.GetValue<string>("Graph:Authority"), tenant);
                 string[] scopes = new string[] { configuration.GetValue<string>("Graph:Scope") };
+                string secretLocation = configuration.GetValue<string>("Graph:ClientSecretLocation");
+                string clientSecret = configuration.GetValue<string>(secretLocation);
 
                 IConfidentialClientApplication confidentialClient = ConfidentialClientApplicationBuilder
                     .Create(configuration.GetValue<string>("Graph:ClientId"))
                     .WithAuthority(authority)
-                    .WithClientSecret(configuration.GetValue<string>("GraphClientSecret"))
+                    .WithClientSecret(clientSecret)
                     .Build();
 
                 IGraphServiceClient graphServiceClient = new GraphServiceClient(new DelegateAuthenticationProvider(async (requestMessage) =>
