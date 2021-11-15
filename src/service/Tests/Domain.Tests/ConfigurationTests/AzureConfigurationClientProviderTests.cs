@@ -59,11 +59,15 @@ namespace Microsoft.FeatureFlighting.Services.Tests
             var configurationSection = new Mock<IConfigurationSection>();
             configurationSection.Setup(a => a.Value).Returns("testvalue");
 
+            var configurationSectionLocation = new Mock<IConfigurationSection>();
+            configurationSectionLocation.Setup(a => a.Value).Returns("AppConfiguration-ConnectionString");
+
             var configurationSectionApp = new Mock<IConfigurationSection>();
             configurationSectionApp.Setup(a => a.Value).Returns("Endpoint=https://tesingpoc.azconfig.io;Id=0-s0:Dwk1fZx;Secret=testing=");
 
             config.Setup(a => a.GetSection("Env:Label")).Returns(configurationSection.Object);
-            config.Setup(a => a.GetSection("AzureAppConfigurationConnectionString")).Returns(configurationSectionApp.Object);
+            config.Setup(a => a.GetSection("AppConfiguration:ConnectionStringLocation")).Returns(configurationSectionLocation.Object);
+            config.Setup(a => a.GetSection("AppConfiguration-ConnectionString")).Returns(configurationSectionApp.Object);
         }
 
         private void SetConfigClient()
