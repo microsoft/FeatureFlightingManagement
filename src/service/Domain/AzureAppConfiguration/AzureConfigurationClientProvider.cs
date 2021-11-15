@@ -31,7 +31,8 @@ namespace Microsoft.FeatureFlighting.Core.AzureAppConfiguration
                 options.Retry.MaxRetries = 10;
                 options.Retry.Delay = TimeSpan.FromSeconds(1);
 
-                string connectionString = _configuration.GetValue<string>("AzureAppConfigurationConnectionString");
+                string connectionStringLocation = _configuration.GetValue<string>("AppConfiguration:ConnectionStringLocation");
+                string connectionString = _configuration.GetValue<string>(connectionStringLocation);
                 _configurationClient = new ConfigurationClient(connectionString, options);
                 return _configurationClient;
 
