@@ -13,14 +13,14 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "PreProd"
+        "ASPNETCORE_ENVIRONMENT": "fxp-preprod"
       }
     },
     "Microsoft.PS.Services.FlightingService.Api": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "PreProd"
+        "ASPNETCORE_ENVIRONMENT": "fxp-prod"
       },
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     }

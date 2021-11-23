@@ -57,7 +57,8 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 
                 Dictionary<string, object> flightContext = GetFlightContext(trackingIds);
                 EvaluationResult evaluationResult = await evaluator.Evaluate(flightContext, trackingIds);
-                bool isEnabled = @operator == Operator.Evaluates && evaluationResult.Result;
+                bool isEnabled = (@operator == Operator.Evaluates && evaluationResult.Result) 
+                    || (@operator == Operator.NotEvaluates && !evaluationResult.Result);
                 AddContext(isEnabled, context, evaluationResult, @operator);
                 return isEnabled;
             }
