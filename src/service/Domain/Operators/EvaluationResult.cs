@@ -1,4 +1,5 @@
-﻿using Microsoft.FeatureFlighting.Core.FeatureFilters;
+﻿using System.Text;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
 namespace Microsoft.FeatureFlighting.Core.Operators
 {
@@ -27,32 +28,46 @@ namespace Microsoft.FeatureFlighting.Core.Operators
         /// </summary>
         public double TimeTaken { get; set; }
 
-        public EvaluationResult(bool result)
+        public EvaluationResult(bool isSuccess, string message)
         {
-            Result = result;
-            Message = result ? "Evaluation is sucesfull" : "Evaluation was unsuccesfull";
-            IsFaulted = false;
-        }
-
-        public EvaluationResult(bool result, Operator @operator, string filter)
-        {
-            Result = result;
-            Message = result ? $"{@operator} operator passed for {filter}" : $"{@operator} operator failed for {filter}";
-            IsFaulted = false;
-        }
-
-        public EvaluationResult(bool result, string message)
-        {
-            Result = result;
+            Result = isSuccess;
             Message = message;
-            IsFaulted = true;
         }
 
-        public EvaluationResult(bool result, string message, Operator @operator, string filter)
+        public EvaluationResult(bool isSuccess, Operator @operator, string filter)
+        {
+            Result = isSuccess;
+            Message = CreateMessage(isSuccess, @operator, filter);
+            IsFaulted = false;
+        }
+
+        public EvaluationResult(bool result, Operator @operator, string filter, string additionalMessage)
         {
             Result = result;
-            Message = $"{@operator} operator failed for {filter}. Message - {message}";
-            IsFaulted = true;
+            Message = CreateMessage(false, @operator, filter, additionalMessage);
+        }
+
+        public static EvaluationResult CreateFaultedResult(bool isEvaluationSuccesfull, string faultMessage, Operator @operator, string filter)
+        {
+            return new EvaluationResult(isEvaluationSuccesfull, @operator, filter, faultMessage)
+            {
+                IsFaulted = true
+            };
+        }
+
+        private string CreateMessage(bool isSuccess, Operator @operator, string filter, string additionalMessage = null)
+        {
+            StringBuilder messageBuilder = new();
+            messageBuilder.Append(@operator.ToString());
+            messageBuilder.Append(isSuccess ? " operator passed for " : " operator failed for ");
+            messageBuilder.Append(filter);
+            messageBuilder.Append(".");
+            if (!string.IsNullOrWhiteSpace(additionalMessage))
+            {
+                messageBuilder.Append(" Message - ");
+                messageBuilder.Append(additionalMessage);
+            }
+            return messageBuilder.ToString();
         }
     }
 }

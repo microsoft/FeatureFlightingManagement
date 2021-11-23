@@ -43,12 +43,9 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
                     string failureMessage =
                         string.Join(',', ruleResult.Where(result => !result.IsSuccess)
                             .Select(failedRule => failedRule.ExceptionMessage ?? failedRule.Rule.ErrorMessage).ToArray());
-                    return new EvaluationResult(result: false, failureMessage);
+                    return new EvaluationResult(isSuccess: false, failureMessage);
                 }
-                return new EvaluationResult(result: true)
-                {
-                    Message = $"{_workflowName} rule engine passsed"
-                };
+                return new EvaluationResult(true, $"{_workflowName} rule engine passsed");
             }
             catch (Exception exception)
             {

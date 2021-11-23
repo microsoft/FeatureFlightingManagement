@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AppInsights.EnterpriseTelemetry" Version="1.0.2" />
+    <PackageReference Include="AppInsights.EnterpriseTelemetry" Version="1.1.0" />
   </ItemGroup>
 
 </Project>
