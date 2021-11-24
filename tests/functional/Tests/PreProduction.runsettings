@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <MaxCpuCount>4</MaxCpuCount>
+    <ResultsDirectory>.\TestResults</ResultsDirectory>
+  </RunConfiguration>
+
+  <TestRunParameters>
+    
+    <!--ENVIRONMENT-->
+    <Parameter name="FunctionalTest:Environment" value="PreProduction" />
+
+    <!--APPLICATION-->
+    <Parameter name="FunctionalTest:Application:Environment" value="dev" />
+    <Parameter name="FunctionalTest:Application" value="field experience (fxp)" />
+    <Parameter name="FunctionalTest:NoFlagsPresent:Application" value="axis" />
+
+    <!--FLAG NAMES-->
+    <Parameter name="FunctionalTest:FlagName" value="FunctionalTestingflag" />
+    <Parameter name="FunctionalTest:FlagName:Enabled" value="FunctionalTestingflagForEnabled" />
+    <Parameter name="FunctionalTest:FlagName:BRE" value="Test-BRE-001" />
+    <Parameter name="FunctionalTest:FlagName:BRE:Complementary" value="Test-BRE-001-Complement" />
+    <Parameter name="FunctionalTest:BRE:Name" value="TestFeatureRule" />
+
+    <!--KEYVAULT-->
+    <Parameter name="FunctionalTest:KeyVault:Endpoint" value="https://kv-exp-ppe-eus.vault.azure.net" />
+
+    <!--AAD SETTNGS-->
+    <Parameter name="FunctionalTest:AAD:Authority" value="https://login.microsoftonline.com/microsoft.onmicrosoft.com" />
+    <Parameter name="FunctionalTest:AAD:ClientId" value="6f40053e-5319-40e5-a90b-6f714506d96d" />
+    <Parameter name="FunctionalTest:AAD:ClientSecret" value="" />
+    <Parameter name="FunctionalTest:InvalidAAD:ClientId" value="0155af7d-472f-40dc-bc8e-78d2154e7c75" />
+    <Parameter name="FunctionalTest:InvalidAAD:ClientSecret" value="" />
+
+    <!--FEATURE FLAG API SETTNGS-->
+    <Parameter name="FunctionalTest:FxpFlighting:Endpoint" value="https://feature-flights-management-api-preprod-eus.azurewebsites.net" />
+    <Parameter name="FunctionalTest:FxpFlighting:AAD:ResourceId" value="6f40053e-5319-40e5-a90b-6f714506d96d" />
+    
+  </TestRunParameters>
+</RunSettings>
