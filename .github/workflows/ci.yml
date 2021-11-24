@@ -27,3 +27,9 @@ jobs:
     
     - name: Test
       run: dotnet test src/service/Microsoft.FeatureFlighting.sln --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
+
+    - name: Restore dependencies (Functional Tests)
+      run: dotnet restore tests/functional/Microsoft.FeatureFlighting.Tests.Functional.sln
+    
+    - name: Build (Functional Tests)
+      run: dotnet build tests/functional/Microsoft.FeatureFlighting.Tests.Functional.sln --no-restore
