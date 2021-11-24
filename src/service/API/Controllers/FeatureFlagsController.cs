@@ -177,13 +177,13 @@ namespace Microsoft.PS.Services.FlightingService.Api.Controllers
         private void ValidateHeaders(string appName, string envName)
         {
             if (string.IsNullOrEmpty(appName))
-                ModelState.AddModelError("X-Application", "Invalid Application Header");
+                ModelState.AddModelError("X-Application", "Missing application name");
 
             if (string.IsNullOrEmpty(envName))
-                ModelState.AddModelError("X-Environment", "Invalid Environment Header");
+                ModelState.AddModelError("X-Environment", "Missing environment name");
 
             if (!ValidateEnvironment(envName))
-                ModelState.AddModelError("X-Environment", "Environment {0} is not supported");
+                ModelState.AddModelError("X-Environment", $"Environment {envName} is not supported");
         }
 
         private bool ValidateEnvironment(string envName)

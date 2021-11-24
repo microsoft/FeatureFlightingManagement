@@ -41,7 +41,7 @@ namespace Microsoft.FeatureFlighting.Core.Operators
             {
                 return new EvaluationResult(contextNumber < configuredNumber, Operator, filterType);
             }
-            return new EvaluationResult(false, "Either the context or the configured value is not an integer", Operator, filterType);
+            return EvaluationResult.CreateFaultedResult(false, "Either the context or the configured value is not an integer", Operator, filterType);
         }
     }
 }

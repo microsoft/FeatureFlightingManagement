@@ -17,7 +17,7 @@ namespace Microsoft.FeatureFlighting.Core.Operators
         protected override Task<EvaluationResult> Process(string configuredValue, string contextValue, string filterType, LoggerTrackingIds trackingIds)
         {
             if (string.IsNullOrWhiteSpace(configuredValue))
-                return Task.FromResult(new EvaluationResult(true, "Configured Value is empty", Operator, filterType));
+                return Task.FromResult(EvaluationResult.CreateFaultedResult(true, "Configured Value is empty", Operator, filterType));
 
             var configuredValues = configuredValue.Split(',').Select(p => p.Trim()).ToList();
             return Task.FromResult(new EvaluationResult(!configuredValues.Any(value => value.ToLowerInvariant() == contextValue.ToLowerInvariant()), Operator, filterType));

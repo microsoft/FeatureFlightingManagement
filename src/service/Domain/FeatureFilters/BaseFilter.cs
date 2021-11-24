@@ -15,7 +15,6 @@ using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using static Microsoft.FeatureFlighting.Common.Constants;
-using System.Text;
 
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
@@ -165,13 +164,12 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
                     return;
 
                 string disabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-disabed-context";
-                string enabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-enabled-context";
-
                 if (result.Result)
                 {
                     if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(disabledContextKey))
                         _httpContextAccessor.HttpContext.Response.Headers.Remove(disabledContextKey);
 
+                    string enabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-enabled-context";
                     _httpContextAccessor.HttpContext.Response.Headers.AddOrUpdate(enabledContextKey.RemoveSpecialCharacters(), result.Message.RemoveSpecialCharacters());
                     return;
                 }
