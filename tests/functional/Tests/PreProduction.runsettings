@@ -17,6 +17,7 @@
 
     <!--FLAG NAMES-->
     <Parameter name="FunctionalTest:FlagName" value="FunctionalTestingflag" />
+    <Parameter name="FunctionalTest:FlagName:Verification" value="VerificationFlag" />
     <Parameter name="FunctionalTest:FlagName:Enabled" value="FunctionalTestingflagForEnabled" />
     <Parameter name="FunctionalTest:FlagName:BRE" value="Test-BRE-001" />
     <Parameter name="FunctionalTest:FlagName:BRE:Complementary" value="Test-BRE-001-Complement" />

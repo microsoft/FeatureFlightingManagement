@@ -28,12 +28,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context() { Role = "Manager" };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new() { Role = "Manager" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -52,12 +52,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context() { Role = "Designer" };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new() { Role = "Designer" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -76,12 +76,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context() { Date = "1587540496000" };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new() { Date = "1587540496000" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -99,12 +99,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context() { Date = "1587022096000" };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new() { Date = "1587022096000" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -122,12 +122,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context() { };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new();
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -145,12 +145,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context() { Region = "Local" };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new() { Region = "Local" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -169,12 +169,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context() { Region = "Global" };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new() { Region = "Global" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -193,12 +193,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context { RoleGroup = "3" };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new() { RoleGroup = "3" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -217,12 +217,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context { RoleGroup = "1" };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new() { RoleGroup = "1" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -242,12 +242,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context { number = "8" };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new() { number = "8" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -266,12 +266,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context { number = "1" };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new() { number = "1" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -291,12 +291,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context { Country = "India" };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new() { Country = "India" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -315,12 +315,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context { Country = "Italy" };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new() { Country = "Italy" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
             //Act
@@ -337,10 +337,10 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
             List<string> featureNameList = new();
             Context contextData = new() { Upn = "pratikb@microsoft.com" };
             string context = JsonConvert.SerializeObject(contextData);
@@ -359,12 +359,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context { Upn = "morat@microsoft.com" };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new() { Upn = "morat@microsoft.com" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -383,10 +383,10 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
             List<string> featureNameList = new();
             Context contextData = new() { Alias = "morat" };
             string context = JsonConvert.SerializeObject(contextData);
@@ -407,10 +407,10 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
             List<string> featureNameList = new();
             Context contextData = new() { Alias = "pratikb" };
             string context = JsonConvert.SerializeObject(contextData);
@@ -431,12 +431,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context() { };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new();
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -455,11 +455,11 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context { Alias = "twsharma" };
+            string featureName = _testContext.Properties["FunctionalTest:FlagName:Verification"].ToString();
+            List<string> featureNameList = new();
+            Context contextData = new() { Alias = "twsharma" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -478,12 +478,12 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
             string featureName = "InvalidFlag";
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context { Alias = "twsharma" };
+            List<string> featureNameList = new();
+            Context contextData = new() { Alias = "twsharma" };
             string context = JsonConvert.SerializeObject(contextData);
             featureNameList.Add(featureName);
 
@@ -502,11 +502,11 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlag(_testContext);
+            await CreateFlagHelper.CreateVerificationFlag(_testContext);
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            List<string> featureNameList = new List<string>();
-            Context contextData = new Context { Alias = "twsharma" };
+            List<string> featureNameList = new();
+            Context contextData = new() { Alias = "twsharma" };
             string context = JsonConvert.SerializeObject(contextData);
 
             //Act
@@ -516,31 +516,6 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
             Assert.IsNotNull(result);
             Assert.AreNotEqual(HttpStatusCode.BadRequest.ToString(), result.First().Key);
 
-        }
-
-        [TestCategory("Functional")]
-        [TestMethod]
-        [Description("Test Case ID - 5676058")]
-        [Priority(2)]
-        public async Task Verify_Evaluate_response_for_enabled_filterKey_correct_env_correct_app_empty_context_to_user()
-        {
-            //Arrange
-            FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
-            await CreateFlagHelper.CreateFlagWithEnabledFilterKey(_testContext);
-
-            string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
-            string app = _testContext.Properties["FunctionalTest:Application"].ToString();
-            string featureName = _testContext.Properties["FunctionalTest:FlagName:Enabled"].ToString();
-            List<string> featureNameList = new();
-            Context contextData = new();
-            string context = JsonConvert.SerializeObject(contextData);
-            featureNameList.Add(featureName);
-
-            //Act
-            var result = await flightingClient.Evaluate(app, environment, featureNameList, context.ToString());
-
-            //Assert
-            Assert.IsTrue(result[featureName]);
         }
 
         [TestCategory("Functional")]
