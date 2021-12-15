@@ -14,6 +14,9 @@ This is a centralized feature flighting management system which leverages Azure 
 - ### [Designing a Centralized Feature flighting system](https://www.devcompost.com/post/control-rollout-2)
 - ### [Official Documentation](https://github.com/microsoft/FeatureFlightingManagement/wiki)
 
+## Flighting in a nutshell
+![Feature Flighting Architecture Diagram](https://github.com/microsoft/FeatureFlightingManagement/blob/main/assets/static/images/FLighting%20Flowchart.jpg)
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
