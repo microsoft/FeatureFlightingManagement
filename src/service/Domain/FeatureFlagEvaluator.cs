@@ -66,7 +66,7 @@ namespace Microsoft.FeatureFlighting.Core
             _logger.Log(@event);
             return result;
         }
-        
+
         private string GetContext()
         {
             return _httpContextAccessor.HttpContext.Request.Headers.Any(header => header.Key.ToLowerInvariant() == Constants.Flighting.FLIGHT_CONTEXT_HEADER.ToLowerInvariant())
@@ -110,10 +110,8 @@ namespace Microsoft.FeatureFlighting.Core
             {
                 if (!tenantConfiguration.Evaluation.IgnoreException)
                     throw;
-
                 string correlationId = _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault("x-correlationId", Guid.NewGuid().ToString()).ToString();
                 string transactionId = _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault("x-messageId", Guid.NewGuid().ToString()).ToString();
-
                 BaseAppException appException;
                 if (exception is not EvaluationException)
                 {
@@ -129,7 +127,6 @@ namespace Microsoft.FeatureFlighting.Core
                 context.AddProperty("Tenant", tenantConfiguration.Name);
                 context.AddProperty("TenantShortName", tenantConfiguration.ShortName);
                 _logger.Log(context);
-
                 string disabledContextKey = $"x-flag-{featureFlag.ToLowerInvariant()}-disabled-context";
                 _httpContextAccessor.HttpContext.Response.Headers.AddOrUpdate(disabledContextKey.RemoveSpecialCharacters(), appException.Message.RemoveSpecialCharacters());
 

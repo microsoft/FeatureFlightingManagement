@@ -159,21 +159,17 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
             {
                 bool shoudAddEnabledContext = (bool)_httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ADD_ENABLED_CONTEXT];
                 bool shoudAddDisabledContext = (bool)_httpContextAccessor.HttpContext.Items[Flighting.FEATURE_ADD_DISABLED_CONTEXT];
-
                 if (!(shoudAddEnabledContext || shoudAddDisabledContext))
                     return;
-
                 string disabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-disabed-context";
                 if (result.Result)
                 {
                     if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(disabledContextKey))
                         _httpContextAccessor.HttpContext.Response.Headers.Remove(disabledContextKey);
-
                     string enabledContextKey = $"x-flag-{FlagUtilities.GetFeatureFlagName(tenant, env, featureFlag.FeatureName).ToLowerInvariant()}-enabled-context";
                     _httpContextAccessor.HttpContext.Response.Headers.AddOrUpdate(enabledContextKey.RemoveSpecialCharacters(), result.Message.RemoveSpecialCharacters());
                     return;
                 }
-
                 if (_httpContextAccessor.HttpContext.Response.Headers.ContainsKey(disabledContextKey))
                 {
                     _httpContextAccessor.HttpContext.Response.Headers[disabledContextKey] = _httpContextAccessor.HttpContext.Response.Headers[disabledContextKey] + " | " + result.Message;
