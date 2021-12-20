@@ -111,7 +111,8 @@ namespace Microsoft.FeatureFlighting.Core.Configuration
                 string key = FlagUtilities.GetFeatureFlagId(appName, envName, name);
                 ConfigurationClient client = _configurationClientProvider.GetConfigurationClient();
                 var res = await client.GetConfigurationSettingAsync(_featureFlagPrefix + key, _envLabel);
-                var featureflag = JsonConvert.DeserializeObject<FeatureFlag>(res.Value.Value);
+                var rawConfigurationSetting = JsonConvert.DeserializeObject<ConfigurationSetting>(res?.GetRawResponse()?.Content?.ToString());
+                var featureflag = JsonConvert.DeserializeObject<FeatureFlag>(rawConfigurationSetting.Value);
                 featureflag.Name = !string.IsNullOrWhiteSpace(featureflag.Name) ? featureflag.Name : FlagUtilities.GetFeatureFlagName(appName, envName, featureflag.Id);
                 featureflag.Environment = !string.IsNullOrWhiteSpace(featureflag.Environment) ? featureflag.Environment : envName.ToLowerInvariant();
                 return featureflag;
