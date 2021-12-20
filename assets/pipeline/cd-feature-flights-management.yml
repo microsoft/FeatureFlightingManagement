@@ -1,0 +1,124 @@
+resources:
+    repositories:
+    - repository: FeatureFlightingGithub
+      type: github
+      endpoint: github.com
+      name: microsoft/FeatureFlightingManagement
+      trigger:
+      - main
+      
+variables:
+  BuildPlatform: 'any cpu'
+  BuildConfiguration: 'release'
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    displayName: "Build & Publish Artifact"
+    pool:
+      vmImage: vs2017-win2016
+    steps:
+    - checkout: FeatureFlightingGithub
+    - checkout: self
+    - task: NuGetToolInstaller@1
+      displayName: Use NuGet 4.3.0
+      inputs:
+        versionSpec: 4.3.0
+        checkLatest: true
+    - task: UseDotNet@2
+      displayName: Use .Net Core sdk 3.1.x
+      inputs:
+        version: 3.1.x
+        includePreviewVersions: true
+    - task: DotNetCoreCLI@2
+      displayName: Restore API (Microsoft.FeatureFlighting.sln)
+      inputs:
+        command: restore
+        projects: '**/Microsoft.FeatureFlighting.sln'
+    - task: DotNetCoreCLI@2
+      displayName: Build API (Microsoft.FeatureFlighting.sln)
+      inputs:
+        projects: '**/Microsoft.FeatureFlighting.sln'
+    - task: DotNetCoreCLI@2
+      displayName: Test API (*.Tests.csproj)
+      continueOnError: false
+      inputs:
+        command: test
+        projects: '**/*Tests.csproj'
+    - task: DotNetCoreCLI@2
+      displayName: Publish API (Microsoft.FeatureFlighting.sln)
+      inputs:
+        command: publish
+        publishWebProjects: false
+        projects: '**/Microsoft.FeatureFlighting.API.csproj'
+        arguments: --output $(Build.artifactstagingdirectory)
+    - task: DotNetCoreCLI@2
+      displayName: Restore Functional Tests (Microsoft.FeatureFlighting.Tests.Functional.sln)
+      inputs:
+        command: restore
+        projects: '**/Microsoft.FeatureFlighting.Tests.Functional.sln'
+    - task: DotNetCoreCLI@2
+      displayName: Build Functional Tests (Microsoft.FeatureFlighting.Tests.Functional.sln)
+      inputs:
+        projects: '**/Microsoft.FeatureFlighting.Tests.Functional.sln'
+    - task: DotNetCoreCLI@2
+      displayName: Publish Functional Tests (Microsoft.FeatureFlighting.Tests.Functional.sln)
+      inputs:
+        command: publish
+        publishWebProjects: false
+        projects: tests/functional/Tests/Microsoft.FeatureFlighting.Tests.Functional.csproj
+        arguments: --output $(Build.artifactstagingdirectory)
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: drop'
+
+- stage: Pre_Prod_Deploy
+  dependsOn:
+    - Build
+  condition: succeeded('Build')
+  jobs:
+   - deployment: Pre_Prod_Deploy_EUS
+     displayName: Pre-Production Deployment EUS
+     pool:
+      name: Azure Pipelines
+      vmImage: 'vs2017-win2016'
+      demands: vstest
+     variables:
+      KeyVault: '__KEY_VAULT_NAME__'
+      AppService: '__APP_SERVICE_NAME (not the URL, just the name)__'
+      AppService-Staging: '__APP_SERVICE_STAGING_NAME__'
+      ResourceGroup: '__RESOURCE_GROUP_NAME__'
+     environment: '__VSO_ENVIRONMENT__' 
+     strategy:
+      runOnce:
+        deploy:
+          steps:
+          - powershell: |
+              [string] $branchName = "refs/heads/master"
+              [string] $branchNameHotfix = "hotfix"
+              if ($env:BUILD_SOURCEBRANCH -eq $branchName -Or $env:BUILD_SOURCEBRANCH -contains $branchNameHotfix)
+              {
+                  Write-Host $branchName "branch check passed. Release triggered" from $env:BUILD_SOURCEBRANCH branch.
+              }
+              else
+              {
+                [string] $text1 = "##vso[task.logissue type=error;]"
+                [string] $text2 = "Branch Policy Violation:"
+                [string] $text3 = " !="
+                [string] $text4 = "branch. Deployment stopped from"
+                [string] $text5 = "branch."
+              
+                Write-Host "$text1 $text2 $env:BUILD_SOURCEBRANCH $text3 $branchName $text4 $env:BUILD_SOURCEBRANCH  $text5"
+              
+                exit 1
+              }
+            displayName: 'Stop Release if not from master branch'
+            enabled: true
+          - template: templates/app-service-deploy.yml
+            parameters:
+             KeyVault: $(KeyVault)
+             AppService: $(AppService)
+             ResourceGroup: $(ResourceGroup)
+             FunctionalTestRunSettingsFile: 'PreProduction.runsettings'
+             AppServiceStaging: $(AppService-Staging)
+             DeploymentAppSettings: 'AppConfiguration:ConfigurationCommonLabel Feature-Flight-Management-Config -AppConfiguration:ConfigurationEnvLabel Feature-Flight-Management-Config-PPE -AppConfiguration:FeatureFlightsLabel PPE -Keyvault:Name: $(KeyVault) -Keyvault:EndpointUrl https://$(KeyVault).azure.net/ -FeatureManagement:* true'
+ 
