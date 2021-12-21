@@ -34,7 +34,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.ConfigurationTests
             'id': 'fxp_dev_Flag1',
             'description': 'Check if Alias is a member of a given list',
             'enabled': true,
-            'enableIncrementalRings': true,
+            'incrementalRingsEnabled': true,
             'label': 'PPE',
             'name' : 'Flag1',
             'environment' : 'dev',

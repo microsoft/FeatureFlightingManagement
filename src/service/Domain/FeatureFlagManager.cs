@@ -243,9 +243,23 @@ namespace Microsoft.FeatureFlighting.Core.Configuration
             var flagName = featureFlag?.Name;
             featureFlag = await GetFeatureFlag(appName, envName, flagName, trackingIds);
             ValidateFeatureFlag(featureFlag, flagName, appName, envName);
-            foreach (var filter in featureFlag.Conditions.Client_Filters)
+            var stageId = featureFlag.Conditions.Client_Filters
+                .Where(f => f.Parameters.StageName.Equals(stage, StringComparison.OrdinalIgnoreCase))
+                .FirstOrDefault()
+                .Parameters.StageId;
+            featureFlag.Conditions.Client_Filters.ToList()
+                .ForEach(f => f.Parameters.IsActive = "false");
+            if (featureFlag.IncrementalRingsEnabled)
             {
-                filter.Parameters.IsActive = Convert.ToString(filter.Parameters.StageName == stage);
+                featureFlag.Conditions.Client_Filters.Where(f => Int32.Parse(f.Parameters.StageId) <= Int32.Parse(stageId))
+                    .ToList()
+                    .ForEach(f => f.Parameters.IsActive = "true");
+            }
+            else
+            {
+                featureFlag.Conditions.Client_Filters.Where(f => f.Parameters.StageId.Equals(stageId, StringComparison.OrdinalIgnoreCase))
+                    .ToList()
+                    .ForEach(f => f.Parameters.IsActive = "true");
             }
             await UpdateFeatureFlag(appName, envName, featureFlag, trackingIds);
             await DeleteCachedFeatureFlags(appName, envName, trackingIds);
