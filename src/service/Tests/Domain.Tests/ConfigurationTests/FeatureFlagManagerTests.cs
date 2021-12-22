@@ -34,6 +34,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.ConfigurationTests
             'id': 'fxp_dev_Flag1',
             'description': 'Check if Alias is a member of a given list',
             'enabled': true,
+            'incrementalRingsEnabled': true,
             'label': 'PPE',
             'name' : 'Flag1',
             'environment' : 'dev',
@@ -138,6 +139,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.ConfigurationTests
                 ContentType = _featureFlagContenetType,
                 Value = str
             };
+            var mockResponse = new Mock<Response>();
             Mock<Response<ConfigurationSetting>> response = new Mock<Response<ConfigurationSetting>>();
             Mock<ConfigurationClient> configClient = new Mock<ConfigurationClient>();
             Mock<AsyncPageable<ConfigurationSetting>> mockAsyncConfig = new Mock<AsyncPageable<ConfigurationSetting>>();
@@ -149,8 +151,12 @@ namespace Microsoft.FeatureFlighting.Core.Tests.ConfigurationTests
             };
             mockAsyncConfig.Setup(_ => _.GetAsyncEnumerator(It.IsAny<CancellationToken>())).Returns(returnConfigSetting(str).GetAsyncEnumerator());
             response.Setup(_ => _.Value).Returns(setting);
+
+            mockResponse.Setup(_ => _.Content).Returns(BinaryData.FromObjectAsJson(setting));
+            Response<ConfigurationSetting> getResponse = Response.FromValue(setting, mockResponse.Object);
+            
             configClient.Setup(_ => _.AddConfigurationSettingAsync(It.IsAny<string>(), It.IsAny<string>(), null, It.IsAny<CancellationToken>())).Returns(Task.FromResult(response.Object));
-            configClient.Setup(_ => _.GetConfigurationSettingAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(response.Object));
+            configClient.Setup(_ => _.GetConfigurationSettingAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(getResponse));
             configClient.Setup(_ => _.SetConfigurationSettingAsync(_featureFlagPrefix + appName.ToLowerInvariant(), "abc", "PPE", It.IsAny<CancellationToken>())).Returns(Task.FromResult(response.Object));
             configClient.Setup(_ => _.DeleteConfigurationSettingAsync(_featureFlagPrefix + appName.ToLowerInvariant(), "PPE", It.IsAny<CancellationToken>())).Returns(Task.FromResult(response1.Object));
             configClient.Setup(_ => _.SetConfigurationSetting(_featureFlagPrefix + appName.ToLowerInvariant(), "abc", "PPE", It.IsAny<CancellationToken>())).Returns(response.Object);

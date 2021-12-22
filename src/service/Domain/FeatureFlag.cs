@@ -13,6 +13,8 @@ namespace Microsoft.FeatureFlighting.Core
         public string Description { get; set; }
         [JsonProperty("enabled")]
         public bool Enabled { get; set; }
+        [JsonProperty("incrementalRingsEnabled")]
+        public bool IncrementalRingsEnabled { get; set; }
         [JsonProperty("label")]
         public string Label { get; set; }
         [JsonProperty("name")]

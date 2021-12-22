@@ -111,7 +111,8 @@ namespace Microsoft.FeatureFlighting.Core.Configuration
                 string key = FlagUtilities.GetFeatureFlagId(appName, envName, name);
                 ConfigurationClient client = _configurationClientProvider.GetConfigurationClient();
                 var res = await client.GetConfigurationSettingAsync(_featureFlagPrefix + key, _envLabel);
-                var featureflag = JsonConvert.DeserializeObject<FeatureFlag>(res.Value.Value);
+                var rawConfigurationSetting = JsonConvert.DeserializeObject<ConfigurationSetting>(res?.GetRawResponse()?.Content?.ToString());
+                var featureflag = JsonConvert.DeserializeObject<FeatureFlag>(rawConfigurationSetting.Value);
                 featureflag.Name = !string.IsNullOrWhiteSpace(featureflag.Name) ? featureflag.Name : FlagUtilities.GetFeatureFlagName(appName, envName, featureflag.Id);
                 featureflag.Environment = !string.IsNullOrWhiteSpace(featureflag.Environment) ? featureflag.Environment : envName.ToLowerInvariant();
                 return featureflag;
@@ -242,9 +243,23 @@ namespace Microsoft.FeatureFlighting.Core.Configuration
             var flagName = featureFlag?.Name;
             featureFlag = await GetFeatureFlag(appName, envName, flagName, trackingIds);
             ValidateFeatureFlag(featureFlag, flagName, appName, envName);
-            foreach (var filter in featureFlag.Conditions.Client_Filters)
+            var stageId = featureFlag.Conditions.Client_Filters
+                .Where(f => f.Parameters.StageName.Equals(stage, StringComparison.OrdinalIgnoreCase))
+                .FirstOrDefault()
+                .Parameters.StageId;
+            featureFlag.Conditions.Client_Filters.ToList()
+                .ForEach(f => f.Parameters.IsActive = "false");
+            if (featureFlag.IncrementalRingsEnabled)
             {
-                filter.Parameters.IsActive = Convert.ToString(filter.Parameters.StageName == stage);
+                featureFlag.Conditions.Client_Filters.Where(f => Int32.Parse(f.Parameters.StageId) <= Int32.Parse(stageId))
+                    .ToList()
+                    .ForEach(f => f.Parameters.IsActive = "true");
+            }
+            else
+            {
+                featureFlag.Conditions.Client_Filters.Where(f => f.Parameters.StageId.Equals(stageId, StringComparison.OrdinalIgnoreCase))
+                    .ToList()
+                    .ForEach(f => f.Parameters.IsActive = "true");
             }
             await UpdateFeatureFlag(appName, envName, featureFlag, trackingIds);
             await DeleteCachedFeatureFlags(appName, envName, trackingIds);
