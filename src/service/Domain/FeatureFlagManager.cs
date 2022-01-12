@@ -169,8 +169,8 @@ namespace Microsoft.FeatureFlighting.Core.Configuration
 
                 if (featureFlag.Conditions != null && featureFlag.Conditions.Client_Filters != null && featureFlag.Conditions.Client_Filters.Any())
                 {
-                    dto.Stages = new List<Stage>();
-                    IList<Filter> filters = new List<Filter>(featureFlag.Conditions.Client_Filters);
+                    dto.Stages = new List<StageDto>();
+                    IList<FilterDto> filters = new List<FilterDto>(featureFlag.Conditions.Client_Filters);
 
                     if (filters.Count > 1)
                     {
@@ -178,12 +178,12 @@ namespace Microsoft.FeatureFlighting.Core.Configuration
                         var sortedList = distinct.OrderBy(o => o.Parameters.StageId);
 
                         var i = 1;
-                        foreach (Filter filter in sortedList)
+                        foreach (FilterDto filter in sortedList)
                         {
                             if (filter is null)
                                 continue;
 
-                            var stage = new Stage
+                            var stage = new StageDto
                             {
                                 IsActive = Convert.ToBoolean(filter.Parameters.IsActive),
                                 StageId = Convert.ToInt32(filter.Parameters.StageId),
@@ -200,7 +200,7 @@ namespace Microsoft.FeatureFlighting.Core.Configuration
                         if (filters[0] is null)
                             continue;
 
-                        var stage = new Stage
+                        var stage = new StageDto
                         {
                             IsActive = Convert.ToBoolean(filters[0].Parameters.IsActive),
                             StageId = Convert.ToInt32(filters[0].Parameters.StageId),
@@ -363,9 +363,9 @@ namespace Microsoft.FeatureFlighting.Core.Configuration
         }
     }
 
-    public class FilterComparer : IEqualityComparer<Filter>
+    public class FilterComparer : IEqualityComparer<FilterDto>
     {
-        public bool Equals(Filter x, Filter y)
+        public bool Equals(FilterDto x, FilterDto y)
         {
             if (ReferenceEquals(x, y)) return true;
 
@@ -375,7 +375,7 @@ namespace Microsoft.FeatureFlighting.Core.Configuration
             return x.Parameters.StageId == y.Parameters.StageId && x.Parameters.StageName == y.Parameters.StageName;
         }
 
-        public int GetHashCode(Filter obj)
+        public int GetHashCode(FilterDto obj)
         {
             if (obj is null) return 0;
 

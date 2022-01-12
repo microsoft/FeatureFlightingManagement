@@ -34,6 +34,16 @@ namespace Microsoft.FeatureFlighting.Common.Config
         public BusinessRuleEngineConfiguration BusinessRuleEngine { get; set; }
 
         /// <summary>
+        /// Configuration for flights database
+        /// </summary>
+        public CosmosDbConfiguration FlightsDatabase { get; set; }
+
+        /// <summary>
+        /// Configuration for optimizing feature flags when saving to Azure
+        /// </summary>
+        public FlightOptimizationConfiguration Optimization { get; set; }
+
+        /// <summary>
         /// Configuration when feature flags are evaluated
         /// </summary>
         public FlagEvaluationConfiguration Evaluation { get; set; }
@@ -50,7 +60,9 @@ namespace Microsoft.FeatureFlighting.Common.Config
                 ShortName = "Default",
                 Authorization = new AuthorizationConfiguration(),
                 Cache = new CacheConfiguration(),
-                Evaluation = FlagEvaluationConfiguration.GetDefault()
+                Evaluation = FlagEvaluationConfiguration.GetDefault(),
+                FlightsDatabase = new CosmosDbConfiguration(),
+                Optimization = FlightOptimizationConfiguration.GetDefault()
             };
         }
 
@@ -83,10 +95,24 @@ namespace Microsoft.FeatureFlighting.Common.Config
             else
                 Cache.MergeWithDefault(defaultTenantConfiguration.Cache);
 
+            if (FlightsDatabase == null)
+                FlightsDatabase = defaultTenantConfiguration.FlightsDatabase;
+            else
+                FlightsDatabase.MergeWithDefault(defaultTenantConfiguration.FlightsDatabase);
+
+            if (Optimization == null)
+                Optimization = defaultTenantConfiguration.Optimization;
+            else
+                Optimization.MergeWithDefault(defaultTenantConfiguration.Optimization);
+
             if (Evaluation == null)
                 Evaluation = defaultTenantConfiguration.Evaluation;
         }
 
+        /// <summary>
+        /// Checks if BRE is enabled for the tenant
+        /// </summary>
+        /// <returns>True of BRE is enabled for the tenant</returns>
         public bool IsBusinessRuleEngineEnabled()
         {
             return BusinessRuleEngine != null && BusinessRuleEngine.Enabled && BusinessRuleEngine.Storage != null;

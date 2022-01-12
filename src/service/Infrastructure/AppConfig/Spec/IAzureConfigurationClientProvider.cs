@@ -1,6 +1,6 @@
 ﻿using Azure.Data.AppConfiguration;
 
-namespace Microsoft.FeatureFlighting.Core.AzureAppConfiguration
+namespace Microsoft.FeatureFlighting.Infrastructure.AppConfig
 {
     /// <summary>
     /// Creates the client for connecting to Azure App Configuration

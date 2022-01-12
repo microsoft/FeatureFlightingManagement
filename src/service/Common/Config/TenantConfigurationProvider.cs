@@ -51,6 +51,8 @@ namespace Microsoft.FeatureFlighting.Common.Config
             IConfigurationSection tenantConfigurationSection = _configuration.GetSection("Tenants");
             IEnumerable<IConfigurationSection> rawTenantConfigurations = tenantConfigurationSection.GetChildren();
             _defaultTenantConfiguration = _configuration.GetSection("Tenants:Default").Get<TenantConfiguration>();
+            if (_defaultTenantConfiguration.FlightsDatabase != null && !_defaultTenantConfiguration.FlightsDatabase.Disabled)
+                _defaultTenantConfiguration.FlightsDatabase.AddPrimaryKey(_configuration);
 
             foreach (IConfigurationSection rawTenantConfiguration in rawTenantConfigurations)
             {
@@ -77,6 +79,9 @@ namespace Microsoft.FeatureFlighting.Common.Config
                         tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionString = storageConnectionString;
                     }
                 }
+
+                if (tenantConfiguration.FlightsDatabase != null)
+                    tenantConfiguration.FlightsDatabase.AddPrimaryKey(_configuration);
 
                 tenantConfiguration.MergeWithDefault(_defaultTenantConfiguration);
 

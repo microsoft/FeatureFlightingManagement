@@ -3,12 +3,12 @@ using Azure.Core;
 using Azure.Data.AppConfiguration;
 using Microsoft.Extensions.Configuration;
 
-namespace Microsoft.FeatureFlighting.Core.AzureAppConfiguration
+namespace Microsoft.FeatureFlighting.Infrastructure.AppConfig
 {   
     // <inheritdoc/>
     public class AzureConfigurationClientProvider : IAzureConfigurationClientProvider
     {
-        private ConfigurationClient _configurationClient;
+        private static ConfigurationClient? _configurationClient;
         private readonly IConfiguration _configuration;
         private static readonly object _lock = new();
 

@@ -1,0 +1,25 @@
+﻿using System.Collections.Generic;
+using Microsoft.FeatureFlighting.Common;
+
+namespace Microsoft.FeatureFlighting.Core.Domain.Events
+{
+    public class FeatureFlightCreated : BaseFeatureFlightEvent
+    {
+        public override string DisplayName => nameof(FeatureFlightCreated);
+    
+        public string CreatedBy { get; set; }
+
+        public FeatureFlightCreated(FeatureFlightAggregateRoot flight, LoggerTrackingIds trackingIds)
+            :base(flight, trackingIds)
+        {
+            CreatedBy = flight.Audit.CreatedBy;
+        }
+
+        public override Dictionary<string, string> GetProperties()
+        {
+            Dictionary<string, string> properties = base.GetProperties();
+            properties.AddOrUpdate(nameof(CreatedBy), CreatedBy);
+            return properties;
+        }
+    }
+}
