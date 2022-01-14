@@ -61,7 +61,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
             AzureFeatureFlag azureFlag = new()
             {
                 Id = flight.Id,
-                Name = flight.FeatureName,
+                Name = flight.Name,
                 Description = flight.Description,
                 Tenant = flight.Tenant,
                 Environment = flight.Environment,

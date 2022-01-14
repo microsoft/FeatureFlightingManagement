@@ -7,8 +7,8 @@ namespace Microsoft.FeatureFlighting.Common.Model
     {
         [JsonProperty("id")]
         public string Id { get; set; }
-
-        public string FeatureName { get; set; }
+        
+        public string Name { get; set; }
 
         public string Tenant { get; set; }
 

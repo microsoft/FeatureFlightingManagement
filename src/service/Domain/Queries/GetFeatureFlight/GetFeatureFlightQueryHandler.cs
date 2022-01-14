@@ -1,7 +1,6 @@
 ﻿using CQRS.Mediatr.Lite;
 using System.Threading.Tasks;
 using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Core.Domain;
 using Microsoft.FeatureFlighting.Common.Model;
 using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Common.Storage;
@@ -54,8 +53,7 @@ namespace Microsoft.FeatureFlighting.Core.Queries
             AzureFeatureFlag azureFlag = await _azureFeatureManager.Get(query.FeatureName, query.Environment, tenantConfiguration.Name, query.TrackingIds);
             if (azureFlag == null)
                 return null;
-            FeatureFlightAggregateRoot aggregateRoot = FeatureFlightAggregateRootAssembler.Assemble(azureFlag, tenantConfiguration);
-            return FeatureFlightDtoAssembler.Assemble(aggregateRoot);
+            return FeatureFlightDtoAssembler.Assemble(azureFlag);
         }
     }
 }

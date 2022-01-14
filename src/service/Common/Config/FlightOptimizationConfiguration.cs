@@ -17,6 +17,9 @@
 
         public void MergeWithDefault(FlightOptimizationConfiguration defaultConfiguration)
         {
+            if (defaultConfiguration == null)
+                return;
+                
             if (string.IsNullOrWhiteSpace(OptimizationRules))
                 OptimizationRules = defaultConfiguration.OptimizationRules;
         }

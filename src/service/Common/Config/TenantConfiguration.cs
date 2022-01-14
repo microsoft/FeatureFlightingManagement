@@ -49,6 +49,16 @@ namespace Microsoft.FeatureFlighting.Common.Config
         public FlagEvaluationConfiguration Evaluation { get; set; }
 
         /// <summary>
+        /// Configuration to subscribe to change notifications
+        /// </summary>
+        public TenantChangeNotificationConfiguration ChangeNotificationSubscription { get; set; }
+
+        /// <summary>
+        /// Email address for contacting the tenant
+        /// </summary>
+        public string Contact { get; set; }
+
+        /// <summary>
         /// Gets a default <see cref="TenantConfiguration"/>
         /// </summary>
         /// <returns>Default tenant configuration</returns>
@@ -62,7 +72,8 @@ namespace Microsoft.FeatureFlighting.Common.Config
                 Cache = new CacheConfiguration(),
                 Evaluation = FlagEvaluationConfiguration.GetDefault(),
                 FlightsDatabase = new CosmosDbConfiguration(),
-                Optimization = FlightOptimizationConfiguration.GetDefault()
+                Optimization = FlightOptimizationConfiguration.GetDefault(),
+                ChangeNotificationSubscription = TenantChangeNotificationConfiguration.GetDefault()
             };
         }
 
@@ -104,6 +115,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
                 Optimization = defaultTenantConfiguration.Optimization;
             else
                 Optimization.MergeWithDefault(defaultTenantConfiguration.Optimization);
+
+            if (ChangeNotificationSubscription == null)
+                ChangeNotificationSubscription = defaultTenantConfiguration.ChangeNotificationSubscription;
+            else
+                ChangeNotificationSubscription.MergeOrDefault(defaultTenantConfiguration.ChangeNotificationSubscription);
 
             if (Evaluation == null)
                 Evaluation = defaultTenantConfiguration.Evaluation;

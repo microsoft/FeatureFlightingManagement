@@ -1,5 +1,7 @@
 ﻿using System.Linq;
+using System.Collections.Generic;
 using Microsoft.FeatureFlighting.Common.Model;
+using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
 
 namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
 {
@@ -10,7 +12,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
             FeatureFlightDto dto = new()
             {
                 Id = flight.Id,
-                FeatureName = flight.Feature.Name,
+                Name = flight.Feature.Name,
                 Description = flight.Feature.Description,
                 Tenant = flight.Tenant.Id,
                 Environment = flight.Tenant.Environment,
@@ -57,6 +59,76 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                     }).ToList()
                 }).ToList()
             };
+            return dto;
+        }
+
+        public static FeatureFlightDto Assemble(AzureFeatureFlag azureFeatureFlag, bool ignoreDetailedFilter = false)
+        {
+            FeatureFlightDto dto = new()
+            {
+                Id = azureFeatureFlag.Id,
+                Name = azureFeatureFlag.Name,
+                Description = azureFeatureFlag.Description,
+                Tenant = azureFeatureFlag.Tenant,
+                Environment = azureFeatureFlag.Environment,
+                Enabled = azureFeatureFlag.Enabled,
+                Version = azureFeatureFlag.Version,
+                IsAzureFlightOptimized = false,
+                Audit = null,
+                EvaluationMetrics = null
+            };
+
+            if (azureFeatureFlag.Conditions == null ||
+                azureFeatureFlag.Conditions.Client_Filters == null || !azureFeatureFlag.Conditions.Client_Filters.Any())
+                return dto;
+
+            IEnumerable<AzureFilter> azureFilters = azureFeatureFlag.Conditions.Client_Filters.OrderBy(azureFilter => azureFilter.Parameters.StageId);
+            int initialStageId = int.Parse(azureFilters.First().Parameters.StageId);
+            int finalStageId = int.Parse(azureFilters.Last().Parameters.StageId);
+
+            List<StageDto> stages = new();
+            foreach(AzureFilter azureFilter in azureFilters)
+            {
+                StageDto currentStage = stages.FirstOrDefault(stage => stage.StageId.ToString() == azureFilter.Parameters.StageId);
+                if (currentStage == null)
+                {
+                    currentStage = new StageDto()
+                    {
+                        StageId = int.Parse(azureFilter.Parameters.StageId),
+                        StageName = azureFilter.Parameters.StageName,
+                        IsActive = bool.Parse(azureFilter.Parameters.IsActive),
+                        IsFirstStage = int.Parse(azureFilter.Parameters.StageId) == initialStageId,
+                        IsLastStage = int.Parse(azureFilter.Parameters.StageId) == finalStageId,
+                        LastActivatedOn = null,
+                        LastDeactivatedOn = null,
+                        Filters = ignoreDetailedFilter ? null : new List<FilterDto>
+                        {
+                            new FilterDto
+                            {
+                                FilterType = azureFilter.Name,
+                                FilterName = azureFilter.Parameters.FlightContextKey,
+                                Operator = azureFilter.Parameters.Operator,
+                                Value =  azureFilter.Parameters.Value
+                            }
+                        }
+                    };
+                    stages.Add(currentStage);
+                }
+                else
+                {
+                    if (ignoreDetailedFilter)
+                        continue;
+                    FilterDto filter = new()
+                    {
+                        FilterType = azureFilter.Name,
+                        FilterName = azureFilter.Parameters.FlightContextKey,
+                        Operator = azureFilter.Parameters.Operator,
+                        Value = azureFilter.Parameters.Value
+                    };
+                    currentStage.Filters.Add(filter);
+                }
+            }
+
             return dto;
         }
     }

@@ -22,7 +22,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
         public static FeatureFlightAggregateRoot Assemble(FeatureFlightDto flag, TenantConfiguration tenantConfiguration)
         {
             FeatureFlightAggregateRoot aggregateRoot = new(
-                feature: new Feature(flag.FeatureName, flag.Description),
+                feature: new Feature(flag.Name, flag.Description),
                 status: new Status(flag.Enabled, flag.IsAzureFlightOptimized),
                 tenant: new Tenant(flag.Tenant, flag.Environment),
                 settings: new Settings(tenantConfiguration?.Optimization),
