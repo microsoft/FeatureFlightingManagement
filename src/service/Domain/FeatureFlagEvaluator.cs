@@ -41,12 +41,46 @@ namespace Microsoft.FeatureFlighting.Core
             featureFlags = featureFlags.Distinct().ToList();
             TenantConfiguration tenantConfiguration = await _tenantConfigurationProvider.Get(applicationName);
             string context = GetContext();
-            var @event = CreateFeatureFlagsEvaluatedEvent(tenantConfiguration.Name, environment, context, "Azure", featureFlags.Count);
-
-            ConcurrentDictionary<string, bool> result = new();
+            EventContext @event = CreateFeatureFlagsEvaluatedEvent(tenantConfiguration.Name, environment, context, "Azure", featureFlags.Count);
             AddHttpContext(environment, tenantConfiguration);
-            var evaluationTasks = new List<Task>();
 
+            int batchSize = GetBatchSize(tenantConfiguration);
+            @event.AddProperty("BatchSize", batchSize);
+            if (featureFlags.Count <= batchSize)
+            {
+                @event.AddProperty("Batches", 1);
+                IDictionary<string, bool> groupResult = await EvaluateFeatureFlags(featureFlags, tenantConfiguration, environment, @event);
+                LogEvaluationResults(performanceContext, @event);
+                return groupResult;
+            }   
+
+            IEnumerable<IGrouping<int, string>> featureFlagGroups = featureFlags.Select((flag, index) => new
+            {
+                Index = index,
+                Flag = flag
+            }).GroupBy(indexedFlag => indexedFlag.Index / batchSize, indexedFlag => indexedFlag.Flag).ToList();
+            @event.AddProperty("Batches", featureFlagGroups.Count());
+
+            IDictionary<string, bool> result = await EvaluateFeatureFlags(featureFlagGroups, tenantConfiguration, environment, @event);
+            LogEvaluationResults(performanceContext, @event);
+            return result;
+        }
+
+        private async Task<IDictionary<string, bool>> EvaluateFeatureFlags(IEnumerable<IGrouping<int, string>> featureFlagGroups, TenantConfiguration tenantConfiguration, string environment, EventContext @event)
+        {
+            IDictionary<string, bool> results = new Dictionary<string, bool>();
+            foreach(var featureFlagGroup in featureFlagGroups)
+            {
+                IDictionary<string, bool> currentGroupResult = await EvaluateFeatureFlags(featureFlagGroup.ToList(), tenantConfiguration, environment, @event);
+                results.Merge(currentGroupResult);
+            }
+            return results;
+        }
+
+        private async Task<IDictionary<string, bool>> EvaluateFeatureFlags(IEnumerable<string> featureFlags, TenantConfiguration tenantConfiguration, string environment, EventContext @event)
+        {
+            ConcurrentDictionary<string, bool> result = new();
+            List<Task> evaluationTasks = new();
             foreach (string featureFlag in featureFlags)
             {
                 evaluationTasks.Add(Task.Run(async () =>
@@ -60,13 +94,23 @@ namespace Microsoft.FeatureFlighting.Core
                 }));
             }
             await Task.WhenAll(evaluationTasks).ConfigureAwait(false);
-
-            performanceContext.Stop();
-            _logger.Log(performanceContext);
-            _logger.Log(@event);
             return result;
         }
-        
+
+        private int GetBatchSize(TenantConfiguration tenantConfiguration)
+        {
+            if (tenantConfiguration.Evaluation == null)
+                return FlagEvaluationConfiguration.DefaultBatchSize;
+
+            if (tenantConfiguration.Evaluation.BatchSize == 0)
+                return 1;
+
+            if (tenantConfiguration.Evaluation.BatchSize < 0)
+                return int.MaxValue;
+
+            return tenantConfiguration.Evaluation.BatchSize;
+        }
+
         private string GetContext()
         {
             return _httpContextAccessor.HttpContext.Request.Headers.Any(header => header.Key.ToLowerInvariant() == Constants.Flighting.FLIGHT_CONTEXT_HEADER.ToLowerInvariant())
@@ -92,10 +136,10 @@ namespace Microsoft.FeatureFlighting.Core
         {
             _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ENV_PARAM] = environment;
             _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_APP_PARAM] = tenantConfiguration.Name;
-            _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ADD_DISABLED_CONTEXT] = 
+            _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ADD_DISABLED_CONTEXT] =
                 tenantConfiguration.Evaluation.AddDisabledContext
                 || _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault(Constants.Flighting.FLIGHT_ADD_RESULT_CONTEXT_HEADER, bool.FalseString).ToString().ToLowerInvariant() == bool.TrueString.ToLowerInvariant();
-            _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ADD_ENABLED_CONTEXT] = 
+            _httpContextAccessor.HttpContext.Items[Constants.Flighting.FEATURE_ADD_ENABLED_CONTEXT] =
                 tenantConfiguration.Evaluation.AddEnabledContext
                 || _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault(Constants.Flighting.FLIGHT_ADD_RESULT_CONTEXT_HEADER, bool.FalseString).ToString().ToLowerInvariant() == bool.TrueString.ToLowerInvariant();
         }
@@ -108,7 +152,7 @@ namespace Microsoft.FeatureFlighting.Core
             }
             catch (Exception exception)
             {
-                if (!tenantConfiguration.Evaluation.IgnoreException)
+                if (tenantConfiguration.Evaluation == null || !tenantConfiguration.Evaluation.IgnoreException)
                     throw;
 
                 string correlationId = _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault("x-correlationId", Guid.NewGuid().ToString()).ToString();
@@ -134,7 +178,15 @@ namespace Microsoft.FeatureFlighting.Core
                 _httpContextAccessor.HttpContext.Response.Headers.AddOrUpdate(disabledContextKey.RemoveSpecialCharacters(), appException.Message.RemoveSpecialCharacters());
 
                 return false;
-            }   
+            }
+        }
+
+        private void LogEvaluationResults(PerformanceContext performanceContext, EventContext @event)
+        {
+            performanceContext.Stop();
+            @event.AddProperty("TotalTimeTaken", (performanceContext.EndTime - performanceContext.StartTime).TotalMilliseconds.ToString());
+            _logger.Log(performanceContext);
+            _logger.Log(@event);
         }
     }
 }

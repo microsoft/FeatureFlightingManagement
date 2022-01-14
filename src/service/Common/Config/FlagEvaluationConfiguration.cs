@@ -21,6 +21,13 @@
         public bool AddDisabledContext { get; set; }
 
         /// <summary>
+        /// Number of feature flags to be evaluated concurently (in a batch)
+        /// </summary>
+        public int BatchSize { get; set; }
+
+        public static int DefaultBatchSize = 10;
+
+        /// <summary>
         /// Gets a default <see cref="FlagEvaluationConfiguration"/>
         /// </summary>
         /// <returns></returns>
@@ -30,7 +37,8 @@
             {
                 IgnoreException = false,
                 AddDisabledContext = false,
-                AddEnabledContext = false
+                AddEnabledContext = false,
+                BatchSize = DefaultBatchSize
             };
         }
     }
