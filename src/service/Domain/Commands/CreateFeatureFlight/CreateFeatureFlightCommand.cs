@@ -19,12 +19,12 @@ namespace Microsoft.FeatureFlighting.Core.Commands
 
         public LoggerTrackingIds TrackingIds => new(CorrelationId, TransactionId);
 
-        public CreateFeatureFlightCommand(AzureFeatureFlag flag, LoggerTrackingIds trackingIds)
+        public CreateFeatureFlightCommand(AzureFeatureFlag flag, string correlationId, string transactionId)
         {
             _id = Guid.NewGuid().ToString();
             AzureFeatureFlag = flag;
-            CorrelationId = trackingIds.CorrelationId ?? Guid.NewGuid().ToString();
-            TransactionId = trackingIds.TransactionId ?? Guid.NewGuid().ToString();
+            CorrelationId = correlationId ?? Guid.NewGuid().ToString();
+            TransactionId = transactionId ?? Guid.NewGuid().ToString();
         }
 
         public override bool Validate(out string ValidationErrorMessage)

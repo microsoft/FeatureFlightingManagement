@@ -18,7 +18,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
     /// <summary>
     /// Handles the command <see cref="CreateFeatureFlightCommand"/>
     /// </summary>
-    public class CreateFeatureFlightCommandHandler : CommandHandler<CreateFeatureFlightCommand, IdCommandResult>
+    internal class CreateFeatureFlightCommandHandler : CommandHandler<CreateFeatureFlightCommand, IdCommandResult>
     {
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
         private readonly IAzureFeatureManager _azureFeatureManager;

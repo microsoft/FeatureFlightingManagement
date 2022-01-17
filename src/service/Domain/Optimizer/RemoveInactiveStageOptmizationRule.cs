@@ -8,7 +8,10 @@ using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
 
 namespace Microsoft.FeatureFlighting.Core.Optimizer
 {
-    public class RemoveInactiveStageOptmizationRule : IFlightOptimizationRule
+    /// <summary>
+    /// Removes filters from stages which are inactive
+    /// </summary>
+    internal class RemoveInactiveStageOptmizationRule : IFlightOptimizationRule
     {
         public int Priority => 1;
 

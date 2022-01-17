@@ -6,7 +6,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
     /// <summary>
     /// Event when a feature flight is disabled
     /// </summary>
-    public class FeatureFlightDisabled : BaseFeatureFlightEvent
+    internal class FeatureFlightDisabled : BaseFeatureFlightEvent
     {
         public override string DisplayName => nameof(FeatureFlightUpdated);
 

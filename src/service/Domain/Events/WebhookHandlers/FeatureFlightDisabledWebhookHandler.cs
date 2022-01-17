@@ -7,9 +7,9 @@ namespace Microsoft.FeatureFlighting.Core.Events.WebhookHandlers
 {
     internal class FeatureFlightDisabledWebhookHandler : BaseFeatureFlightWebhookEventHandler<FeatureFlightDisabled>
     {
-        protected override string NotificationSubject => _emailConfiguration.FeatureFlagDisabledEmailSubject;
+        protected override string NotificationSubject => _emailConfiguration.FeatureFlightDisabledEmailSubject;
 
-        protected override string NotificationContent => _emailConfiguration.FeatureFlagDisabledEmailTemplate;
+        protected override string NotificationContent => _emailConfiguration.FeatureFlightDisabledEmailTemplate;
         
         public FeatureFlightDisabledWebhookHandler(ITenantConfigurationProvider tenantConfigurationProvider, IWebhookTriggerManager webhookTriggerManager, EventStoreEmailConfiguration emailConfiguration, ILogger logger)
             :base(tenantConfigurationProvider, webhookTriggerManager, emailConfiguration, logger)

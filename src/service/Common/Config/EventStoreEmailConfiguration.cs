@@ -8,33 +8,39 @@
         public string NotificationChannel { get; set; }
         public string EmailSubjectPrefix { get; set; }
 
-        public string FeatureFlagCreatedEmailSubject { get; set; }
-        public string FeatureFlagCreatedEmailTemplate { get; set; }
+        public string FeatureFlightCreatedEmailSubject { get; set; }
+        public string FeatureFlightCreatedEmailTemplate { get; set; }
 
-        public string FeatureFlagUpdatedEmailSubject { get; set; }
-        public string FeatureFlagUpdatedEmailTemplate { get; set; }
+        public string FeatureFlightUpdatedEmailSubject { get; set; }
+        public string FeatureFlightUpdatedEmailTemplate { get; set; }
 
-        public string FeatureFlagEnabledEmailSubject { get; set; }
-        public string FeatureFlagEnabledEmailTemplate { get; set; }
+        public string FeatureFlightEnabledEmailSubject { get; set; }
+        public string FeatureFlightEnabledEmailTemplate { get; set; }
 
-        public string FeatureFlagDisabledEmailSubject { get; set; }
-        public string FeatureFlagDisabledEmailTemplate { get; set; }
-        
-        public string InactiveFeatureFlagEmailTemplate { get; set; }
+        public string FeatureFlightDisabledEmailSubject { get; set; }
+        public string FeatureFlightDisabledEmailTemplate { get; set; }
+
+        public string FeatureFlightDeletedEmailSubject { get; set; }
+        public string FeatureFlightDeletedEmailTemplate { get; set; }
+
+        public string InactiveFeatureFlightEmailTemplate { get; set; }
 
         public void SetDefaultEmailTemplates()
         {
-            FeatureFlagCreatedEmailSubject = string.IsNullOrWhiteSpace(FeatureFlagCreatedEmailSubject) ? "A new feature flag \"<<FeatureName>>\" has been created" : FeatureFlagCreatedEmailSubject;
-            FeatureFlagCreatedEmailTemplate = string.IsNullOrWhiteSpace(FeatureFlagCreatedEmailTemplate) ? "email-feature-flag-created" : FeatureFlagCreatedEmailTemplate;
+            FeatureFlightCreatedEmailSubject = string.IsNullOrWhiteSpace(FeatureFlightCreatedEmailSubject) ? "A new feature flight \"<<FeatureName>>\" has been created" : FeatureFlightCreatedEmailSubject;
+            FeatureFlightCreatedEmailTemplate = string.IsNullOrWhiteSpace(FeatureFlightCreatedEmailTemplate) ? "email-feature-flight-created" : FeatureFlightCreatedEmailTemplate;
 
-            FeatureFlagUpdatedEmailSubject = string.IsNullOrWhiteSpace(FeatureFlagUpdatedEmailSubject) ? "Feature flag \"<<FeatureName>>\" has been created" : FeatureFlagUpdatedEmailSubject;
-            FeatureFlagUpdatedEmailTemplate = string.IsNullOrWhiteSpace(FeatureFlagUpdatedEmailTemplate) ? "email-feature-flag-updated" : FeatureFlagUpdatedEmailTemplate;
+            FeatureFlightUpdatedEmailSubject = string.IsNullOrWhiteSpace(FeatureFlightUpdatedEmailSubject) ? "Feature flight for \"<<FeatureName>>\" has been created" : FeatureFlightUpdatedEmailSubject;
+            FeatureFlightUpdatedEmailTemplate = string.IsNullOrWhiteSpace(FeatureFlightUpdatedEmailTemplate) ? "email-feature-flight-updated" : FeatureFlightUpdatedEmailTemplate;
 
-            FeatureFlagEnabledEmailSubject = string.IsNullOrWhiteSpace(FeatureFlagEnabledEmailSubject) ? "Feature flag \"<<FeatureName>>\" has been enabled" : FeatureFlagEnabledEmailSubject;
-            FeatureFlagEnabledEmailTemplate = string.IsNullOrWhiteSpace(FeatureFlagEnabledEmailTemplate) ? "email-feature-flag-enabled" : FeatureFlagEnabledEmailTemplate;
+            FeatureFlightEnabledEmailSubject = string.IsNullOrWhiteSpace(FeatureFlightEnabledEmailSubject) ? "Feature flight for \"<<FeatureName>>\" has been enabled" : FeatureFlightEnabledEmailSubject;
+            FeatureFlightEnabledEmailTemplate = string.IsNullOrWhiteSpace(FeatureFlightEnabledEmailTemplate) ? "email-feature-flight-enabled" : FeatureFlightEnabledEmailTemplate;
 
-            FeatureFlagDisabledEmailSubject = string.IsNullOrWhiteSpace(FeatureFlagDisabledEmailSubject) ? "Feature flag \"<<FeatureName>>\" has been disabled" : FeatureFlagDisabledEmailSubject;
-            FeatureFlagDisabledEmailTemplate = string.IsNullOrWhiteSpace(FeatureFlagDisabledEmailTemplate) ? "email-feature-flag-disabled" : FeatureFlagDisabledEmailTemplate;
+            FeatureFlightDisabledEmailSubject = string.IsNullOrWhiteSpace(FeatureFlightDisabledEmailSubject) ? "Feature flight for \"<<FeatureName>>\" has been disabled" : FeatureFlightDisabledEmailSubject;
+            FeatureFlightDisabledEmailTemplate = string.IsNullOrWhiteSpace(FeatureFlightDisabledEmailTemplate) ? "email-feature-flight-disabled" : FeatureFlightDisabledEmailTemplate;
+
+            FeatureFlightDeletedEmailSubject = string.IsNullOrWhiteSpace(FeatureFlightDisabledEmailSubject) ? "Feature flight for \"<<FeatureName>>\" has been deleted" : FeatureFlightDeletedEmailSubject;
+            FeatureFlightDeletedEmailTemplate = string.IsNullOrWhiteSpace(FeatureFlightDeletedEmailTemplate) ? "email-feature-flight-deleted" : FeatureFlightDeletedEmailTemplate;
         }
     }
 }

@@ -4,8 +4,9 @@ using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
 
 namespace Microsoft.FeatureFlighting.Core.Optimizer
-{
-    public class FlightOptimizer : IFlightOptimizer
+{   
+    // <inheritdoc/>
+    internal class FlightOptimizer : IFlightOptimizer
     {
         private readonly List<IFlightOptimizationRule> _optimizationRules;
 
@@ -17,6 +18,7 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
             _optimizationRules = optimizationRules;
         }
 
+        // <inheritdoc/>
         public void Optmize(AzureFeatureFlag flag, List<string> optimizationRules, LoggerTrackingIds trackingIds)
         {
             bool isFlagOptimized = false;

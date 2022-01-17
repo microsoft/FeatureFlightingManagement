@@ -8,7 +8,7 @@ namespace Microsoft.FeatureFlighting.Core.Spec
     /// <summary>
     /// Cache for feature flights
     /// </summary>
-    public interface IFeatureFlightCache
+    internal interface IFeatureFlightCache
     {
         /// <summary>
         /// Gets feature flights from cache

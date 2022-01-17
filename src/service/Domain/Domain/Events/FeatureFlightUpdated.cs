@@ -8,7 +8,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
     /// <summary>
     /// Event when an feature flight is updated
     /// </summary>
-    public class FeatureFlightUpdated : BaseFeatureFlightEvent
+    internal class FeatureFlightUpdated : BaseFeatureFlightEvent
     {
         public override string DisplayName => nameof(FeatureFlightUpdated);
 

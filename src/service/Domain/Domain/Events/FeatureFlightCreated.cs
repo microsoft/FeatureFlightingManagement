@@ -3,7 +3,7 @@ using Microsoft.FeatureFlighting.Common;
 
 namespace Microsoft.FeatureFlighting.Core.Domain.Events
 {
-    public class FeatureFlightCreated : BaseFeatureFlightEvent
+    internal class FeatureFlightCreated : BaseFeatureFlightEvent
     {
         public override string DisplayName => nameof(FeatureFlightCreated);
     

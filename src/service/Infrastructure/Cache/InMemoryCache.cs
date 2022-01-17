@@ -11,7 +11,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
     /// <summary>
     /// In Memory cache (wrapper over <see cref="IMemoryCache"/>)
     /// </summary>
-    public class InMemoryCache : ICache
+    internal class InMemoryCache : ICache
     {
         private readonly IMemoryCache _memoryCache;
         private readonly string _tenant;

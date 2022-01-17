@@ -65,7 +65,7 @@ namespace Microsoft.FeatureFlighting.Core.Events.WebhookHandlers
                 EventName = @event.DisplayName,
                 EventSubject = new StringBuilder().Append(@event.TenantName).Append(":").Append(@event.Environment).ToString(),
                 EventType = changeNotificationConfiguration.EnableEmailForChangeNotifications ? "Notification" : "Entity",
-                Payload = JsonConvert.SerializeObject(@event.Payload),
+                Payload = @event.Payload != null ? JsonConvert.SerializeObject(@event.Payload) : string.Empty,
                 Properties = @event.GetProperties(),
                 Publisher = new(_emailConfiguration.PublisherId, _emailConfiguration.PublisherName),
                 Notification = IsEmailNotificationEnabled && changeNotificationConfiguration.EnableEmailForChangeNotifications ? new NotificationCollection

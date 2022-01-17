@@ -8,8 +8,9 @@ using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Common.Storage;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Storage
-{
-    public class FlightsDbRepositoryFactory : IFlightsDbRepositoryFactory
+{   
+    // <inheritdoc/>
+    internal class FlightsDbRepositoryFactory : IFlightsDbRepositoryFactory
     {
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
         private readonly IConfiguration _configuration;
@@ -24,6 +25,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Storage
             _documentRepositoryCache = new ConcurrentDictionary<string, IDocumentRepository<FeatureFlightDto>?>();
         }
 
+        // <inheritdoc/>
         public async Task<IDocumentRepository<FeatureFlightDto>?> GetFlightsRepository(string tenantName)
         {
             if (_documentRepositoryCache.ContainsKey(tenantName.ToUpperInvariant()))

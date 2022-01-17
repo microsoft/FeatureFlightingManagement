@@ -16,7 +16,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
     /// <summary>
     /// Enables a disabled feature flight
     /// </summary>
-    public class DisableFeatureFlightCommandHandler : CommandHandler<DisableFeatureFlightCommand, IdCommandResult>
+    internal class DisableFeatureFlightCommandHandler : CommandHandler<DisableFeatureFlightCommand, IdCommandResult>
     {
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
         private readonly IAzureFeatureManager _azureFeatureManager;

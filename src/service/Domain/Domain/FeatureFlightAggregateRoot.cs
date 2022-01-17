@@ -1,20 +1,19 @@
-﻿using System.Text;
+﻿using System;
+using System.Linq;
+using System.Text;
 using CQRS.Mediatr.Lite.SDK.Domain;
 using Microsoft.FeatureFlighting.Common;
+using Microsoft.FeatureFlighting.Common.Model;
 using Microsoft.FeatureFlighting.Core.Optimizer;
 using Microsoft.FeatureFlighting.Core.Domain.Events;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Core.Domain.Assembler;
 using Microsoft.FeatureFlighting.Core.Domain.ValueObjects;
 using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
-using System;
-using Microsoft.FeatureFlighting.Common.Model;
-using System.Net.Http.Headers;
-using System.Linq;
-using Microsoft.FeatureFlighting.Common.AppExceptions;
 
 namespace Microsoft.FeatureFlighting.Core.Domain
 {
-    public class FeatureFlightAggregateRoot : AggregateRoot
+    internal class FeatureFlightAggregateRoot : AggregateRoot
     {
         public Feature Feature { get; private set; }
         public Status Status { get; private set; }
@@ -34,7 +33,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             ValueObjects.Version version) : base(null)
         {
             _id = GetFlightId();
-            Feature = feature;
+            Feature = feature; 
             Status = status;
             Tenant = tenant;
             Settings = settings;
@@ -157,6 +156,12 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             ProjectAzureFlag(optimizer, trackingIds);
             Audit.Update(activatedBy, DateTime.UtcNow, "Stage Activated");
             ApplyChange(new FeatureFlightStageActivated(this, stageName, trackingIds));
+        }
+
+        public void Delete(string deletedBy, LoggerTrackingIds trackingIds)
+        {   
+            Audit.Update(deletedBy, DateTime.UtcNow, "Flight Deleted");
+            ApplyChange(new FeatureFlightDeleted(this, trackingIds));
         }
 
         private string GetFlightId()

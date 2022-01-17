@@ -17,7 +17,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
     /// <summary>
     /// Updates a feature flag in database and azure
     /// </summary>
-    public class UpdateFeatureFlightCommandHandler : CommandHandler<UpdateFeatureFlightCommand, IdCommandResult>
+    internal class UpdateFeatureFlightCommandHandler : CommandHandler<UpdateFeatureFlightCommand, IdCommandResult>
     {
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
         private readonly IAzureFeatureManager _azureFeatureManager;

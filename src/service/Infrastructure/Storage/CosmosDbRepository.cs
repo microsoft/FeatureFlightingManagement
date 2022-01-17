@@ -18,7 +18,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Storage
     /// <summary>
     /// Azure Cosmos DB Document repository
     /// </summary>
-    public class CosmosDbRepository<TDoc>: IDocumentRepository<TDoc> where TDoc : class, new()
+    internal class CosmosDbRepository<TDoc>: IDocumentRepository<TDoc> where TDoc : class, new()
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;

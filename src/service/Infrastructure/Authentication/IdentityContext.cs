@@ -14,8 +14,8 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
 
         public IdentityContext(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
-            _isUserImpersonationEnabled = configuration.GetValue<bool>("UserImpersonation:Enabled");
-            _impersonationHeader =  configuration.GetValue<string>("UserImpersonation:ImpersonationHeader");
+            _isUserImpersonationEnabled = bool.Parse(configuration["UserImpersonation:Enabled"]);
+            _impersonationHeader =  configuration["UserImpersonation:ImpersonationHeader"];
             _httpContextAccessor = httpContextAccessor;
         }
 

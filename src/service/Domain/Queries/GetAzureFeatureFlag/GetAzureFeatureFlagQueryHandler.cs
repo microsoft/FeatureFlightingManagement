@@ -13,7 +13,7 @@ namespace Microsoft.FeatureFlighting.Core.Queries
     /// <summary>
     /// Gets <see cref="AzureFeatureFlag"/> from database or Azure App Config
     /// </summary>
-    public class GetAzureFeatureFlagQueryHandler : QueryHandler<GetAzureFeatureFlagQuery, AzureFeatureFlag?>
+    internal class GetAzureFeatureFlagQueryHandler : QueryHandler<GetAzureFeatureFlagQuery, AzureFeatureFlag?>
     {
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
         private readonly IFlightsDbRepositoryFactory _flightDbRepositoryFactory;

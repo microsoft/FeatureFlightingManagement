@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 namespace Microsoft.FeatureFlighting.Infrastructure.AppConfig
 {   
     // <inheritdoc/>
-    public class AzureConfigurationClientProvider : IAzureConfigurationClientProvider
+    internal class AzureConfigurationClientProvider : IAzureConfigurationClientProvider
     {
         private static ConfigurationClient? _configurationClient;
         private readonly IConfiguration _configuration;
@@ -31,8 +31,8 @@ namespace Microsoft.FeatureFlighting.Infrastructure.AppConfig
                 options.Retry.MaxRetries = 10;
                 options.Retry.Delay = TimeSpan.FromSeconds(1);
 
-                string connectionStringLocation = _configuration.GetValue<string>("AppConfiguration:ConnectionStringLocation");
-                string connectionString = _configuration.GetValue<string>(connectionStringLocation);
+                string connectionStringLocation = _configuration["AppConfiguration:ConnectionStringLocation"];
+                string connectionString = _configuration[connectionStringLocation];
                 _configurationClient = new ConfigurationClient(connectionString, options);
                 return _configurationClient;
 

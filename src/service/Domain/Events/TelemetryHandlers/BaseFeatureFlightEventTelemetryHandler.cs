@@ -22,6 +22,8 @@ namespace Microsoft.FeatureFlighting.Core.Events.TelemetryHandlers
             try
             {
                 Dictionary<string, string> properties = @event.GetProperties();
+                if (@event.Payload != null)
+                    properties.Add("FeatureFlight", JsonConvert.SerializeObject(@event.Payload));
                 if (@event is FeatureFlightUpdated featureFlightUpdatedEvent)
                     properties.AddOrUpdate(nameof(featureFlightUpdatedEvent.OriginalPayload), JsonConvert.SerializeObject(featureFlightUpdatedEvent.OriginalPayload));
 

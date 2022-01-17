@@ -14,7 +14,7 @@ using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.AppConfig
 {
-    public class AzureFeatureManager: IAzureFeatureManager
+    internal class AzureFeatureManager: IAzureFeatureManager
     {
         private readonly ConfigurationClient _configurationClient;
         private readonly ILogger _logger;
@@ -24,7 +24,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.AppConfig
 
         public AzureFeatureManager(IConfiguration configuration, IAzureConfigurationClientProvider configurationClientProvider, ILogger logger)
         {
-            _envLabel = configuration.GetValue<string>("Env:Label");
+            _envLabel = configuration["Env:Label"];
             _configurationClient = configurationClientProvider.GetConfigurationClient();
             _logger = logger;
         }

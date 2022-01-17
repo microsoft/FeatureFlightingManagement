@@ -6,7 +6,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
     /// <summary>
     /// Events when a stage in the feature flight is activated
     /// </summary>
-    public class FeatureFlightStageActivated : BaseFeatureFlightEvent
+    internal class FeatureFlightStageActivated : BaseFeatureFlightEvent
     {
         public override string DisplayName => nameof(FeatureFlightStageActivated);
         public string ActivatedStageName { get; set; }

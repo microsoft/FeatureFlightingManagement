@@ -13,7 +13,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
     /// Redis cache
     /// </summary>
     /// <remarks>https://redis.io</remarks>
-    public class RedisCache : ICache
+    internal class RedisCache : ICache
     {
         protected readonly IConnectionMultiplexer _connectionMultiplexer;
         protected readonly IDatabase _database;

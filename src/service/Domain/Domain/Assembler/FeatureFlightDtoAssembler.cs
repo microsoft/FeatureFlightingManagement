@@ -5,7 +5,7 @@ using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
 
 namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
 {
-    public static class FeatureFlightDtoAssembler
+    internal static class FeatureFlightDtoAssembler
     {
         public static FeatureFlightDto Assemble(FeatureFlightAggregateRoot flight)
         {

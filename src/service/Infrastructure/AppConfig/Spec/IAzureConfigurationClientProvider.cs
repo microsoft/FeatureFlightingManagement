@@ -5,7 +5,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.AppConfig
     /// <summary>
     /// Creates the client for connecting to Azure App Configuration
     /// </summary>
-    public interface IAzureConfigurationClientProvider
+    internal interface IAzureConfigurationClientProvider
     {
         /// <summary>
         /// Creates <see cref="ConfigurationClient"/>

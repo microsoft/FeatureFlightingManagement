@@ -13,7 +13,7 @@ namespace Microsoft.FeatureFlighting.Core.Queries
     /// <summary>
     /// Handles <see cref="GetFeatureFlightQuery"/>. Gets feature flag from db or azure (fallback)
     /// </summary>
-    public class GetFeatureFlightQueryHandler : QueryHandler<GetFeatureFlightQuery, FeatureFlightDto>
+    internal class GetFeatureFlightQueryHandler : QueryHandler<GetFeatureFlightQuery, FeatureFlightDto>
     {
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
         private readonly IAzureFeatureManager _azureFeatureManager;

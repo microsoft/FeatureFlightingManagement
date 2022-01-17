@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using Microsoft.FeatureFlighting.Common.Webhook;
+using Microsoft.FeatureFlighting.Common.Authentication;
 
-namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
+namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
 {
     /// <summary>
     /// Generates authentication token using MSAL

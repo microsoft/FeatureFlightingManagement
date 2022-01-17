@@ -8,13 +8,14 @@ using Microsoft.FeatureFlighting.Common;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Common.Webhook;
+using Microsoft.FeatureFlighting.Common.Authentication;
 using Microsoft.FeatureFlighting.Common.Model.ChangeNotification;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
 {
     
     // <inheritdoc/>
-    public class WebhookTriggerManager: IWebhookTriggerManager
+    internal class WebhookTriggerManager: IWebhookTriggerManager
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ITokenGenerator _tokenGenerator;

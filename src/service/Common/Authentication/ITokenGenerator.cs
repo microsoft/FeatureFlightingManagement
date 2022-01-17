@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Microsoft.FeatureFlighting.Common.Webhook
+namespace Microsoft.FeatureFlighting.Common.Authentication
 {
     /// <summary>
     /// Generates authentication token

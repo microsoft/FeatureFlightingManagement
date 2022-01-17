@@ -8,7 +8,7 @@ using Microsoft.FeatureFlighting.Core.Domain.Assembler;
 
 namespace Microsoft.FeatureFlighting.Core.Domain.Events
 {
-    public abstract class BaseFeatureFlightEvent: Event
+    internal abstract class BaseFeatureFlightEvent: Event
     {   
         public override string Id { get; set; }
         public string FlagId { get; set; }
@@ -24,7 +24,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
         {
             Id = Guid.NewGuid().ToString();
             FlagId = flight.Id;
-            FeatureName = = flight.Feature.Name;
+            FeatureName = flight.Feature.Name;
             TenantName = flight.Tenant.Id;
             Environment = flight.Tenant.Environment;
             Enabled = flight.Status.Enabled;
