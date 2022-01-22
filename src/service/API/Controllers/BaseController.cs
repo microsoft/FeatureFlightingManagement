@@ -45,7 +45,7 @@ namespace Microsoft.FeatureFlighting.API.Controllers
 
         private string GetHeaderValue(string headerKey, string defaultValue = default)
         {
-            if (Request.Headers == null || !Request.Headers.Any(header => header.Key.ToLowerInvariant() == headerKey.ToLowerInvariant()))
+            if (Request == null || Request.Headers == null || !Request.Headers.Any(header => header.Key.ToLowerInvariant() == headerKey.ToLowerInvariant()))
                 return defaultValue;
             return Request.Headers[headerKey].ToString();
         }
