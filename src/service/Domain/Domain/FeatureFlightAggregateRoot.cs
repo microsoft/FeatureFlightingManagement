@@ -32,13 +32,13 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Condition condition,
             ValueObjects.Version version) : base(null)
         {
-            _id = GetFlightId();
-            Feature = feature; 
+            Feature = feature;
             Status = status;
             Tenant = tenant;
             Settings = settings;
             Condition = condition;
             Version = version;
+            _id = GetFlightId();
         }
 
         public FeatureFlightAggregateRoot(Feature feature,
@@ -64,23 +64,25 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Audit = new Audit(createdBy, System.DateTime.UtcNow, Status.Enabled);
             Version = new ValueObjects.Version();
             Status.UpdateActiveStatus(Condition);
+            Condition.Validate(trackingIds);
             ProjectAzureFlag(optimizer, trackingIds);
             ApplyChange(new FeatureFlightCreated(this, trackingIds));
         }
 
         public void UpdateFeatureFlag(IFlightOptimizer optimizer, AzureFeatureFlag updatedFlag, string updatedBy, LoggerTrackingIds trackingIds, out bool isUpdated)
-        {   
+        {
             FeatureFlightDto originalFlag = FeatureFlightDtoAssembler.Assemble(this);
             Status newStatus = new(updatedFlag.Enabled, updatedFlag.IsFlagOptimized);
             bool isStatusUpdated = false;
-            if (!Status.Enabled != newStatus.Enabled)
+            if (Status.Enabled != newStatus.Enabled)
             {
                 Status = newStatus;
                 isStatusUpdated = true;
-                if (Status.IsActive)
+                if (Status.Enabled)
                     ApplyChange(new FeatureFlightEnabled(this, trackingIds));
                 else
                     ApplyChange(new FeatureFlightDisabled(this, trackingIds));
+                Audit.UpdateEnabledStatus(updatedBy, DateTime.UtcNow, Status.Enabled);
             }
 
             Condition newCondition = new(updatedFlag.IncrementalRingsEnabled, updatedFlag.Conditions);
@@ -90,10 +92,11 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             isUpdated = isStatusUpdated || areStageSettingsUpdated || areStagesUpdated || areStagesAdded || areStagesDeleted;
             if (!isUpdated)
                 return;
-
+            Condition.Validate(trackingIds);
             if (areStagesAdded || areStagesDeleted)
                 Version.UpdateMajor();
-            Version.UpdateMinor();
+            else
+                Version.UpdateMinor();
 
             ProjectAzureFlag(optimizer, trackingIds);
             string updateType = GetUpdateType(isStatusUpdated, areStageSettingsUpdated, areStagesUpdated, areStagesAdded, areStagesDeleted);
@@ -101,9 +104,9 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             ApplyChange(new FeatureFlightUpdated(this, originalFlag, updateType, trackingIds));
         }
 
-        public void Enable(string enabledBy, LoggerTrackingIds trackingIds, out bool isUpdated)
+        public void Enable(string enabledBy, IFlightOptimizer optimizer, LoggerTrackingIds trackingIds, out bool isUpdated)
         {
-            if (Status.IsActive)
+            if (Status.Enabled)
             {
                 isUpdated = false;
                 return;
@@ -112,14 +115,15 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Status.Toggle();
             Status.UpdateActiveStatus(Condition);
             Version.UpdateMinor();
-            Audit.UpdateEnabledStatus(enabledBy, DateTime.UtcNow, Status.IsActive);
+            Audit.UpdateEnabledStatus(enabledBy, DateTime.UtcNow, Status.Enabled);
+            ProjectAzureFlag(optimizer, trackingIds);
             isUpdated = true;
             ApplyChange(new FeatureFlightEnabled(this, trackingIds));
         }
 
-        public void Disable(string disabledBy, LoggerTrackingIds trackingIds, out bool isUpdated)
+        public void Disable(string disabledBy, IFlightOptimizer optimizer, LoggerTrackingIds trackingIds, out bool isUpdated)
         {
-            if (!Status.IsActive)
+            if (!Status.Enabled)
             {
                 isUpdated = false;
                 return;
@@ -128,7 +132,8 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Status.Toggle();
             Status.UpdateActiveStatus(Condition);
             Version.UpdateMinor();
-            Audit.UpdateEnabledStatus(disabledBy, DateTime.UtcNow, Status.IsActive);
+            Audit.UpdateEnabledStatus(disabledBy, DateTime.UtcNow, Status.Enabled);
+            ProjectAzureFlag(optimizer, trackingIds);
             isUpdated = true;
             ApplyChange(new FeatureFlightDisabled(this, trackingIds));
         }
@@ -141,25 +146,32 @@ namespace Microsoft.FeatureFlighting.Core.Domain
                 throw new DomainException($"Stage with name {stageName} doesn't exist in flight for feature {Feature.Name}", "ACTIVATE_STAGE_001",
                     trackingIds.CorrelationId, trackingIds.TransactionId, "FeatureFlightAggregateRoot:ActivateStage");
 
-            if (stage.IsActive)
+            if (stage.IsActive && Condition.GetHighestActiveStage().Id == stage.Id)
                 return;
 
             stage.Activate();
-            if (!Condition.IncrementalActivation)
+
+            foreach (Stage lowerStage in Condition.Stages.Where(s => s.Id < stage.Id))
             {
-                foreach(Stage lowerStage in Condition.Stages.Where(s => s.Id < stage.Id))
-                {
+                if (Condition.IncrementalActivation)
+                    lowerStage.Activate();
+                else
                     lowerStage.Deactivate();
-                }
+            }
+
+            foreach (Stage higerStage in Condition.Stages.Where(s => s.Id > stage.Id))
+            {
+                higerStage.Deactivate();
             }
             isStageActivated = true;
-            ProjectAzureFlag(optimizer, trackingIds);
+            Version.UpdateMinor();
             Audit.Update(activatedBy, DateTime.UtcNow, "Stage Activated");
+            ProjectAzureFlag(optimizer, trackingIds);
             ApplyChange(new FeatureFlightStageActivated(this, stageName, trackingIds));
         }
 
         public void Delete(string deletedBy, LoggerTrackingIds trackingIds)
-        {   
+        {
             Audit.Update(deletedBy, DateTime.UtcNow, "Flight Deleted");
             ApplyChange(new FeatureFlightDeleted(this, trackingIds));
         }

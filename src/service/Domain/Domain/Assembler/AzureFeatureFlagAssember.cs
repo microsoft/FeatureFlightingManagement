@@ -52,7 +52,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                     });
                 }
             }
-
+            azureFlag.Conditions.Client_Filters = azureFilters.ToArray();
             return azureFlag;
         }
 
@@ -101,6 +101,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                     });
                 }
             }
+            azureFlag.Conditions.Client_Filters = azureFilters.ToArray();
 
             return azureFlag;
         }

@@ -35,9 +35,9 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                     LastEvaluatedOn = flight.EvaluationMetrics.LastEvaluatedOn,
                     LastEvaluatedBy = flight.EvaluationMetrics.LastEvaluatedBy,
                     EvaluationCount = flight.EvaluationMetrics.EvaluationCount,
-                    AverageLatency = flight.EvaluationMetrics.Performance.AverageLatency,
-                    P90Latency = flight.EvaluationMetrics.Performance.Percentile90Latency,
-                    P95Latency = flight.EvaluationMetrics.Performance.Percentile95Latency,
+                    AverageLatency = flight.EvaluationMetrics.Performance != null ? flight.EvaluationMetrics.Performance.AverageLatency : -1,
+                    P90Latency = flight.EvaluationMetrics.Performance != null ? flight.EvaluationMetrics.Performance.Percentile90Latency : -1,
+                    P95Latency = flight.EvaluationMetrics.Performance != null ? flight.EvaluationMetrics.Performance.Percentile95Latency : -1,
                     From = flight.EvaluationMetrics.StartedOn,
                     To = flight.EvaluationMetrics.CompletedOn
                 } : null,
@@ -48,8 +48,8 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                     IsActive = stage.IsActive,
                     LastActivatedOn = stage.ActivatedOn,
                     LastDeactivatedOn = stage.DeactivatedOn,
-                    IsFirstStage = stage.Id == flight.Condition.InitialStage.Id,
-                    IsLastStage = stage.Id == flight.Condition.FinalStage.Id,
+                    IsFirstStage = flight?.Condition?.InitialStage != null && stage.Id == flight.Condition.InitialStage.Id,
+                    IsLastStage = flight?.Condition?.FinalStage != null && stage.Id == flight.Condition.FinalStage.Id,
                     Filters = stage.Filters?.Select(filter => new FilterDto()
                     {
                         FilterName = filter.Name,

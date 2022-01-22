@@ -2,7 +2,9 @@
 using System.Linq;
 using System.Collections.Generic;
 using CQRS.Mediatr.Lite.SDK.Domain;
+using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Common.Model;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
 
 namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
@@ -25,6 +27,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
                 if (stage == null)
                 {
                     stage = new Stage(int.Parse(azureFilter.Parameters.StageId), azureFilter.Parameters.StageName, bool.Parse(azureFilter.Parameters.IsActive));
+                    Stages.Add(stage);
                 }
                 stage.AddAzureFilter(azureFilter);
             }
@@ -37,7 +40,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
             {
                 Stages = new();
                 return;
-            }   
+            }
 
             Stages = stages.Select(stage => new Stage(stage)).ToList();
         }
@@ -73,6 +76,28 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
             }
         }
 
+        public IEnumerable<Stage> GetActiveStages()
+        {
+            return Stages
+                .Where(stage => stage.IsActive)
+                .ToList();
+        }
+
+        public IEnumerable<Stage> GetInactiveStages()
+        {
+            return Stages
+                .Where(stage => !stage.IsActive)
+                .ToList();
+        }
+
+        public Stage GetHighestActiveStage()
+        {
+            return Stages
+                .OrderByDescending(stage => stage.Id)
+                .Where(stage => stage.IsActive)
+                .FirstOrDefault();
+        }
+
         public bool IsActive()
         {
             return !IsEmpty()
@@ -82,7 +107,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
 
         public bool IsEmpty()
         {
-            return Stages != null && Stages.Any();
+            return Stages == null || !Stages.Any();
         }
 
         public Tuple<bool, bool, bool, bool> Update(Condition updatedCondition)
@@ -98,15 +123,30 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
             return new(areSettingsUpdated, areStagesUpdated, areStagesAdded, areStagesDeleted);
         }
 
+        public void Validate(LoggerTrackingIds trackingIds)
+        {
+            if (Stages == null || !Stages.Any())
+                return;
+
+            if (IncrementalActivation)
+                return;
+
+            IEnumerable<Stage> activeStages = Stages.Where(stage => stage.IsActive);
+            if (activeStages.Count() > 1)
+                throw new DomainException("Feature flight cannot have more than 1 active stage when Incremental Activation is disabled",
+                    "CND_001", trackingIds.CorrelationId, trackingIds.TransactionId, "Condition:Validate");
+
+        }
+
         private Tuple<bool, bool, bool> UpdateStages(Condition updatedCondition)
-        {   
+        {
             bool areStagesAdded = false;
             bool areStagesDeleted = false;
             bool areStagesUpdated = false;
 
             IEnumerable<Stage> newStages = updatedCondition.Stages.Where(updatedStage => !Stages.Any(stage => stage.Id == updatedStage.Id));
             IEnumerable<Stage> deletedStages = Stages.Where(stage => !updatedCondition.Stages.Any(updatedStage => updatedStage.Id == stage.Id));
-            IEnumerable<Stage> updatedStages = Stages.Where(stage => updatedCondition.Stages.Any(updatedStage => updatedStage.Id == stage.Id));
+            IEnumerable<Stage> updatedStages = updatedCondition.Stages.Where(updatedStage => Stages.Any(stage => stage.Id == updatedStage.Id));
 
             if (updatedStages.Any())
             {
@@ -131,7 +171,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
                 }
             }
 
-            return new(areStagesAdded, areStagesDeleted, areStagesUpdated);
+            return new(areStagesUpdated, areStagesAdded, areStagesDeleted);
         }
 
     }

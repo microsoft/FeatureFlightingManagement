@@ -30,5 +30,11 @@ namespace Microsoft.FeatureFlighting.Common.Model.AzureAppConfig
             validationErrorMessage = null;
             return true;
         }
+
+        public bool IsActive()
+        {
+            return !string.IsNullOrWhiteSpace(Parameters.IsActive) &&
+                Parameters.IsActive.ToLowerInvariant() == bool.TrueString.ToLowerInvariant();
+        }
     }
 }

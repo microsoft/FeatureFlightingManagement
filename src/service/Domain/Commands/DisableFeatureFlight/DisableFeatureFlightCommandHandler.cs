@@ -6,6 +6,7 @@ using Microsoft.FeatureFlighting.Common.Model;
 using Microsoft.FeatureFlighting.Core.Queries;
 using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Common.Storage;
+using Microsoft.FeatureFlighting.Core.Optimizer;
 using Microsoft.FeatureFlighting.Common.AppConfig;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Core.Domain.Assembler;
@@ -21,6 +22,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
         private readonly IAzureFeatureManager _azureFeatureManager;
         private readonly IFlightsDbRepositoryFactory _flightDbRepositoryFactory;
+        private readonly IFlightOptimizer _flightOptimizer;
         private readonly IQueryService _queryService;
         private readonly IEventBus _eventBus;
         private readonly IIdentityContext _identityContext;
@@ -28,6 +30,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
         public DisableFeatureFlightCommandHandler(ITenantConfigurationProvider tenantConfigurationProvider,
             IAzureFeatureManager azureFeatureFlightManager,
             IFlightsDbRepositoryFactory flightsDbRepositoryFactory,
+            IFlightOptimizer flightOptimizer,
             IQueryService queryService,
             IEventBus eventBus,
             IIdentityContext identityContext)
@@ -35,6 +38,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
             _tenantConfigurationProvider = tenantConfigurationProvider;
             _azureFeatureManager = azureFeatureFlightManager;
             _flightDbRepositoryFactory = flightsDbRepositoryFactory;
+            _flightOptimizer = flightOptimizer;
             _queryService = queryService;
             _eventBus = eventBus;
             _identityContext = identityContext;
@@ -48,13 +52,13 @@ namespace Microsoft.FeatureFlighting.Core.Commands
                 throw new DomainException($"Flight for feature {command.FeatureName} does not existing for {tenantConfiguration.Name} in {command.Environment}",
                     "UPDATE_FLAG_001", command.CorrelationId, command.TransactionId, "DisableFeatureFlightCommandHandler:ProcessRequest");
 
-            flight.Disable(_identityContext.GetCurrentUserPrincipalName(), command.TrackingIds, out bool isUpdated);
+            flight.Disable(_identityContext.GetCurrentUserPrincipalName(), _flightOptimizer, command.TrackingIds, out bool isUpdated);
             if (!isUpdated)
                 return new IdCommandResult(flight.Id);
 
             await Task.WhenAll(
                 SaveFlag(flight, tenantConfiguration, command.TrackingIds),
-                _azureFeatureManager.ChangeStatus(flight.Feature.Name, flight.Tenant.Id, flight.Tenant.Environment, flight.Status.IsActive, command.TrackingIds)
+                _azureFeatureManager.Update(flight.ProjectedFlag, command.TrackingIds)
             );
 
             await flight.Commit(_eventBus);

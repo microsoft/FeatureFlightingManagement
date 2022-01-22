@@ -1,4 +1,5 @@
 ﻿using AppInsights.EnterpriseTelemetry;
+using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Common.Webhook;
 using Microsoft.FeatureFlighting.Core.Domain.Events;
@@ -11,7 +12,7 @@ namespace Microsoft.FeatureFlighting.Core.Events.WebhookHandlers
 
         protected override string NotificationContent => _emailConfiguration.FeatureFlightDisabledEmailTemplate;
         
-        public FeatureFlightDisabledWebhookHandler(ITenantConfigurationProvider tenantConfigurationProvider, IWebhookTriggerManager webhookTriggerManager, EventStoreEmailConfiguration emailConfiguration, ILogger logger)
+        public FeatureFlightDisabledWebhookHandler(ITenantConfigurationProvider tenantConfigurationProvider, IWebhookTriggerManager webhookTriggerManager, IConfiguration emailConfiguration, ILogger logger)
             :base(tenantConfigurationProvider, webhookTriggerManager, emailConfiguration, logger)
         { }
     }

@@ -14,6 +14,9 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
 
         public Metric(EvaluationMetricsDto evaluationMetrics)
         {
+            if (evaluationMetrics == null)
+                return;
+
             LastEvaluatedOn = evaluationMetrics.LastEvaluatedOn;
             LastEvaluatedBy = evaluationMetrics.LastEvaluatedBy;
             EvaluationCount = evaluationMetrics.EvaluationCount;

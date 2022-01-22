@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.FeatureFlighting.Core.Queries;
-using Microsoft.PS.Services.FlightingService.Api.ActionFilters;
 
 namespace Microsoft.FeatureFlighting.API.Controllers
 {
@@ -32,7 +31,6 @@ namespace Microsoft.FeatureFlighting.API.Controllers
 
         [HttpGet]
         [Produces(typeof(Dictionary<string, bool>))]
-        [ValidateModel]
         [Route("{appName}/{envName}/flighting")]
         [Route("/api/v1/{appName}/{envName}/flighting")]
         public async Task<IActionResult> EvaluateFeatureFlag_Backward([FromRoute] string appName, [FromRoute] string envName, [FromQuery] string featureNames)
@@ -44,7 +42,6 @@ namespace Microsoft.FeatureFlighting.API.Controllers
 
         [HttpGet]
         [Produces(typeof(Dictionary<string, bool>))]
-        [ValidateModel]
         [Route("Evaluate")]
         [Route("/api/v1/Evaluate")]
         public async Task<IActionResult> EvaluateFeatureFlag([FromQuery] string featureNames)

@@ -133,6 +133,28 @@ namespace Microsoft.FeatureFlighting.API.Extensions
         public static void AddHttpClients(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            if (!string.IsNullOrWhiteSpace(configuration["EventStore:BaseEndpoint"]))
+            {
+                services.AddHttpClient(configuration["EventStore:WebhookId"], httpClient =>
+                {
+                    httpClient.BaseAddress = new System.Uri(configuration["EventStore:BaseEndpoint"]);
+                });
+            }
+
+            IConfigurationSection tenantConfigurationSection = configuration.GetSection("Tenants");
+            IEnumerable<IConfigurationSection> tenantConfigurations = tenantConfigurationSection.GetChildren();
+
+            foreach(IConfigurationSection tenantConfiguration in tenantConfigurations)
+            {
+                string changeSubscriptionWebhookId = tenantConfiguration["ChangeNotificationSubscription:Webhook:WebhookId"];
+                if (!string.IsNullOrWhiteSpace(changeSubscriptionWebhookId) && changeSubscriptionWebhookId != configuration["EventStore:WebhookId"])
+                {
+                    services.AddHttpClient(tenantConfiguration["ChangeNotificationSubscription:Webhook:WebhookId"], httpClient =>
+                    {
+                        httpClient.BaseAddress = new System.Uri(configuration["EventStore:BaseEndpoint"]);
+                    });
+                }
+            }
         }
     }
 }

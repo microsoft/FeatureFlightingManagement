@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text;
 using System.Collections.Generic;
 using AppInsights.EnterpriseTelemetry;
 using Microsoft.FeatureFlighting.Common;
@@ -8,7 +9,7 @@ using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
 
 namespace Microsoft.FeatureFlighting.Core.Optimizer
 {
-    public abstract class OperatorGroupingOptimizer: IFlightOptimizationRule
+    public abstract class MergedOperatorOptimizer: IFlightOptimizationRule
     {   
         public abstract string RuleName { get; }
         protected abstract Operator DuplicateOperator { get; }
@@ -17,16 +18,16 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
 
         private readonly ILogger _logger;
 
-        protected OperatorGroupingOptimizer(ILogger logger)
+        protected MergedOperatorOptimizer(ILogger logger)
         {
             _logger = logger;
         }
 
         public bool Optimize(AzureFeatureFlag flag, LoggerTrackingIds trackingIds)
-        {
-            IEnumerable<AzureFilter> activeFilters = GetActiveFilters(flag, DuplicateOperator);
+       {
+            IEnumerable<AzureFilter> activeFilters = GetActiveFilters(flag);
             IEnumerable<IGrouping<string, AzureFilterGroup>> groupedDuplicateFilters = GroupFiltersWithDuplicateContextKey(activeFilters);
-            IEnumerable<AzureFilter> optimizedFilters = OptimizeDuplicateGroups(groupedDuplicateFilters, OptimizedOperator);
+            IEnumerable<AzureFilter> optimizedFilters = OptimizeDuplicateGroups(groupedDuplicateFilters);
             RemoveDuplicateFilters(flag, groupedDuplicateFilters);
             AddOptimizedFilters(flag, optimizedFilters);
             LogOptimizationResults(optimizedFilters, groupedDuplicateFilters, flag, trackingIds);
@@ -44,20 +45,26 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
             context.AddProperty("FiltersRemovedCount", removedFilters.Count());
             context.AddProperty("RemovedFilters", removedFilters);
             context.AddProperty("OptimizedFilters", flag.Conditions.Client_Filters);
+            context.AddProperty("Description", new StringBuilder()
+                .Append("Merged all filters with ")
+                .Append(DuplicateOperator.ToString())
+                .Append(" into a single filter with ")
+                .Append(OptimizedOperator.ToString())
+                .ToString());
             _logger.Log(context);
         }
 
-        protected IEnumerable<AzureFilter> GetActiveFilters(AzureFeatureFlag flag, Operator @operator)
+        protected IEnumerable<AzureFilter> GetActiveFilters(AzureFeatureFlag flag)
         {
             if (flag.Conditions == null || flag.Conditions.Client_Filters == null || !flag.Conditions.Client_Filters.Any())
                 return null;
 
-            List<AzureFilter> activeFilters = flag.Conditions.Client_Filters.Where(filter => filter.Parameters.IsActive.ToLowerInvariant() == bool.TrueString.ToLowerInvariant()).ToList();
+            List<AzureFilter> activeFilters = flag.Conditions.Client_Filters.Where(filter => filter.IsActive()).ToList();
             if (activeFilters == null || !activeFilters.Any())
                 return null;
 
-            List<AzureFilter> activeFiltersWithEqualOperator = activeFilters.Where(filter => filter.Parameters.Operator == @operator.ToString()).ToList();
-            return activeFiltersWithEqualOperator;
+            List<AzureFilter> activeFiltersWithDuplicateOperator = activeFilters.Where(filter => filter.Parameters.Operator == DuplicateOperator.ToString()).ToList();
+            return activeFiltersWithDuplicateOperator;
         }
 
         protected IEnumerable<IGrouping<string, AzureFilterGroup>> GroupFiltersWithDuplicateContextKey(IEnumerable<AzureFilter> activeFilters)
@@ -79,7 +86,7 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
             return duplicateFilters;
         }
 
-        protected IEnumerable<AzureFilter> OptimizeDuplicateGroups(IEnumerable<IGrouping<string, AzureFilterGroup>> duplicateFilterGroups, Operator optimizedOperator)
+        protected IEnumerable<AzureFilter> OptimizeDuplicateGroups(IEnumerable<IGrouping<string, AzureFilterGroup>> duplicateFilterGroups)
         {
             if (duplicateFilterGroups == null || !duplicateFilterGroups.Any())
                 return null;
@@ -87,15 +94,15 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
             List<AzureFilter> optimizedInFilters = new();
             foreach (var duplicateGroup in duplicateFilterGroups)
             {   
-                AzureFilter optimizedInFilter = OptimizeDuplicates(duplicateGroup, optimizedOperator);
+                AzureFilter optimizedInFilter = OptimizeDuplicates(duplicateGroup);
                 optimizedInFilters.Add(optimizedInFilter);
             }
             return optimizedInFilters;
         }
 
-        private AzureFilter OptimizeDuplicates(IGrouping<string, AzureFilterGroup> duplicateFilters, Operator optimizedOperator)
+        private AzureFilter OptimizeDuplicates(IGrouping<string, AzureFilterGroup> duplicateFilters)
         {
-            string joinedFilterValue = string.Join(',', duplicateFilters.Select(group => group.Filter.Parameters.Value));
+            string joinedFilterValue = string.Join(',', duplicateFilters.Select(group => group.Filter.Parameters.Value).Distinct());
             AzureFilter optimizedInFilter = new()
             {
                 Name = duplicateFilters.First().Filter.Name,
@@ -103,7 +110,7 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
                 {
                     FlightContextKey = duplicateFilters.Key,
                     IsActive = bool.TrueString,
-                    Operator = optimizedOperator.ToString(),
+                    Operator = OptimizedOperator.ToString(),
                     StageId = FlightOptimizer.OptimizedStageId,
                     StageName = FlightOptimizer.OptimizedStageName,
                     Value = joinedFilterValue
@@ -118,22 +125,23 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
                 return;
 
             List<string> groupedEqualOperatorFiltersContextKey = groupedDuplicateFilters.Select(group => group.Key).ToList();
-            foreach (AzureFilter filter in flag.Conditions.Client_Filters)
+            foreach (AzureFilter filter in flag.Conditions.Client_Filters.Where(azureFilter => azureFilter.Parameters.Operator == DuplicateOperator.ToString()))
             {
                 if (groupedEqualOperatorFiltersContextKey.Contains(filter.Parameters.FlightContextKey))
                 {
                     filter.Parameters.IsActive = bool.FalseString;
                 }
             }
-            flag.Conditions.Client_Filters = flag.Conditions.Client_Filters.Where(filter => filter.Parameters.IsActive.ToLowerInvariant() == bool.TrueString).ToArray();
+            flag.Conditions.Client_Filters = flag.Conditions.Client_Filters.Where(filter => filter.IsActive()).ToArray();
         }
 
         protected void AddOptimizedFilters(AzureFeatureFlag flag, IEnumerable<AzureFilter> optimizedFilters)
         {
             if (optimizedFilters == null || !optimizedFilters.Any())
                 return;
-            flag.Conditions.Client_Filters = flag.Conditions.Client_Filters ?? new AzureFilter[] { };
-            flag.Conditions.Client_Filters.ToList().AddRange(optimizedFilters);
+            List<AzureFilter> updatedFilters = flag.Conditions.Client_Filters.ToList() ?? new();
+            updatedFilters.AddRange(optimizedFilters);
+            flag.Conditions.Client_Filters = updatedFilters.ToArray();
         }
     }
 }

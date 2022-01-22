@@ -27,24 +27,6 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Storage
         private const string GET_ALL_DOCS_QUERY = "SELECT * FROM C";
         private const string GET_DOC_BY_ID_QUERY = "SELECT * FROM C WHERE C.id = {0}";
 
-        public CosmosDbRepository(IConfiguration configuration, ILogger logger)
-        {
-            _configuration = configuration;
-            CosmosClientOptions options = new()
-            {
-                ApplicationName = "FeatureFlightingManagement",
-                EnableTcpConnectionEndpointRediscovery = true,
-                MaxRequestsPerTcpConnection = int.Parse(_configuration["CosmosDb:MaxRequestsPerTcpConnection"]),
-                ConnectionMode = ConnectionMode.Direct,
-                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(int.Parse(_configuration["CosmosDb:MaxRetryWaitTimeOnRateLimitedRequests"])),
-                MaxRetryAttemptsOnRateLimitedRequests = int.Parse(_configuration["CosmosDb:MaxRetryAttemptsOnRateLimitedRequests"])
-            };
-            CosmosClient client = new(_configuration["CosmosDb:Endpoint"], _configuration["Experimentation-Db-Primary-Key"], options);
-            Database database = client.GetDatabase(_configuration["CosmosDb:Database"]);
-            _container = database.GetContainer(_configuration["CosmosDb:FlightsContainer"]);
-            _logger = logger;
-        }
-
         public CosmosDbRepository(CosmosDbConfiguration cosmosConfiguration, IConfiguration configuration, ILogger logger)
         {
             _configuration = configuration;

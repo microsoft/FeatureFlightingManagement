@@ -46,11 +46,13 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
         public void Activate()
         {
             IsActive = true;
+            ActivatedOn = DateTime.UtcNow;
         }
 
         public void Deactivate()
         {
             IsActive = false;
+            DeactivatedOn = DateTime.UtcNow;
         }
 
         public bool TryUpdate(Stage updatedStage)
@@ -75,8 +77,8 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
                 Filters = updatedStage.Filters;
             }
             else
-            {
-                bool areFiltersUpdated = Filters.Any(filter => updatedStage.Filters.Any(updatedFilter => updatedFilter.Equals(filter)));
+            {   
+                bool areFiltersUpdated = !updatedStage.Filters.TrueForAll(updatedFilter => Filters.Any(filter => filter.Equals(updatedFilter)));
                 if (areFiltersUpdated)
                 {
                     Filters = updatedStage.Filters;

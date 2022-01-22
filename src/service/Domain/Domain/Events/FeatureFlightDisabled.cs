@@ -8,7 +8,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
     /// </summary>
     internal class FeatureFlightDisabled : BaseFeatureFlightEvent
     {
-        public override string DisplayName => nameof(FeatureFlightUpdated);
+        public override string DisplayName => nameof(FeatureFlightDisabled);
 
         public string DisabledBy { get; set; }
 

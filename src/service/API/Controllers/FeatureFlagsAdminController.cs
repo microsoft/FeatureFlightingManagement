@@ -9,7 +9,6 @@ using Microsoft.FeatureFlighting.Common.Model;
 using Microsoft.FeatureFlighting.Core.Queries;
 using Microsoft.FeatureFlighting.Core.Commands;
 using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
-using Microsoft.PS.Services.FlightingService.Api.ActionFilters;
 
 namespace Microsoft.FeatureFlighting.API.Controllers
 {
@@ -52,7 +51,7 @@ namespace Microsoft.FeatureFlighting.API.Controllers
             return new OkObjectResult(featureFlights);
         }
 
-        [HttpPut]
+        [HttpPost]
         [Route("/api/v1")]
         [Route("")]
         public async Task<IActionResult> CreateFeatureFlag([FromBody] AzureFeatureFlag featureFlag)
@@ -66,7 +65,6 @@ namespace Microsoft.FeatureFlighting.API.Controllers
         }
 
         [HttpPut]
-        [ValidateModel]
         [Route("/api/v1")]
         [Route("")]
         public async Task<IActionResult> UpdateFeatureFlag([FromBody] AzureFeatureFlag featureFlag)

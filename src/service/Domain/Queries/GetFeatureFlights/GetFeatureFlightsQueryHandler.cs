@@ -61,10 +61,12 @@ namespace Microsoft.FeatureFlighting.Core.Queries
                 return null;
 
             string getFlightsDbQuery = new StringBuilder()
-                .Append("SELECT * FROM c WHERE c.Tenant = ")
+                .Append("SELECT * FROM c WHERE c.Tenant = '")
                 .Append(tenantConfiguration.Name)
-                .Append(" AND c.Environment = ")
-                .Append(query.Environment)
+                .Append("'")
+                .Append(" AND c.Environment = '")
+                .Append(query.Environment.ToLowerInvariant())
+                .Append("'")
                 .ToString();
 
             IEnumerable<FeatureFlightDto> featureFlights = await repository.QueryAll(getFlightsDbQuery, tenantConfiguration.Name, query.TrackingIds);

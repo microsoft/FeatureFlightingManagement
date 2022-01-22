@@ -101,28 +101,44 @@ namespace Microsoft.FeatureFlighting.Core
 
         private void RegisterOptimizer(ContainerBuilder builder)
         {
+            builder.RegisterType<RemoveDisabledFlagStagesOptimizationRule>()
+                .As<IFlightOptimizationRule>()
+                .SingleInstance();
+
             builder.RegisterType<RemoveInactiveStageOptmizationRule>()
                 .As<IFlightOptimizationRule>()
                 .SingleInstance();
 
-            builder.RegisterType<EqualOperatorGroupingOptimizer>()
+            builder.RegisterType<MergedEqualOperatorOptimizer>()
                 .As<IFlightOptimizationRule>()
                 .SingleInstance();
 
-            builder.RegisterType<InOperatorGroupingOptimizer>()
+            builder.RegisterType<MergedInOperatorOptimizer>()
                 .As<IFlightOptimizationRule>()
                 .SingleInstance();
 
-            builder.RegisterType<NotEqualOperatorGroupingOptimizer>()
+            builder.RegisterType<MergedNotEqualOperatorOptimizer>()
                 .As<IFlightOptimizationRule>()
                 .SingleInstance();
 
-            builder.RegisterType<NotInOperatorGroupingOptimizer>()
+            builder.RegisterType<MergedNotInOperatorOptimizer>()
                 .As<IFlightOptimizationRule>()
                 .SingleInstance();
 
-            builder.RegisterType<IFlightOptimizer>()
-                .As<FlightOptimizer>()
+            builder.RegisterType<MemberOfSecurityGroupOptimizer>()
+                .As<IFlightOptimizationRule>()
+                .SingleInstance();
+
+            builder.RegisterType<NotMemberOfSecurityGroupOptimizer>()
+                .As<IFlightOptimizationRule>()
+                .SingleInstance();
+
+            builder.RegisterType<DuplicateFilterValuesOptimizationRule>()
+                .As<IFlightOptimizationRule>()
+                .SingleInstance();
+
+            builder.RegisterType<FlightOptimizer>()
+                .As<IFlightOptimizer>()
                 .SingleInstance();
         }
 
@@ -142,6 +158,10 @@ namespace Microsoft.FeatureFlighting.Core
 
             builder.RegisterType<GetFeatureNamesQueryHandler>()
                 .As<QueryHandler<GetFeatureNamesQuery, IEnumerable<string>>>()
+                .SingleInstance();
+
+            builder.RegisterType<QueryService>()
+                .As<IQueryService>()
                 .SingleInstance();
         }
 
@@ -170,6 +190,10 @@ namespace Microsoft.FeatureFlighting.Core
             builder.RegisterType<DeleteFeatureFlightCommandHandler>()
                 .As<CommandHandler<DeleteFeatureFlightCommand, IdCommandResult>>()
                 .SingleInstance();
+
+            builder.RegisterType<CommandBus>()
+                .As<ICommandBus>()
+                .SingleInstance();
         }
 
         private void RegisterEvents(ContainerBuilder builder)
@@ -177,6 +201,10 @@ namespace Microsoft.FeatureFlighting.Core
             RegisterCacheEventHandlers(builder);
             RegisterTelemetryEventHandlers(builder);
             RegisterWebhookEventHandlers(builder);
+
+            builder.RegisterType<EventBus>()
+                .As<IEventBus>()
+                .SingleInstance();
         }
 
         private void RegisterCacheEventHandlers(ContainerBuilder builder)

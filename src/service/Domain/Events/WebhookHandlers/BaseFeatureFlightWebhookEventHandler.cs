@@ -5,6 +5,7 @@ using CQRS.Mediatr.Lite;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using AppInsights.EnterpriseTelemetry;
+using Microsoft.Extensions.Configuration;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Common.Webhook;
@@ -25,11 +26,11 @@ namespace Microsoft.FeatureFlighting.Core.Events.WebhookHandlers
 
         protected virtual bool IsEmailNotificationEnabled => _emailConfiguration != null && !string.IsNullOrWhiteSpace(NotificationSubject) && !string.IsNullOrWhiteSpace(NotificationContent);
 
-        public BaseFeatureFlightWebhookEventHandler(ITenantConfigurationProvider tenantConfigurationProvider, IWebhookTriggerManager webhookTriggerManager, EventStoreEmailConfiguration emailConfiguration, ILogger logger)
+        public BaseFeatureFlightWebhookEventHandler(ITenantConfigurationProvider tenantConfigurationProvider, IWebhookTriggerManager webhookTriggerManager, IConfiguration configuration, ILogger logger)
         {
             _tenantConfigurationProvider = tenantConfigurationProvider;
             _webhookTriggerManager = webhookTriggerManager;
-            _emailConfiguration = emailConfiguration;
+            _emailConfiguration = configuration.GetSection("EventStore:Email").Get<EventStoreEmailConfiguration>();
             _emailConfiguration.SetDefaultEmailTemplates();
             _logger = logger;
         }
@@ -39,7 +40,7 @@ namespace Microsoft.FeatureFlighting.Core.Events.WebhookHandlers
             try
             {
                 TenantConfiguration tenantConfiguration = await _tenantConfigurationProvider.Get(@event.TenantName);
-                if (tenantConfiguration.ChangeNotificationSubscription == null || !tenantConfiguration.ChangeNotificationSubscription.IsSubscribed)
+                if (!IsSubscribed(tenantConfiguration, @event))
                     return new VoidResult();
 
                 FeatureFlightChangeEventNotification changeNotification = CreateChangeNotification(@event, tenantConfiguration);
@@ -90,6 +91,24 @@ namespace Microsoft.FeatureFlighting.Core.Events.WebhookHandlers
                 } : null
             };
             return changeNotification;
+        }
+
+        private bool IsSubscribed(TenantConfiguration tenantConfiguration, BaseFeatureFlightEvent @event)
+        {
+            if (tenantConfiguration.ChangeNotificationSubscription == null || !tenantConfiguration.ChangeNotificationSubscription.IsSubscribed)
+                return false;
+
+            List<string> subscribedEvents = !string.IsNullOrWhiteSpace(tenantConfiguration.ChangeNotificationSubscription.SubscribedEvents)
+                ? tenantConfiguration.ChangeNotificationSubscription.SubscribedEvents.Split(",").ToList()
+                : new List<string>();
+
+            if (subscribedEvents == null || !subscribedEvents.Any())
+                return false;
+
+            if (subscribedEvents[0].ToLowerInvariant() == "*".ToLowerInvariant())
+                return true;
+
+            return subscribedEvents.Any(subscribedEvent => subscribedEvent.ToLowerInvariant() == @event.DisplayName.ToLowerInvariant());
         }
     }
 }

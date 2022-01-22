@@ -4,9 +4,9 @@ using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
 namespace Microsoft.FeatureFlighting.Core.Optimizer
 {
-    public class NotEqualOperatorGroupingOptimizer : OperatorGroupingOptimizer, IFlightOptimizationRule
+    public class MergedNotEqualOperatorOptimizer : MergedOperatorOptimizer, IFlightOptimizationRule
     {
-        public override string RuleName => nameof(NotEqualOperatorGroupingOptimizer);
+        public override string RuleName => nameof(MergedNotEqualOperatorOptimizer);
 
         protected override Operator DuplicateOperator => Operator.NotEquals;
 
@@ -16,7 +16,7 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
 
         private readonly IConfiguration _configuration;
 
-        public NotEqualOperatorGroupingOptimizer(ILogger logger, IConfiguration configuration): base(logger)
+        public MergedNotEqualOperatorOptimizer(ILogger logger, IConfiguration configuration): base(logger)
         {
             _configuration = configuration;
         }

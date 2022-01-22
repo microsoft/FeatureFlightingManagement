@@ -34,11 +34,14 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
         private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId, string clientSecret)
         {
             string confidentialAppCacheKey = CreateConfidentialAppCacheKey(authority, clientId);
-            IConfidentialClientApplication cachedClient = (IConfidentialClientApplication)_cache[confidentialAppCacheKey];
-            if (cachedClient != null)
+            if (_cache.ContainsKey(confidentialAppCacheKey))
             {
-                return cachedClient;
+                if (_cache[confidentialAppCacheKey] is IConfidentialClientApplication cachedClient)
+                {
+                    return cachedClient;
+                }
             }
+            
             IConfidentialClientApplication client =
                 ConfidentialClientApplicationBuilder
                     .Create(clientId)

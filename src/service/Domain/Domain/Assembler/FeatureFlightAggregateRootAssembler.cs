@@ -12,7 +12,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
             FeatureFlightAggregateRoot aggregateRoot = new(
                 feature: new Feature(flag.Name, flag.Description),
                 status: new Status(flag.Enabled, flag.IsFlagOptimized),
-                tenant: new Tenant(flag.Tenant, flag.Environment),
+                tenant: new Tenant(tenantConfiguration.Name, flag.Environment),
                 settings: new Settings(tenantConfiguration?.Optimization),
                 condition: new Condition(flag.IncrementalRingsEnabled, flag.Conditions),
                 version: new Version(flag.Version));
@@ -24,7 +24,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
             FeatureFlightAggregateRoot aggregateRoot = new(
                 feature: new Feature(flag.Name, flag.Description),
                 status: new Status(flag.Enabled, flag.IsAzureFlightOptimized),
-                tenant: new Tenant(flag.Tenant, flag.Environment),
+                tenant: new Tenant(tenantConfiguration.Name, flag.Environment),
                 settings: new Settings(tenantConfiguration?.Optimization),
                 condition: new Condition(flag.IsIncremental, flag.Stages),
                 version: new Version(flag.Version),

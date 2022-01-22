@@ -68,6 +68,7 @@ namespace Microsoft.FeatureFlighting.Common.Config
 
                 AddBusinessRuleEngineConfiguration(tenantConfiguration);
                 AddFlightsDatabaseConfiguration(tenantConfiguration);
+                AddChangeNotificationWebhook(tenantConfiguration);
                 tenantConfiguration.MergeWithDefault(_defaultTenantConfiguration);
 
                 _configurationCache.AddOrUpdate(tenantConfiguration.Name.ToLowerInvariant(), tenantConfiguration);
@@ -102,7 +103,7 @@ namespace Microsoft.FeatureFlighting.Common.Config
 
         private WebhookConfiguration GetEventStoreWebhook()
         {
-            WebhookConfiguration eventStoreWebhook = _configuration.GetSection("Store").Get<WebhookConfiguration>();
+            WebhookConfiguration eventStoreWebhook = _configuration.GetSection("EventStore").Get<WebhookConfiguration>();
             string clientSecretLocation = eventStoreWebhook.ClientSecretLocation;
             string clientSecret = _configuration[clientSecretLocation];
             eventStoreWebhook.ClientSecret = clientSecret;

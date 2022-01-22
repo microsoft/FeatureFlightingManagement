@@ -8,15 +8,15 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
 {
     public class Filter: ValueObject
     {
-        public string Name { get; private set; }
-        public string Type { get; private set; }
+        public string Name { get; private set; } // Context-Key
+        public string Type { get; private set; } // Name
         public Operator Operator { get; private set; }
         public string Value { get; private set; }
 
         public Filter(AzureFilter azureFilter)
         {
-            Name = azureFilter.Name;
-            Type = azureFilter.Parameters.FlightContextKey;
+            Name = azureFilter.Parameters.FlightContextKey;
+            Type = azureFilter.Name;
             Enum.TryParse<Operator>(azureFilter.Parameters.Operator, out Operator op);
             Operator = op;
             Value = azureFilter.Parameters.Value;

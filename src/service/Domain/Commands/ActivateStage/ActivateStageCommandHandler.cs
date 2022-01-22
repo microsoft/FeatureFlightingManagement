@@ -55,7 +55,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
 
             await Task.WhenAll(
                 SaveFlag(flight, tenantConfiguration, command.TrackingIds),
-                _azureFeatureManager.Update(AzureFeatureFlagAssember.Assemble(flight), command.TrackingIds)
+                _azureFeatureManager.Update(flight.ProjectedFlag, command.TrackingIds)
             );
 
             await flight.Commit(_eventBus);

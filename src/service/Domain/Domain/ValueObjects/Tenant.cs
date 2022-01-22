@@ -10,7 +10,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
         public Tenant(string tenantId, string environment)
         {
             Id = tenantId;
-            Environment = environment;
+            Environment = environment.ToLowerInvariant();
         }
     }
 }

@@ -39,7 +39,7 @@
             FeatureFlightDisabledEmailSubject = string.IsNullOrWhiteSpace(FeatureFlightDisabledEmailSubject) ? "Feature flight for \"<<FeatureName>>\" has been disabled" : FeatureFlightDisabledEmailSubject;
             FeatureFlightDisabledEmailTemplate = string.IsNullOrWhiteSpace(FeatureFlightDisabledEmailTemplate) ? "email-feature-flight-disabled" : FeatureFlightDisabledEmailTemplate;
 
-            FeatureFlightDeletedEmailSubject = string.IsNullOrWhiteSpace(FeatureFlightDisabledEmailSubject) ? "Feature flight for \"<<FeatureName>>\" has been deleted" : FeatureFlightDeletedEmailSubject;
+            FeatureFlightDeletedEmailSubject = string.IsNullOrWhiteSpace(FeatureFlightDeletedEmailSubject) ? "Feature flight for \"<<FeatureName>>\" has been deleted" : FeatureFlightDeletedEmailSubject;
             FeatureFlightDeletedEmailTemplate = string.IsNullOrWhiteSpace(FeatureFlightDeletedEmailTemplate) ? "email-feature-flight-deleted" : FeatureFlightDeletedEmailTemplate;
         }
     }

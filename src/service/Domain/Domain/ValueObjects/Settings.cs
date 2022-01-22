@@ -17,7 +17,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
                 EnableOptimization = false;
                 return;
             }
-            EnableOptimization = optimizationConfiguration.EnableOptimization && string.IsNullOrWhiteSpace(optimizationConfiguration.OptimizationRules);
+            EnableOptimization = optimizationConfiguration.EnableOptimization && !string.IsNullOrWhiteSpace(optimizationConfiguration.OptimizationRules);
             OptimizationRules =  !string.IsNullOrWhiteSpace(optimizationConfiguration.OptimizationRules)
                 ? optimizationConfiguration.OptimizationRules.Split(';').ToList()
                 : null;
