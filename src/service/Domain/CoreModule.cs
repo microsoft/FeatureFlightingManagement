@@ -191,6 +191,10 @@ namespace Microsoft.FeatureFlighting.Core
                 .As<CommandHandler<DeleteFeatureFlightCommand, IdCommandResult>>()
                 .SingleInstance();
 
+            builder.RegisterType<RebuildFlightsCommandHandler>()
+                .As<CommandHandler<RebuildFlightsCommand, RebuildCommandResult>>()
+                .SingleInstance();
+
             builder.RegisterType<CommandBus>()
                 .As<ICommandBus>()
                 .SingleInstance();
@@ -259,6 +263,10 @@ namespace Microsoft.FeatureFlighting.Core
             builder.RegisterType<FeatureFlightStageActivatedTelemetryHandler>()
                 .As<EventHandler<FeatureFlightStageActivated>>()
                 .SingleInstance();
+
+            builder.RegisterType<FeatureFlightRebuiltTelemetryHandler>()
+                .As<EventHandler<FeatureFlightRebuilt>>()
+                .SingleInstance();
         }
 
         private void RegisterWebhookEventHandlers(ContainerBuilder builder)
@@ -285,6 +293,10 @@ namespace Microsoft.FeatureFlighting.Core
 
             builder.RegisterType<FeatureFlightStageActivatedWebhookHandler>()
                 .As<EventHandler<FeatureFlightStageActivated>>()
+                .SingleInstance();
+
+            builder.RegisterType<FeatureFlightRebuiltWebhookHandler>()
+                .As<EventHandler<FeatureFlightRebuilt>>()
                 .SingleInstance();
         }
     }

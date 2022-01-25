@@ -176,6 +176,14 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             ApplyChange(new FeatureFlightDeleted(this, trackingIds));
         }
 
+        public void ReBuild(string triggeredBy, string reason, IFlightOptimizer optimizer, LoggerTrackingIds trackingIds)
+        {
+            Audit.Update(triggeredBy, DateTime.UtcNow, $"Flight Rebuild - {reason}");
+            Version.UpdateMinor();
+            ProjectAzureFlag(optimizer, trackingIds);
+            ApplyChange(new FeatureFlightRebuilt(this, reason, trackingIds));
+        }
+
         private string GetFlightId()
         {
             return new StringBuilder()

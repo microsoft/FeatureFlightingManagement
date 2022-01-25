@@ -120,5 +120,15 @@ namespace Microsoft.FeatureFlighting.API.Controllers
             await _commandBus.Send(command);
             return new NoContentResult();
         }
+
+        [HttpPut]
+        [Route("rebuild")]
+        public async Task<IActionResult> RebuildFlags([FromQuery] string reason, [FromQuery] string[] featureName = null)
+        {
+            var (tenant, environment, correlationId, transactionId) = GetHeaders();
+            RebuildFlightsCommand command = new(featureName.ToList(), tenant, environment, reason, correlationId, transactionId);
+            RebuildCommandResult result = await _commandBus.Send(command);
+            return new OkObjectResult(result);
+        }
     }
 }
