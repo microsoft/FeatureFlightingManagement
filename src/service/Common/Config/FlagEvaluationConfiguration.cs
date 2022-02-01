@@ -21,11 +21,10 @@
         public bool AddDisabledContext { get; set; }
 
         /// <summary>
-        /// Number of feature flags to be evaluated concurently (in a batch)
+        /// Configuraion for parallel feature flag evaluation
         /// </summary>
-        public int BatchSize { get; set; }
-
-        public static int DefaultBatchSize = 10;
+        public ParallelEvaluationConfiguration ParallelEvaluation { get; set; }
+        
 
         /// <summary>
         /// Gets a default <see cref="FlagEvaluationConfiguration"/>
@@ -38,7 +37,7 @@
                 IgnoreException = false,
                 AddDisabledContext = false,
                 AddEnabledContext = false,
-                BatchSize = DefaultBatchSize
+                ParallelEvaluation = ParallelEvaluationConfiguration.GetDefault(),
             };
         }
     }

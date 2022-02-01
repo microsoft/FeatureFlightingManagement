@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Autofac.Core;
 using CQRS.Mediatr.Lite;
 using System.Collections.Generic;
 using Microsoft.FeatureFlighting.Core.Spec;
@@ -8,6 +9,7 @@ using Microsoft.FeatureFlighting.Common.Model;
 using Microsoft.FeatureFlighting.Core.Commands;
 using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Core.Optimizer;
+using Microsoft.FeatureFlighting.Core.Evaluation;
 using Microsoft.FeatureFlighting.Core.RulesEngine;
 using Microsoft.FeatureFlighting.Core.Domain.Events;
 using Microsoft.FeatureFlighting.Core.Events.CacheHandlers;
@@ -33,6 +35,7 @@ namespace Microsoft.FeatureFlighting.Core
             }).As<IRequestHandlerResolver>();
 
             RegisterOperators(builder);
+            RegisterEvaluators(builder);
             RegisterServices(builder);
             RegisterQueries(builder);
             RegisterCommands(builder);
@@ -71,6 +74,44 @@ namespace Microsoft.FeatureFlighting.Core
 
             builder.RegisterType<NotMemberOfSecurityGroupOperator>()
                 .As<BaseOperator>()
+                .SingleInstance();
+        }
+
+        private void RegisterEvaluators(ContainerBuilder builder)
+        {
+            builder.RegisterType<FeatureBatchBuilder>()
+                .As<IFeatureBatchBuilder>()
+                .SingleInstance();
+
+            builder.RegisterType<SingleFlagEvaluator>()
+                .As<ISingleFlagEvaluator>()
+                .SingleInstance();
+
+            builder.RegisterType<SyncEvaluationStrategy>()
+                .As<IEvaluationStrategy>()
+                .As<ISyncEvaluationStrategy>()
+                .SingleInstance();
+
+            builder.RegisterType<AsyncEvaluationStrategy>()
+                .As<IEvaluationStrategy>()
+                .As<IAsyncEvaluationStrategy>()
+                .SingleInstance();
+
+            builder.RegisterType<AsyncBatchEvaluationStrategy>()
+                .As<IEvaluationStrategy>()
+                .As<IBatchEvaluationStrategy>()
+                .SingleInstance();
+
+            builder.RegisterType<SyncBatchParallelEvaluationStrategy>()
+                .As<IEvaluationStrategy>()
+                .As<IBatchEvaluationStrategy>()
+                .SingleInstance();
+
+            builder.RegisterType<EvaluationStrategyBuilder>()
+                .WithParameter(new ResolvedParameter(
+                    (pi, ctx) => pi.GetType() == typeof(IEnumerable<IEvaluationStrategy>),
+                    (pi, ctx) => ctx.Resolve<IEnumerable<IEvaluationStrategy>>()))
+                .As<IEvaluationStrategyBuilder>()
                 .SingleInstance();
         }
 

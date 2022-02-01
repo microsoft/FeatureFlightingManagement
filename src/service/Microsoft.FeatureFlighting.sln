@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.PS.FlightingServi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.Infrastructure.Tests", "Tests\Services.Tests\Microsoft.FeatureFlighting.Infrastructure.Tests.csproj", "{72D35524-2600-4954-B70D-55AA53C66E76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.FeatureFlighting.Infrastructure", "Infrastructure\Microsoft.FeatureFlighting.Infrastructure.csproj", "{CE568167-2150-4BBC-A559-81517C4C14B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.Infrastructure", "Infrastructure\Microsoft.FeatureFlighting.Infrastructure.csproj", "{CE568167-2150-4BBC-A559-81517C4C14B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
