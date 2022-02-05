@@ -1,20 +1,19 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using Microsoft.FeatureManagement;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.FeatureManagement.FeatureFilters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.OpenApi.Models;
+using AppInsights.EnterpriseTelemetry.Web.Extension;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using Microsoft.FeatureFlighting.Api.ExceptionHandler;
 using AppInsights.EnterpriseTelemetry.Web.Extension.Middlewares;
-using AppInsights.EnterpriseTelemetry.Web.Extension;
-using Microsoft.FeatureManagement;
-using Microsoft.FeatureFlighting.Core.Operators;
-using Microsoft.FeatureFlighting.Core.Spec;
-using Microsoft.FeatureFlighting.Core.RulesEngine;
-using Microsoft.FeatureFlighting.Common.Config;
-using Microsoft.FeatureFlighting.Core.FeatureFilters;
-using Microsoft.FeatureManagement.FeatureFilters;
-using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.FeatureFlighting.API.Extensions
 {
@@ -98,6 +97,16 @@ namespace Microsoft.FeatureFlighting.API.Extensions
                         System.Array.Empty<string>()
                     }
                 });
+                try
+                {
+                    string documentationFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                    string documentationPath = Path.Combine(AppContext.BaseDirectory, documentationFile);
+                    c.IncludeXmlComments(documentationPath);
+                }
+                catch 
+                {
+                    // Do nothing if documentation fails
+                }
             });
             services.AddEndpointsApiExplorer();
         }

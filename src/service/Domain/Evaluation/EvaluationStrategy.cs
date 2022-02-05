@@ -41,10 +41,10 @@ namespace Microsoft.FeatureFlighting.Core.Evaluation
         {
             return strategy?.ToUpperInvariant() switch
             {
-                Constants.EvaluationStrategies.Full => _strategies[typeof(SyncEvaluationStrategy)],
+                Constants.EvaluationStrategies.Full => _strategies[typeof(AsyncEvaluationStrategy)],
                 Constants.EvaluationStrategies.AsyncBatch => _strategies[typeof(AsyncBatchEvaluationStrategy)],
                 Constants.EvaluationStrategies.SyncParallelBatch => _strategies[typeof(SyncBatchParallelEvaluationStrategy)],
-                _ => _strategies[typeof(AsyncEvaluationStrategy)],
+                _ => _strategies[typeof(SyncEvaluationStrategy)],
             };
         }
 

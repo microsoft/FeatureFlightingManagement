@@ -46,6 +46,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
             return Task.FromResult(tenantConfiguration);
         }
 
+        public IEnumerable<TenantConfiguration> GetAllTenants()
+        {
+            return _configurationCache.Values;
+        }
+
         private void Load()
         {
             IConfigurationSection tenantConfigurationSection = _configuration.GetSection("Tenants");

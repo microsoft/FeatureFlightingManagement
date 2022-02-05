@@ -28,14 +28,13 @@ namespace Microsoft.FeatureFlighting.Core.Evaluation
 
             foreach (IGrouping<int, string> batch in batches)
             {
-                evaluationTasks.Add(_syncEvaluationStrategy.Evaluate(batch.ToList(), tenantConfiguration, environment, @event));
+                evaluationTasks.Add(Task.Run(async () => await _syncEvaluationStrategy.Evaluate(batch.ToList(), tenantConfiguration, environment, @event)));
             }
+            await Task.WhenAll(evaluationTasks);
 
-            while (evaluationTasks.Any())
+            foreach(var evaluationTask in evaluationTasks)
             {
-                Task<IDictionary<string, bool>> completedTask = await Task.WhenAny(evaluationTasks);
-                results.Merge(completedTask.Result);
-                evaluationTasks.Remove(completedTask);
+                results.Merge(evaluationTask.Result);
             }
             return results;
         }

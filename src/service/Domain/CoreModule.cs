@@ -6,6 +6,7 @@ using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.FeatureFlighting.Core.Cache;
 using Microsoft.FeatureFlighting.Core.Queries;
 using Microsoft.FeatureFlighting.Common.Model;
+using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Core.Commands;
 using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Core.Optimizer;
@@ -197,8 +198,8 @@ namespace Microsoft.FeatureFlighting.Core
                 .As<QueryHandler<GetFeatureFlightsQuery, IEnumerable<FeatureFlightDto>>>()
                 .SingleInstance();
 
-            builder.RegisterType<GetFeatureNamesQueryHandler>()
-                .As<QueryHandler<GetFeatureNamesQuery, IEnumerable<string>>>()
+            builder.RegisterType<GetRegisteredTenantsQueryHandler>()
+                .As<QueryHandler<GetRegisteredTenantsQuery, IEnumerable<TenantConfiguration>>>()
                 .SingleInstance();
 
             builder.RegisterType<QueryService>()

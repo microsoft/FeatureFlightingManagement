@@ -54,6 +54,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
         public TenantChangeNotificationConfiguration ChangeNotificationSubscription { get; set; }
 
         /// <summary>
+        /// Configuration to send alerts
+        /// </summary>
+        public IntelligentAlertConfiguration IntelligentAlerts { get; set; }
+
+        /// <summary>
         /// Email address for contacting the tenant
         /// </summary>
         public string Contact { get; set; }
@@ -123,6 +128,12 @@ namespace Microsoft.FeatureFlighting.Common.Config
 
             if (Evaluation == null)
                 Evaluation = defaultTenantConfiguration.Evaluation;
+
+            if (IntelligentAlerts == null)
+                IntelligentAlerts = defaultTenantConfiguration.IntelligentAlerts;
+            else
+                IntelligentAlerts.MergeWithDefault(defaultTenantConfiguration.IntelligentAlerts);
+
         }
 
         /// <summary>
