@@ -29,7 +29,8 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                 condition: new Condition(flag.IsIncremental, flag.Stages),
                 version: new Version(flag.Version),
                 audit: new Audit(flag.Audit),
-                evaluationMetrics: new Metric(flag.EvaluationMetrics));
+                evaluationMetrics: new Metric(flag.EvaluationMetrics),
+                report: new Report(tenantConfiguration, flag.UsageReport));
             return aggregateRoot;
         }
     }

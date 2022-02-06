@@ -72,7 +72,8 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                 Conditions = new AzureFilterCollection()
                 {
                     Client_Filters = new AzureFilter[] { }
-                }
+                },
+                UsageReport = flight.UsageReport
             };
 
             if (flight.Stages == null || !flight.Stages.Any())

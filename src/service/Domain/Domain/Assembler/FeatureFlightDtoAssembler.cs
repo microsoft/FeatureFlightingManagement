@@ -57,7 +57,24 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                         Operator = filter.Operator.ToString(),
                         Value = filter.Value
                     }).ToList()
-                }).ToList()
+                }).ToList(),
+                UsageReport = flight.Report != null
+                    ? new FeatureUsageReportDto()
+                    {
+                        EnableAlerts = flight.Report.Settings.EnableAlerts,
+                        UsageStatement = flight.Report.DisplayStatement,
+                        IsNew = flight.Report.IsNew,
+                        GeneratedBy = flight.Report.GeneratedBy,
+                        GeneratedOn = flight.Report.GeneratedOn,
+                        ActivePeriod = flight.Report.ActivePeriod,
+                        InactivePeriod = flight.Report.InactivePeriod,
+                        UnusedPeriod = flight.Report.UnusedPeriod,
+                        HasActivationPeriodExceeded = flight.Report.HasActivePeriodCrossed,
+                        HasDisabledPeriodExceeded = flight.Report.HasInactivePeriodCrossed,
+                        HasUnsedPeriodExceeded = flight.Report.HasUnusedPeriodCrossed,
+                        ShowAlert = flight.Report.TriggerAlert
+                    }
+                    : null
             };
             return dto;
         }

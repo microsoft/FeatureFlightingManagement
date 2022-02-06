@@ -144,5 +144,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
         {
             return BusinessRuleEngine != null && BusinessRuleEngine.Enabled && BusinessRuleEngine.Storage != null;
         }
+
+        public bool IsReportingEnabled()
+        {
+            return IntelligentAlerts != null && IntelligentAlerts.Enabled &&
+                (IntelligentAlerts.MaximumActivePeriodAlertEnabled || IntelligentAlerts.MaximumDisabledPeriodAlertEnabled || IntelligentAlerts.MaximumUnusedPeriodAlertEnabled);
+        }
     }
 }

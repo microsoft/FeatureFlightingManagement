@@ -237,6 +237,10 @@ namespace Microsoft.FeatureFlighting.Core
                 .As<CommandHandler<RebuildFlightsCommand, RebuildCommandResult>>()
                 .SingleInstance();
 
+            builder.RegisterType<GenerateReportCommandHandler>()
+                .As<CommandHandler<GenerateReportCommand, ReportCommandResult>>()
+                .SingleInstance();
+
             builder.RegisterType<CommandBus>()
                 .As<ICommandBus>()
                 .SingleInstance();
@@ -309,6 +313,10 @@ namespace Microsoft.FeatureFlighting.Core
             builder.RegisterType<FeatureFlightRebuiltTelemetryHandler>()
                 .As<EventHandler<FeatureFlightRebuilt>>()
                 .SingleInstance();
+
+            builder.RegisterType<ReportGeneratedTelemetryHandler>()
+                .As<EventHandler<ReportGenerated>>()
+                .SingleInstance();
         }
 
         private void RegisterWebhookEventHandlers(ContainerBuilder builder)
@@ -339,6 +347,10 @@ namespace Microsoft.FeatureFlighting.Core
 
             builder.RegisterType<FeatureFlightRebuiltWebhookHandler>()
                 .As<EventHandler<FeatureFlightRebuilt>>()
+                .SingleInstance();
+
+            builder.RegisterType<ReportGeneratedWebhookHandler>()
+                .As<EventHandler<ReportGenerated>>()
                 .SingleInstance();
         }
     }

@@ -32,5 +32,8 @@ namespace Microsoft.FeatureFlighting.Common.Model
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public EvaluationMetricsDto EvaluationMetrics { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public FeatureUsageReportDto UsageReport { get; set; }
     }
 }

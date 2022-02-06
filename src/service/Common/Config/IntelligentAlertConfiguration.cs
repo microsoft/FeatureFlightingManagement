@@ -14,11 +14,11 @@
         public int MaximumActivePeriod { get; set; }
         public bool MaximumActivePeriodAlertEnabled { get; set; }
         
-        public int MaximumDeactivePeriod { get; set; }
-        public bool MaximumDeactivePeriodAlertEnabled { get; set; }
+        public int MaximumDisabledPeriod { get; set; }
+        public bool MaximumDisabledPeriodAlertEnabled { get; set; }
 
-        public int MaximumLastEvaluatedPeriod { get; set; }
-        public bool MaximumLastEvaluatedPeriodAlertEnabled { get; set; }
+        public int MaximumUnusedPeriod { get; set; }
+        public bool MaximumUnusedPeriodAlertEnabled { get; set; }
 
         public static IntelligentAlertConfiguration GetDefault()
         {
@@ -30,15 +30,14 @@
                 AlertEmailSubject = "Weekly Digest",
                 AlertEmailTemplate = "email-feature-management-weekly-digest",
 
-
                 MaximumActivePeriod = 90,
                 MaximumActivePeriodAlertEnabled = true,
 
-                MaximumDeactivePeriod = 30,
-                MaximumDeactivePeriodAlertEnabled = true,
+                MaximumDisabledPeriod = 30,
+                MaximumDisabledPeriodAlertEnabled = true,
 
-                MaximumLastEvaluatedPeriod = 30,
-                MaximumLastEvaluatedPeriodAlertEnabled = false
+                MaximumUnusedPeriod = 30,
+                MaximumUnusedPeriodAlertEnabled = false
             };
         }
 

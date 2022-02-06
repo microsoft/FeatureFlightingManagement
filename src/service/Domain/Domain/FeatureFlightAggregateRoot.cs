@@ -23,6 +23,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain
         public ValueObjects.Version Version { get; private set; }
         public Audit Audit { get; private set; }
         public Metric EvaluationMetrics { get; private set; }
+        public Report Report { get; private set; }
         public AzureFeatureFlag ProjectedFlag { get; private set; }
 
         public FeatureFlightAggregateRoot(Feature feature,
@@ -48,7 +49,8 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Condition condition,
             ValueObjects.Version version,
             Audit audit,
-            Metric evaluationMetrics) : this(feature,
+            Metric evaluationMetrics,
+            Report report) : this(feature,
                 status,
                 tenant,
                 settings,
@@ -57,6 +59,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain
         {
             Audit = audit;
             EvaluationMetrics = evaluationMetrics;
+            Report = report;
         }
 
         public void CreateFeatureFlag(IFlightOptimizer optimizer, string createdBy, LoggerTrackingIds trackingIds)
@@ -182,6 +185,41 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Version.UpdateMinor();
             ProjectAzureFlag(optimizer, trackingIds);
             ApplyChange(new FeatureFlightRebuilt(this, reason, trackingIds));
+        }
+
+        public void GenerateReport(string requestedBy, LoggerTrackingIds trackingIds)
+        {   
+            DateTime now = DateTime.UtcNow;
+            int modifiedSince = Audit?.LastModifiedOn != null ? (int)(now - Audit.LastModifiedOn).TotalDays : 0;
+            Status.UpdateActiveStatus(Condition);
+
+            int activePeriod = 0;
+            if (Report.Settings.VerifyActivationPeriod && Status.Enabled && Status.IsActive && Audit.EnabledOn != null)
+            {
+                activePeriod = (int)(now - Audit.EnabledOn).Value.TotalDays;
+                activePeriod = Math.Min(activePeriod, modifiedSince);
+            }
+
+            int inactivePeriod = 0;
+            if (Report.Settings.VerifyDisabledPeriod && !Status.Enabled && Audit.DisabledOn != null)
+            {
+                inactivePeriod = (int)(now - Audit.DisabledOn).Value.TotalDays;
+            }
+            if (inactivePeriod == 0 && Report.Settings.VerifyDisabledPeriod && Status.Enabled && !Status.IsActive && Condition.FinalStage.DeactivatedOn != null)
+            {
+                inactivePeriod = (int)(now - Condition.FinalStage.DeactivatedOn).Value.TotalDays;
+            }
+
+            int unusedPeriod = 0;
+            if (Report.Settings.VerifyUnusedPeriod && EvaluationMetrics != null && EvaluationMetrics.LastEvaluatedOn != null)
+            {
+                unusedPeriod = (int)(now - EvaluationMetrics.LastEvaluatedOn).Value.TotalDays;
+            }
+
+            int createdSince = (int)(now - Audit.CreatedOn).TotalDays;
+            bool isNew = createdSince < 10;
+
+            Report.UpdateStatus(isNew, activePeriod, inactivePeriod, unusedPeriod, requestedBy, now);
         }
 
         private string GetFlightId()
