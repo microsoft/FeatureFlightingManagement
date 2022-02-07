@@ -105,7 +105,12 @@ namespace Microsoft.FeatureFlighting.Core.Commands
 
         private UsageReportDto GenerateTenantReport(List<FeatureFlightAggregateRoot> flights, TenantConfiguration tenantConfiguration, GenerateReportCommand command)
         {
-            UsageReportDto report = new(tenantConfiguration.Name, command.Environment, _identityContext.GetCurrentUserPrincipalName());
+            UsageReportDto report = new(tenantConfiguration.Name, command.Environment, _identityContext.GetCurrentUserPrincipalName())
+            {
+                ActivePeriodThreshold = tenantConfiguration.IntelligentAlerts.MaximumActivePeriod,
+                InactivePeriodThreshold = tenantConfiguration.IntelligentAlerts.MaximumDisabledPeriod,
+                UnusedPeriodThreshold = tenantConfiguration.IntelligentAlerts.MaximumUnusedPeriod
+            };
             report.ActiveFeatures = flights
                 .Where(flight => flight.Status.Enabled && flight.Status.IsActive)
                 .Select(flight => flight.Feature.Name)
@@ -134,6 +139,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
                     Value = flight.Report.UnusedPeriod,
                     ThresholdUnit = "Days"
                 })
+                .OrderByDescending(flight => flight.Value)
                 .ToList();
 
             report.LongInactiveFeatures = flights
@@ -148,6 +154,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
                     Value = flight.Report.InactivePeriod,
                     ThresholdUnit = "Days"
                 })
+                .OrderByDescending(flight => flight.Value)
                 .ToList();
 
             report.LongActiveFeatures = flights
@@ -162,6 +169,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
                     Value = flight.Report.ActivePeriod,
                     ThresholdUnit = "Days"
                 })
+                .OrderByDescending(flight => flight.Value)
                 .ToList();
 
             report.CreateFlightSelectorBody();

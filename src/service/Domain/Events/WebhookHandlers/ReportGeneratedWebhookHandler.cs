@@ -76,7 +76,8 @@ namespace Microsoft.FeatureFlighting.Core.Events.WebhookHandlers
                                 Properties = new Dictionary<string, string>
                                 {
                                     { "AdvancedRenderingParameters", JsonConvert.SerializeObject(report) }
-                                }
+                                },
+                                EnableAdvancedRendering = true
                             }
                         }
                     }

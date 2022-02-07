@@ -133,7 +133,7 @@ namespace Microsoft.FeatureFlighting.Common.Model
                     UnusedFeatures.Remove(unusedFlight);
                     continue;
                 }
-                flightSelector.Add(unusedFlight.FeatureName, $"{{{unusedFlight.FeatureName}}}.value");
+                flightSelector.Add(unusedFlight.FeatureName, $"{{{{{unusedFlight.FeatureName}.value}}}}");
             }
 
             foreach (ThresholdExceededReportDto inactiveFeature in LongInactiveFeatures)
@@ -143,7 +143,7 @@ namespace Microsoft.FeatureFlighting.Common.Model
                     UnusedFeatures.Remove(inactiveFeature);
                     continue;
                 }
-                flightSelector.Add(inactiveFeature.FeatureName, $"{{{inactiveFeature.FeatureName}}}.value");
+                flightSelector.Add(inactiveFeature.FeatureName, $"{{{{{inactiveFeature.FeatureName}.value}}}}");
             }
 
             foreach (ThresholdExceededReportDto activeFeature in LongActiveFeatures)
@@ -153,10 +153,10 @@ namespace Microsoft.FeatureFlighting.Common.Model
                     UnusedFeatures.Remove(activeFeature);
                     continue;
                 }
-                flightSelector.Add(activeFeature.FeatureName, $"{{{activeFeature.FeatureName}}}.value");
+                flightSelector.Add(activeFeature.FeatureName, $"{{{{{activeFeature.FeatureName}.value}}}}");
             }
 
-            FlightSelectorBody = !string.IsNullOrWhiteSpace(FlightSelectorBody) ? JsonConvert.SerializeObject(FlightSelectorBody) : string.Empty;
+            FlightSelectorBody = JsonConvert.SerializeObject(JsonConvert.SerializeObject(flightSelector));
         }
 
         public void UpdatePendingAction()
