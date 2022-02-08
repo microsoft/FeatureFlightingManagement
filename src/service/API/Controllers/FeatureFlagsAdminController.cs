@@ -91,7 +91,7 @@ namespace Microsoft.FeatureFlighting.API.Controllers
         {
             var (tenant, environment, correlationId, transactionId, _) = GetHeaders();
             GetFeatureFlightsQuery query = new(tenant, environment, correlationId, transactionId);
-            IEnumerable<FeatureFlightDto> featureFlights = (await _queryService.Query(query)).ToList();
+            IEnumerable<FeatureFlightDto> featureFlights = (await _queryService.Query(query))?.ToList();
             if (featureFlights == null || !featureFlights.Any())
                 return new NotFoundObjectResult($"No feature flights have been registered for {tenant} in {environment}");
             return new OkObjectResult(featureFlights);

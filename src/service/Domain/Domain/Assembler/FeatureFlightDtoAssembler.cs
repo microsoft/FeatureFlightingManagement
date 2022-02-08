@@ -146,6 +146,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                 }
             }
 
+            dto.Stages = stages;
             return dto;
         }
     }

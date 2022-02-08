@@ -31,10 +31,10 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
         }
 
         public Audit(AuditDto audit)
-            :this(audit.CreatedBy, audit.CreatedOn, audit.LastModifiedBy, audit.LastModifiedOn, audit.LastUpdateType)
+            :this(audit?.CreatedBy, audit?.CreatedOn ?? DateTime.UtcNow, audit?.LastModifiedBy, audit?.LastModifiedOn ?? DateTime.UtcNow, audit?.LastUpdateType)
         {
-            EnabledOn = audit.EnabledOn;
-            DisabledOn = audit.DisabledOn;
+            EnabledOn = audit?.EnabledOn ?? DateTime.UtcNow;
+            DisabledOn = audit?.DisabledOn ?? DateTime.UtcNow;
         }
 
         public void Update(string updatedBy, DateTime updatedOn, string updateType)

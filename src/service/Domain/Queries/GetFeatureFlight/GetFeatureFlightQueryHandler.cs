@@ -50,7 +50,7 @@ namespace Microsoft.FeatureFlighting.Core.Queries
 
         private async Task<FeatureFlightDto?> GetFlightFromAzure(GetFeatureFlightQuery query, TenantConfiguration tenantConfiguration)
         {   
-            AzureFeatureFlag azureFlag = await _azureFeatureManager.Get(query.FeatureName, query.Environment, tenantConfiguration.Name, query.TrackingIds);
+            AzureFeatureFlag azureFlag = await _azureFeatureManager.Get(query.FeatureName, tenantConfiguration.Name, query.Environment, query.TrackingIds);
             if (azureFlag == null)
                 return null;
             return FeatureFlightDtoAssembler.Assemble(azureFlag);

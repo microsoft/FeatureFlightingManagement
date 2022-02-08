@@ -45,7 +45,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         [TestMethod]
         [Priority(3)]
         [Description("Test Case ID - 5676071")]
-        public async Task Verify_DeleteFlag_returns_403_for_correct_env_incorrect_app_to_user()
+        public async Task Verify_DeleteFlag_returns_400_for_correct_env_incorrect_app_to_user()
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
@@ -57,7 +57,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
             var result = await flightingClient.DeleteFeatureFlag("INVALID", environment, featureName, useAlternateAccount: true);
             
             //Assert
-            Assert.AreEqual(HttpStatusCode.Forbidden.ToString(), result);
+            Assert.AreEqual(HttpStatusCode.BadRequest.ToString(), result);
         }
 
         [TestCategory("Functional")]
@@ -81,7 +81,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         [TestMethod]
         [Priority(4)]
         [Description("Test Case ID - 5676080")]
-        public async Task Verify_DeleteFlag_returns_404_for_incorrect_flag_correct_env_correct_app_to_user()
+        public async Task Verify_DeleteFlag_returns_400_for_incorrect_flag_correct_env_correct_app_to_user()
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
@@ -92,7 +92,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
             var result = await flightingClient.DeleteFeatureFlag(app, environment, "InvalidFlag");
             
             //Assert
-            Assert.AreEqual(HttpStatusCode.NotFound.ToString(), result);
+            Assert.AreEqual(HttpStatusCode.BadRequest.ToString(), result);
         }
     }
 }

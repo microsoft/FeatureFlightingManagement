@@ -36,6 +36,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Storage
             if (flightsDbConfiguration == null || flightsDbConfiguration.Disabled)
             {
                 _documentRepositoryCache.Add(tenantName.ToUpperInvariant(), null);
+                return null;
             }
 
             IDocumentRepository<FeatureFlightDto> flightsDb = new CosmosDbRepository<FeatureFlightDto>(flightsDbConfiguration, _configuration, _logger);

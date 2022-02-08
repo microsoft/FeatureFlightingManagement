@@ -38,7 +38,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         [TestMethod]
         [Priority(4)]
         [Description("Test Case ID - 5676092")]
-        public async Task Verify_EnableFlag_returns_403_for_correct_env_incorrect_app_to_user()
+        public async Task Verify_EnableFlag_returns_400_for_correct_env_incorrect_app_to_user()
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
@@ -49,7 +49,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
             var result = await flightingClient.EnableFeatureFlag("INVALID", environment, featureName, useAlternateAccount: true);
             
             //Assert
-            Assert.AreEqual(HttpStatusCode.Forbidden.ToString(), result);
+            Assert.AreEqual(HttpStatusCode.BadRequest.ToString(), result);
         }
 
         [TestCategory("Functional")]
@@ -75,7 +75,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         [TestMethod]
         [Priority(4)]
         [Description("Test Case ID - 5676094")]
-        public async Task Verify_EnableFlag_returns_404_for_incorrect_flag_correct_env_correct_app_to_user()
+        public async Task Verify_EnableFlag_returns_400_for_incorrect_flag_correct_env_correct_app_to_user()
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
@@ -85,7 +85,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
             //Act
             var result = await flightingClient.EnableFeatureFlag(app, environment, "Invalid");
             //Assert
-            Assert.AreEqual(HttpStatusCode.NotFound.ToString(), result);
+            Assert.AreEqual(HttpStatusCode.BadRequest.ToString(), result);
         }
     }
 }
