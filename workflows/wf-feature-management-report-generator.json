@@ -1,0 +1,124 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflows_wf_feature_management_report_generator_ppe_name": {
+            "defaultValue": "wf-feature-management-report-generator-ppe",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [{
+        "type": "Microsoft.Logic/workflows",
+        "apiVersion": "2017-07-01",
+        "name": "[parameters('workflows_wf_feature_management_report_generator_ppe_name')]",
+        "location": "northcentralus",
+        "tags": {
+            "Capability": "Feature Flights Management",
+            "Component": "Flighting"
+        },
+        "properties": {
+            "state": "Enabled",
+            "definition": {
+                "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {},
+                "triggers": {
+                    "Recurrence": {
+                        "recurrence": {
+                            "frequency": "Week",
+                            "interval": 1,
+                            "schedule": {
+                                "weekDays": [
+                                    "Saturday"
+                                ]
+                            }
+                        },
+                        "evaluatedRecurrence": {
+                            "frequency": "Week",
+                            "interval": 1,
+                            "schedule": {
+                                "weekDays": [
+                                    "Saturday"
+                                ]
+                            }
+                        },
+                        "type": "Recurrence"
+                    }
+                },
+                "actions": {
+                    "Get_Tenants": {
+                        "runAfter": {},
+                        "type": "Http",
+                        "inputs": {
+                            "authentication": {
+                                "audience": "6f40053e-5319-40e5-a90b-6f714506d96d",
+                                "authority": "https://login.microsoftonline.com",
+                                "clientId": "6f40053e-5319-40e5-a90b-6f714506d96d",
+                                "secret": "__Add_Secret__",
+                                "tenant": "microsoft.onmicrosoft.com",
+                                "type": "ActiveDirectoryOAuth"
+                            },
+                            "method": "GET",
+                            "uri": "https://feature-flights-management-api-perf-eus.azurewebsites.net/api/tenants"
+                        }
+                    },
+                    "Iterate_Tenants": {
+                        "foreach": "@body('Get_Tenants')",
+                        "actions": {
+                            "If_Valid_Tenant": {
+                                "actions": {
+                                    "Generate_Report": {
+                                        "runAfter": {},
+                                        "type": "Http",
+                                        "inputs": {
+                                            "authentication": {
+                                                "audience": "6f40053e-5319-40e5-a90b-6f714506d96d",
+                                                "authority": "https://login.microsoftonline.com",
+                                                "clientId": "6f40053e-5319-40e5-a90b-6f714506d96d",
+                                                "secret": "__Add_Secret__",
+                                                "tenant": "microsoft.onmicrosoft.com",
+                                                "type": "ActiveDirectoryOAuth"
+                                            },
+                                            "headers": {
+                                                "x-application": "@items('Iterate_Tenants').name",
+                                                "x-environment": "Dev"
+                                            },
+                                            "method": "POST",
+                                            "uri": "https://feature-flights-management-api-perf-eus.azurewebsites.net/api/reports"
+                                        }
+                                    }
+                                },
+                                "runAfter": {},
+                                "expression": {
+                                    "and": [{
+                                        "not": {
+                                            "equals": [
+                                                "@items('Iterate_Tenants').name",
+                                                ""
+                                            ]
+                                        }
+                                    }]
+                                },
+                                "type": "If"
+                            }
+                        },
+                        "runAfter": {
+                            "Get_Tenants": [
+                                "Succeeded"
+                            ]
+                        },
+                        "type": "Foreach",
+                        "runtimeConfiguration": {
+                            "concurrency": {
+                                "repetitions": 1
+                            }
+                        }
+                    }
+                },
+                "outputs": {}
+            },
+            "parameters": {}
+        }
+    }]
+}
