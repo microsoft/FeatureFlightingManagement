@@ -241,6 +241,14 @@ namespace Microsoft.FeatureFlighting.Core
                 .As<CommandHandler<GenerateReportCommand, ReportCommandResult>>()
                 .SingleInstance();
 
+            builder.RegisterType<SubscribeAlertsCommandHandler>()
+                .As<CommandHandler<SubscribeAlertsCommand, IdCommandResult>>()
+                .SingleInstance();
+
+            builder.RegisterType<UnsubscribeAlertsCommandHandler>()
+                .As<CommandHandler<UnsubscribeAlertsCommand, IdCommandResult>>()
+                .SingleInstance();
+
             builder.RegisterType<CommandBus>()
                 .As<ICommandBus>()
                 .SingleInstance();
@@ -314,6 +322,14 @@ namespace Microsoft.FeatureFlighting.Core
                 .As<EventHandler<FeatureFlightRebuilt>>()
                 .SingleInstance();
 
+            builder.RegisterType<FeatureFlightAlertsEnabledTelemetryHandler>()
+                .As<EventHandler<FeatureFlightAlertsEnabled>>()
+                .SingleInstance();
+
+            builder.RegisterType<FeatureFlightAlertsDisabledTelemetryHandler>()
+                .As<EventHandler<FeatureFlightAlertsDisabled>>()
+                .SingleInstance();
+
             builder.RegisterType<ReportGeneratedTelemetryHandler>()
                 .As<EventHandler<ReportGenerated>>()
                 .SingleInstance();
@@ -351,6 +367,14 @@ namespace Microsoft.FeatureFlighting.Core
 
             builder.RegisterType<ReportGeneratedWebhookHandler>()
                 .As<EventHandler<ReportGenerated>>()
+                .SingleInstance();
+
+            builder.RegisterType<FeatureFlightAlertsEnabledWebhookHandler>()
+                .As<EventHandler<FeatureFlightAlertsEnabled>>()
+                .SingleInstance();
+
+            builder.RegisterType<FeatureFlightAlertsDisabledWebhookHandler>()
+                .As<EventHandler<FeatureFlightAlertsDisabled>>()
                 .SingleInstance();
         }
     }

@@ -12,8 +12,7 @@ using Microsoft.FeatureFlighting.Common.Authentication;
 using Microsoft.FeatureFlighting.Common.Model.ChangeNotification;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
-{
-    
+{   
     // <inheritdoc/>
     internal class WebhookTriggerManager: IWebhookTriggerManager
     {
@@ -65,7 +64,5 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
         {
             return new DependencyContext(webhook.BaseEndpoint, webhook.BaseEndpoint, "HTTPS", true, "", trackingIds.CorrelationId, trackingIds.TransactionId, "WebhookTriggerManager:Trigger", "", "");
         }
-
-
     }
 }

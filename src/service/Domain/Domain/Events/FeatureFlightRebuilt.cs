@@ -13,8 +13,8 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
         public string RebuildBy { get; set; }
         public string RebuildReason { get; set; }
 
-        public FeatureFlightRebuilt(FeatureFlightAggregateRoot flight, string reason, LoggerTrackingIds trackingIds)
-            : base(flight, trackingIds)
+        public FeatureFlightRebuilt(FeatureFlightAggregateRoot flight, string reason, LoggerTrackingIds trackingIds, string source)
+            : base(flight, trackingIds, source)
         {
             RebuildBy = flight.Audit.LastModifiedBy;
             RebuildReason = reason;

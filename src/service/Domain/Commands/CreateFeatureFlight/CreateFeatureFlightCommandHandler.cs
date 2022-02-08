@@ -51,7 +51,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
             FeatureFlightAggregateRoot flight = FeatureFlightAggregateRootAssembler.Assemble(command.AzureFeatureFlag, tenantConfiguration);
             
             await VerifyUniqueFlag(flight, tenantConfiguration, command.TrackingIds);
-            flight.CreateFeatureFlag(_flightOptimizer, _identityContext.GetCurrentUserPrincipalName(), command.TrackingIds);
+            flight.CreateFeatureFlag(_flightOptimizer, _identityContext.GetCurrentUserPrincipalName(), command.Source, command.TrackingIds);
 
             await Task.WhenAll(
                 SaveFlag(flight, tenantConfiguration, command.TrackingIds),

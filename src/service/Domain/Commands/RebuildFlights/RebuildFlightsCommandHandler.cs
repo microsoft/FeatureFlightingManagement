@@ -59,7 +59,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
             List<Task> updateTasks = new();
             foreach(FeatureFlightAggregateRoot featureFlight in featureFlights)
             {
-                featureFlight.ReBuild(_identityContext.GetCurrentUserPrincipalName(), command.Reason, _flightOptimizer, command.TrackingIds);
+                featureFlight.ReBuild(_identityContext.GetCurrentUserPrincipalName(), command.Reason, _flightOptimizer, command.Source, command.TrackingIds);
                 updateTasks.Add(SaveFlag(featureFlight, tenantConfiguration, command.TrackingIds));
                 updateTasks.Add(_azureFeatureManager.Update(featureFlight.ProjectedFlag, command.TrackingIds));
                 updateTasks.Add(featureFlight.Commit(_eventBus));

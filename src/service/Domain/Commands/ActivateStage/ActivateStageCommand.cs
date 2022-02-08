@@ -17,15 +17,16 @@ namespace Microsoft.FeatureFlighting.Core.Commands
         public string Tenant { get; set; }
         public string Environment { get; set; }
         public string StageName { get; set; }
-
+        public string Source { get; set; }
         public LoggerTrackingIds TrackingIds => new(CorrelationId, TransactionId);
 
-        public ActivateStageCommand(string featureName, string tenant, string environment, string stageName, string correlationId, string transactionId)
+        public ActivateStageCommand(string featureName, string tenant, string environment, string stageName, string correlationId, string transactionId, string source)
         {
             FeatureName = featureName;
             Tenant = tenant;
             Environment = environment;
             StageName = stageName;
+            Source = source;
             CorrelationId = correlationId;
             TransactionId = transactionId;
         }

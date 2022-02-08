@@ -16,14 +16,15 @@ namespace Microsoft.FeatureFlighting.Core.Commands
         public string FeatureName { get; set; }
         public string Tenant { get; set; }
         public string Environment { get; set; }
-
+        public string Source { get; set; }
         public LoggerTrackingIds TrackingIds => new(CorrelationId, TransactionId);
 
-        public EnableFeatureFlightCommand(string featureName, string tenant, string environment, string correlationId, string transactionId)
+        public EnableFeatureFlightCommand(string featureName, string tenant, string environment, string correlationId, string transactionId, string source)
         {
             FeatureName = featureName;
             Tenant = tenant;
             Environment = environment;
+            Source = source;
             CorrelationId = correlationId;
             TransactionId = transactionId;
         }

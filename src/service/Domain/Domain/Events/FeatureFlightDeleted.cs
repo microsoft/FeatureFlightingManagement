@@ -14,8 +14,8 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
 
         public string DeletedBy { get; set; }
 
-        public FeatureFlightDeleted(FeatureFlightAggregateRoot flight, LoggerTrackingIds trackingIds)
-            : base(flight, trackingIds)
+        public FeatureFlightDeleted(FeatureFlightAggregateRoot flight, LoggerTrackingIds trackingIds, string source)
+            : base(flight, trackingIds, source)
         {
             DeletedBy = flight.Audit.LastModifiedBy;
             Payload = FeatureFlightDtoAssembler.Assemble(flight);

@@ -1,11 +1,11 @@
 ﻿using CQRS.Mediatr.Lite;
 using System.Threading.Tasks;
+using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Core.Domain;
 using Microsoft.FeatureFlighting.Common.Model;
 using Microsoft.FeatureFlighting.Core.Queries;
 using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Common.Storage;
-using Microsoft.FeatureFlighting.Common.AppConfig;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Core.Domain.Assembler;
 using Microsoft.FeatureFlighting.Common.Authentication;
@@ -13,56 +13,52 @@ using Microsoft.FeatureFlighting.Common.Authentication;
 namespace Microsoft.FeatureFlighting.Core.Commands
 {
     /// <summary>
-    /// Handles <see cref="DeleteFeatureFlightCommand"/>. Deletes the feature flight from database and Azure App config.
+    /// Handles <see cref="UnsubscribeAlertsCommand"/>
     /// </summary>
-    internal class DeleteFeatureFlightCommandHandler : CommandHandler<DeleteFeatureFlightCommand, IdCommandResult>
+    public class UnsubscribeAlertsCommandHandler : CommandHandler<UnsubscribeAlertsCommand, IdCommandResult>
     {
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
-        private readonly IAzureFeatureManager _azureFeatureManager;
         private readonly IFlightsDbRepositoryFactory _flightDbRepositoryFactory;
         private readonly IQueryService _queryService;
         private readonly IEventBus _eventBus;
         private readonly IIdentityContext _identityContext;
 
-        public DeleteFeatureFlightCommandHandler(ITenantConfigurationProvider tenantConfigurationProvider,
-            IAzureFeatureManager azureFeatureFlightManager,
+        public UnsubscribeAlertsCommandHandler(ITenantConfigurationProvider tenantConfigurationProvider,
             IFlightsDbRepositoryFactory flightsDbRepositoryFactory,
             IQueryService queryService,
             IEventBus eventBus,
             IIdentityContext identityContext)
         {
             _tenantConfigurationProvider = tenantConfigurationProvider;
-            _azureFeatureManager = azureFeatureFlightManager;
             _flightDbRepositoryFactory = flightsDbRepositoryFactory;
             _queryService = queryService;
             _eventBus = eventBus;
             _identityContext = identityContext;
         }
 
-        protected override async Task<IdCommandResult> ProcessRequest(DeleteFeatureFlightCommand command)
+        protected override async Task<IdCommandResult> ProcessRequest(UnsubscribeAlertsCommand command)
         {
             TenantConfiguration tenantConfiguration = await _tenantConfigurationProvider.Get(command.Tenant);
             FeatureFlightAggregateRoot flight = await GetFeatureFlight(command, tenantConfiguration);
-            flight.Delete(_identityContext.GetCurrentUserPrincipalName(), command.Source, command.TrackingIds);
-            await DeleteFromDatabase(flight, tenantConfiguration, command);
-            await DeleteFromAzure(flight, tenantConfiguration, command);
-            await flight.Commit(_eventBus);
 
+            flight.Unsubscribe(_identityContext.GetCurrentUserPrincipalName(), command.Source, command.TrackingIds);
+            await SaveFlag(flight, tenantConfiguration, command.TrackingIds);
+            await flight.Commit(_eventBus);
             return new IdCommandResult(flight.Id);
         }
 
-        private async Task<FeatureFlightAggregateRoot> GetFeatureFlight(DeleteFeatureFlightCommand command, TenantConfiguration tenantConfiguration)
+        private async Task<FeatureFlightAggregateRoot> GetFeatureFlight(UnsubscribeAlertsCommand command, TenantConfiguration tenantConfiguration)
         {
             GetFeatureFlightQuery query = new(command.FeatureName, tenantConfiguration.Name, command.Environment, command.CorrelationId, command.TransactionId);
-            FeatureFlightDto flight = await _queryService.Query(query);
-            if (flight == null)
+            FeatureFlightDto flightDto = await _queryService.Query(query);
+            if (flightDto == null)
                 throw new DomainException($"Flight for feature {command.FeatureName} does not existing for {tenantConfiguration.Name} in {command.Environment}",
-                    "DELETE_FLAG_001", command.CorrelationId, command.TransactionId, "DeleteFeatureFlightCommandHandler:ProcessRequest");
+                    "UPDATE_FLAG_001", command.CorrelationId, command.TransactionId, "UnsubscribeAlertsCommandHandler:GetFeatureFlight");
 
-            return FeatureFlightAggregateRootAssembler.Assemble(flight, tenantConfiguration);
+            return FeatureFlightAggregateRootAssembler.Assemble(flightDto, tenantConfiguration);
         }
 
-        private async Task DeleteFromDatabase(FeatureFlightAggregateRoot flight, TenantConfiguration tenantConfiguration, DeleteFeatureFlightCommand command)
+        private async Task SaveFlag(FeatureFlightAggregateRoot flight, TenantConfiguration tenantConfiguration, LoggerTrackingIds trackingIds)
         {
             if (tenantConfiguration.FlightsDatabase == null || tenantConfiguration.FlightsDatabase.Disabled)
                 return;
@@ -71,12 +67,8 @@ namespace Microsoft.FeatureFlighting.Core.Commands
             if (repository == null)
                 return;
 
-            await repository.Delete(flight.Id, tenantConfiguration.Name, command.TrackingIds);
-        }
-
-        private async Task DeleteFromAzure(FeatureFlightAggregateRoot flight, TenantConfiguration tenantConfiguration, DeleteFeatureFlightCommand command)
-        {
-            await _azureFeatureManager.Delete(flight.Feature.Name, tenantConfiguration.Name, flight.Tenant.Environment, command.TrackingIds);
+            FeatureFlightDto flightDto = FeatureFlightDtoAssembler.Assemble(flight);
+            await repository.Save(flightDto, flightDto.Tenant, trackingIds);
         }
     }
 }

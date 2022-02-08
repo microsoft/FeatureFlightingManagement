@@ -8,8 +8,8 @@ using Microsoft.FeatureFlighting.Core.Domain.Assembler;
 
 namespace Microsoft.FeatureFlighting.Core.Domain.Events
 {
-    internal abstract class BaseFeatureFlightEvent: Event
-    {   
+    internal abstract class BaseFeatureFlightEvent : Event
+    {
         public override string Id { get; set; }
         public string FlagId { get; set; }
         public string FeatureName { get; set; }
@@ -18,9 +18,11 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
         public bool Enabled { get; set; }
         public bool IsIncremental { get; set; }
         public bool FlightOptimized { get; set; }
+        public bool AreAlertsSubscribed { get; set; }
+        public string RequestSource { get; set; }
         public FeatureFlightDto Payload { get; set; }
 
-        public BaseFeatureFlightEvent(FeatureFlightAggregateRoot flight, LoggerTrackingIds trackingIds)
+        public BaseFeatureFlightEvent(FeatureFlightAggregateRoot flight, LoggerTrackingIds trackingIds, string requestSource)
         {
             Id = Guid.NewGuid().ToString();
             FlagId = flight.Id;
@@ -30,6 +32,8 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
             Enabled = flight.Status.Enabled;
             IsIncremental = flight.Condition.IncrementalActivation;
             FlightOptimized = flight.ProjectedFlag != null && flight.ProjectedFlag.IsFlagOptimized;
+            AreAlertsSubscribed = (flight.Report?.Settings) == null || flight.Report.Settings.Status;
+            RequestSource = !string.IsNullOrWhiteSpace(requestSource) ? requestSource : "SYSTEM";
             CorrelationId = trackingIds.CorrelationId;
             TransactionId = trackingIds.TransactionId;
             Payload = FeatureFlightDtoAssembler.Assemble(flight);
@@ -46,6 +50,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
                 { nameof(Enabled), Enabled.ToString() },
                 { nameof(IsIncremental), IsIncremental.ToString() },
                 { nameof(FlightOptimized), FlightOptimized.ToString() },
+                { nameof(RequestSource), RequestSource },
                 { nameof(Payload), JsonConvert.SerializeObject(Payload) }
             };
         }

@@ -9,8 +9,8 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
     
         public string CreatedBy { get; set; }
 
-        public FeatureFlightCreated(FeatureFlightAggregateRoot flight, LoggerTrackingIds trackingIds)
-            :base(flight, trackingIds)
+        public FeatureFlightCreated(FeatureFlightAggregateRoot flight, LoggerTrackingIds trackingIds, string source = null)
+            :base(flight, trackingIds, source)
         {
             CreatedBy = flight.Audit.CreatedBy;
         }

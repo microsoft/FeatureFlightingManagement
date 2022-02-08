@@ -15,11 +15,13 @@ namespace Microsoft.FeatureFlighting.Core.Commands
         public override string Id => _id;
 
         public AzureFeatureFlag AzureFeatureFlag { get; set; }
+        public string Source { get; set; }
         public LoggerTrackingIds TrackingIds => new(CorrelationId, TransactionId);
 
-        public UpdateFeatureFlightCommand(AzureFeatureFlag azureFeatureFlag, string correlationId, string transactionId)
+        public UpdateFeatureFlightCommand(AzureFeatureFlag azureFeatureFlag, string correlationId, string transactionId, string source)
         {
             AzureFeatureFlag = azureFeatureFlag;
+            Source = source;
             CorrelationId = correlationId;
             TransactionId = transactionId;
         }

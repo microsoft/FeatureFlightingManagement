@@ -23,7 +23,9 @@
         public string FeatureFlightDeletedEmailSubject { get; set; }
         public string FeatureFlightDeletedEmailTemplate { get; set; }
 
-        public string InactiveFeatureFlightEmailTemplate { get; set; }
+        public string FeatureFlightAlertsEnabledEmailSubject { get; set; }
+        public string FeatureFlightAlertsEnabledTemplate { get; set; }
+        
 
         public void SetDefaultEmailTemplates()
         {
@@ -41,6 +43,9 @@
 
             FeatureFlightDeletedEmailSubject = string.IsNullOrWhiteSpace(FeatureFlightDeletedEmailSubject) ? "Feature flight for \"<<FeatureName>>\" has been deleted" : FeatureFlightDeletedEmailSubject;
             FeatureFlightDeletedEmailTemplate = string.IsNullOrWhiteSpace(FeatureFlightDeletedEmailTemplate) ? "email-feature-flight-deleted" : FeatureFlightDeletedEmailTemplate;
+
+            FeatureFlightAlertsEnabledEmailSubject = string.IsNullOrWhiteSpace(FeatureFlightAlertsEnabledEmailSubject) ? "Alerts for Feature flight for \"<<FeatureName>>\" has been enabled" : FeatureFlightAlertsEnabledEmailSubject;
+            FeatureFlightAlertsEnabledTemplate = string.IsNullOrWhiteSpace(FeatureFlightAlertsEnabledTemplate) ? "email-feature-flight-alerts-enabled" : FeatureFlightAlertsEnabledTemplate;
         }
     }
 }

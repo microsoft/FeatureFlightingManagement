@@ -21,7 +21,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
         public bool IsNew { get; private set; }
 
         public bool TriggerAlert => Settings.EnableReportGeneration 
-            && Settings.EnableAlerts 
+            && Settings.Status 
             && (HasActivePeriodCrossed || HasInactivePeriodCrossed || HasUnusedPeriodCrossed);
 
         public string GeneratedBy { get; private set; }

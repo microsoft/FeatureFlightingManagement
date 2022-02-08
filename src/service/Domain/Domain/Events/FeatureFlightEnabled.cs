@@ -12,8 +12,8 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
 
         public string EnabledBy { get; set; }
 
-        public FeatureFlightEnabled(FeatureFlightAggregateRoot flight,  LoggerTrackingIds trackingIds)
-            :base(flight, trackingIds)
+        public FeatureFlightEnabled(FeatureFlightAggregateRoot flight,  LoggerTrackingIds trackingIds, string source)
+            :base(flight, trackingIds, source)
         {
             EnabledBy = flight.Audit.LastModifiedBy;
         }

@@ -98,6 +98,9 @@ namespace Microsoft.FeatureFlighting.Core.Events.WebhookHandlers
             if (tenantConfiguration.ChangeNotificationSubscription == null || !tenantConfiguration.ChangeNotificationSubscription.IsSubscribed)
                 return false;
 
+            if (!@event.AreAlertsSubscribed)
+                return false;
+
             List<string> subscribedEvents = !string.IsNullOrWhiteSpace(tenantConfiguration.ChangeNotificationSubscription.SubscribedEvents)
                 ? tenantConfiguration.ChangeNotificationSubscription.SubscribedEvents.Split(",").ToList()
                 : new List<string>();

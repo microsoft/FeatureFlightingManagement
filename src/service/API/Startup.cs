@@ -17,16 +17,28 @@ using AppInsights.EnterpriseTelemetry.Web.Extension.Filters;
 
 namespace Microsoft.PS.Services.FlightingService.Api
 {
+    /// <summary>
+    /// Application setup
+    /// </summary>
     [ExcludeFromCodeCoverage]
     public class Startup
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
+        /// <summary>
+        /// Application configuration
+        /// </summary>
         public IConfiguration Configuration { get; }
 
+        /// <summary>
+        /// Configures applicaton services
+        /// </summary>
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAuthentication(Configuration);
@@ -37,6 +49,9 @@ namespace Microsoft.PS.Services.FlightingService.Api
             services.AddFeatureFilters();
         }
 
+        /// <summary>
+        /// Configures the HTTP pipeline
+        /// </summary>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseSwagger();
@@ -67,6 +82,9 @@ namespace Microsoft.PS.Services.FlightingService.Api
             app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
 
+        /// <summary>
+        /// Configures Autofac modules for DI
+        /// </summary>
         public void ConfigureContainer(ContainerBuilder builder)
         {   
             builder.RegisterModule(new CommonModule());

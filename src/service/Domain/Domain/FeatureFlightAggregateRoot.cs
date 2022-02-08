@@ -62,17 +62,17 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Report = report;
         }
 
-        public void CreateFeatureFlag(IFlightOptimizer optimizer, string createdBy, LoggerTrackingIds trackingIds)
+        public void CreateFeatureFlag(IFlightOptimizer optimizer, string createdBy, string source, LoggerTrackingIds trackingIds)
         {
             Audit = new Audit(createdBy, System.DateTime.UtcNow, Status.Enabled);
             Version = new ValueObjects.Version();
             Status.UpdateActiveStatus(Condition);
             Condition.Validate(trackingIds);
             ProjectAzureFlag(optimizer, trackingIds);
-            ApplyChange(new FeatureFlightCreated(this, trackingIds));
+            ApplyChange(new FeatureFlightCreated(this, trackingIds, source));
         }
 
-        public void UpdateFeatureFlag(IFlightOptimizer optimizer, AzureFeatureFlag updatedFlag, string updatedBy, LoggerTrackingIds trackingIds, out bool isUpdated)
+        public void UpdateFeatureFlag(IFlightOptimizer optimizer, AzureFeatureFlag updatedFlag, string updatedBy, LoggerTrackingIds trackingIds, string source, out bool isUpdated)
         {
             FeatureFlightDto originalFlag = FeatureFlightDtoAssembler.Assemble(this);
             Status newStatus = new(updatedFlag.Enabled, updatedFlag.IsFlagOptimized);
@@ -82,9 +82,9 @@ namespace Microsoft.FeatureFlighting.Core.Domain
                 Status = newStatus;
                 isStatusUpdated = true;
                 if (Status.Enabled)
-                    ApplyChange(new FeatureFlightEnabled(this, trackingIds));
+                    ApplyChange(new FeatureFlightEnabled(this, trackingIds, source));
                 else
-                    ApplyChange(new FeatureFlightDisabled(this, trackingIds));
+                    ApplyChange(new FeatureFlightDisabled(this, trackingIds, source));
                 Audit.UpdateEnabledStatus(updatedBy, DateTime.UtcNow, Status.Enabled);
             }
 
@@ -107,7 +107,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             ApplyChange(new FeatureFlightUpdated(this, originalFlag, updateType, trackingIds));
         }
 
-        public void Enable(string enabledBy, IFlightOptimizer optimizer, LoggerTrackingIds trackingIds, out bool isUpdated)
+        public void Enable(string enabledBy, IFlightOptimizer optimizer, LoggerTrackingIds trackingIds, string source, out bool isUpdated)
         {
             if (Status.Enabled)
             {
@@ -121,10 +121,10 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Audit.UpdateEnabledStatus(enabledBy, DateTime.UtcNow, Status.Enabled);
             ProjectAzureFlag(optimizer, trackingIds);
             isUpdated = true;
-            ApplyChange(new FeatureFlightEnabled(this, trackingIds));
+            ApplyChange(new FeatureFlightEnabled(this, trackingIds, source));
         }
 
-        public void Disable(string disabledBy, IFlightOptimizer optimizer, LoggerTrackingIds trackingIds, out bool isUpdated)
+        public void Disable(string disabledBy, IFlightOptimizer optimizer, LoggerTrackingIds trackingIds, string source, out bool isUpdated)
         {
             if (!Status.Enabled)
             {
@@ -138,10 +138,10 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Audit.UpdateEnabledStatus(disabledBy, DateTime.UtcNow, Status.Enabled);
             ProjectAzureFlag(optimizer, trackingIds);
             isUpdated = true;
-            ApplyChange(new FeatureFlightDisabled(this, trackingIds));
+            ApplyChange(new FeatureFlightDisabled(this, trackingIds, source));
         }
 
-        public void ActivateStage(string stageName, string activatedBy, IFlightOptimizer optimizer, LoggerTrackingIds trackingIds, out bool isStageActivated)
+        public void ActivateStage(string stageName, string activatedBy, IFlightOptimizer optimizer, string source, LoggerTrackingIds trackingIds, out bool isStageActivated)
         {
             isStageActivated = false;
             Stage stage = Condition.Stages.FirstOrDefault(s => s.Name.ToLowerInvariant() == stageName.ToLowerInvariant());
@@ -170,25 +170,25 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Version.UpdateMinor();
             Audit.Update(activatedBy, DateTime.UtcNow, "Stage Activated");
             ProjectAzureFlag(optimizer, trackingIds);
-            ApplyChange(new FeatureFlightStageActivated(this, stageName, trackingIds));
+            ApplyChange(new FeatureFlightStageActivated(this, stageName, trackingIds, source));
         }
 
-        public void Delete(string deletedBy, LoggerTrackingIds trackingIds)
+        public void Delete(string deletedBy, string source, LoggerTrackingIds trackingIds)
         {
             Audit.Update(deletedBy, DateTime.UtcNow, "Flight Deleted");
-            ApplyChange(new FeatureFlightDeleted(this, trackingIds));
+            ApplyChange(new FeatureFlightDeleted(this, trackingIds, source));
         }
 
-        public void ReBuild(string triggeredBy, string reason, IFlightOptimizer optimizer, LoggerTrackingIds trackingIds)
+        public void ReBuild(string triggeredBy, string reason, IFlightOptimizer optimizer, string source, LoggerTrackingIds trackingIds)
         {
             Audit.Update(triggeredBy, DateTime.UtcNow, $"Flight Rebuild - {reason}");
             Version.UpdateMinor();
             ProjectAzureFlag(optimizer, trackingIds);
-            ApplyChange(new FeatureFlightRebuilt(this, reason, trackingIds));
+            ApplyChange(new FeatureFlightRebuilt(this, reason, trackingIds, source));
         }
 
         public void GenerateReport(string requestedBy, LoggerTrackingIds trackingIds)
-        {   
+        {
             DateTime now = DateTime.UtcNow;
             int modifiedSince = Audit?.LastModifiedOn != null ? (int)(now - Audit.LastModifiedOn).TotalDays : 0;
             Status.UpdateActiveStatus(Condition);
@@ -220,6 +220,32 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             bool isNew = createdSince < 10;
 
             Report.UpdateStatus(isNew, activePeriod, inactivePeriod, unusedPeriod, requestedBy, now);
+        }
+
+        public void Subscribe(string unsubscribedBy, string source, LoggerTrackingIds trackingIds)
+        {
+            if (Report == null)
+                return;
+
+            if (Report.Settings.Status)
+                throw new DomainException("Alerts for the flight is already enabled", "FLGT_ALERT_001", trackingIds.CorrelationId, trackingIds.TransactionId, "FeatureFlightAggregateRoot:Subscribe");
+
+            Report.Settings.EnableAlerts();
+            Audit.Update(unsubscribedBy, DateTime.UtcNow, "Enabled Alerts");
+            ApplyChange(new FeatureFlightAlertsEnabled(this, trackingIds, source));
+        }
+
+        public void Unsubscribe(string unsubscribedBy, string source, LoggerTrackingIds trackingIds)
+        {
+            if (Report == null)
+                return;
+
+            if (!Report.Settings.Status)
+                throw new DomainException("Alerts for the flight is already disabled", "FLGT_ALERT_002", trackingIds.CorrelationId, trackingIds.TransactionId, "FeatureFlightAggregateRoot:Unsubscribe");
+
+            Report.Settings.DisableAlerts();
+            Audit.Update(unsubscribedBy, DateTime.UtcNow, "Disabled Alerts");
+            ApplyChange(new FeatureFlightAlertsDisabled(this, trackingIds, source));
         }
 
         private string GetFlightId()

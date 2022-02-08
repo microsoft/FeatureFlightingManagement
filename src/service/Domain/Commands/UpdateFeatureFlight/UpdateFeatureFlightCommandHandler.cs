@@ -52,7 +52,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
                 throw new DomainException($"Flight for feature {command.AzureFeatureFlag.Name} does not existing for {command.AzureFeatureFlag.Tenant} in {command.AzureFeatureFlag.Environment}",
                     "UPDATE_FLAG_001", command.CorrelationId, command.TransactionId, "UpdateFeatureFlightCommandHandler:ProcessRequest");
 
-            flight.UpdateFeatureFlag(_flightOptimizer, command.AzureFeatureFlag, _identityContext.GetCurrentUserPrincipalName(), command.TrackingIds, out bool isUpdated);
+            flight.UpdateFeatureFlag(_flightOptimizer, command.AzureFeatureFlag, _identityContext.GetCurrentUserPrincipalName(), command.TrackingIds, command.Source, out bool isUpdated);
             if (!isUpdated)
                 return new IdCommandResult(flight.Id);
 

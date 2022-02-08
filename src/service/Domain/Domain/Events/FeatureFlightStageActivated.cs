@@ -15,7 +15,8 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
         public List<string> ActiveStages { get; set; }
         public List<string> InactiveStages { get; set; }
 
-        public FeatureFlightStageActivated(FeatureFlightAggregateRoot flight, string activatedStageName, LoggerTrackingIds trackingIds): base(flight, trackingIds)
+        public FeatureFlightStageActivated(FeatureFlightAggregateRoot flight, string activatedStageName, LoggerTrackingIds trackingIds, string source)
+            : base(flight, trackingIds, source)
         {
             ActivatedStageName = activatedStageName;
             ActivatedBy = flight.Audit.LastModifiedBy;

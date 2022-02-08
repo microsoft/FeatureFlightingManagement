@@ -16,13 +16,14 @@ namespace Microsoft.FeatureFlighting.Core.Commands
         public override string Id => _id;
 
         public AzureFeatureFlag AzureFeatureFlag { get; set; }
-
+        public string Source { get; set; }
         public LoggerTrackingIds TrackingIds => new(CorrelationId, TransactionId);
 
-        public CreateFeatureFlightCommand(AzureFeatureFlag flag, string correlationId, string transactionId)
+        public CreateFeatureFlightCommand(AzureFeatureFlag flag, string correlationId, string transactionId, string source)
         {
             _id = Guid.NewGuid().ToString();
             AzureFeatureFlag = flag;
+            Source = source;
             CorrelationId = correlationId ?? Guid.NewGuid().ToString();
             TransactionId = transactionId ?? Guid.NewGuid().ToString();
         }

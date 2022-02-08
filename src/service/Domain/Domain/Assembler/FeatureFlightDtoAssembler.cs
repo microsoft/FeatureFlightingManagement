@@ -61,7 +61,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                 UsageReport = flight.Report != null
                     ? new FeatureUsageReportDto()
                     {
-                        EnableAlerts = flight.Report.Settings.EnableAlerts,
+                        EnableAlerts = flight.Report.Settings.Status,
                         UsageStatement = flight.Report.DisplayStatement,
                         IsNew = flight.Report.IsNew,
                         GeneratedBy = flight.Report.GeneratedBy,

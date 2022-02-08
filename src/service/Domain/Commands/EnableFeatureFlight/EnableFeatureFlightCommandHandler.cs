@@ -49,7 +49,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
             TenantConfiguration tenantConfiguration = await _tenantConfigurationProvider.Get(command.Tenant);
             FeatureFlightAggregateRoot flight = await GetFeatureFlight(command, tenantConfiguration);
 
-            flight.Enable(_identityContext.GetCurrentUserPrincipalName(), _flightOptimizer, command.TrackingIds, out bool isUpdated);
+            flight.Enable(_identityContext.GetCurrentUserPrincipalName(), _flightOptimizer, command.TrackingIds, command.Source, out bool isUpdated);
             if (!isUpdated)
                 return new IdCommandResult(flight.Id);
 

@@ -36,11 +36,14 @@ namespace Microsoft.FeatureFlighting.API.Controllers
         /// GET api/tenants
         /// </remarks>
         /// <response code="200">List of registered tenants</response>
-        /// <response code="404">No tenants are found</response>
+        /// <response code="400">Missing information from client</response>
         /// <response code="401">Unauthorized caller</response>
+        /// <response code="404">No tenants are found</response>
         /// <response code="500">Unhandled exception</response>
         [Produces(contentType: "application/json", Type =typeof(IEnumerable<TenantConfiguration>))]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
