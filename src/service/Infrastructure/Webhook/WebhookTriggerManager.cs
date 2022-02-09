@@ -10,6 +10,9 @@ using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Common.Webhook;
 using Microsoft.FeatureFlighting.Common.Authentication;
 using Microsoft.FeatureFlighting.Common.Model.ChangeNotification;
+using System.Collections.Generic;
+using Microsoft.Graph;
+using System.Linq;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
 {   
@@ -29,7 +32,14 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
         }
 
         // <inheritdoc/>
-        public async Task<string> Trigger(WebhookConfiguration webhook, FeatureFlightChangeEvent @event, LoggerTrackingIds trackingIds)
+        public Task<string> Trigger(WebhookConfiguration webhook, FeatureFlightChangeEvent @event, LoggerTrackingIds trackingIds)
+        {
+            string payload = JsonConvert.SerializeObject(@event);
+            return Trigger(webhook, payload, null, trackingIds);
+        }
+
+        // <inheritdoc/>
+        public async Task<string> Trigger(WebhookConfiguration webhook, string payload, Dictionary<string, string>? headers, LoggerTrackingIds trackingIds)
         {
             HttpClient client = _httpClientFactory.CreateClient(webhook.WebhookId);
             if (client.BaseAddress == null)
@@ -42,7 +52,15 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
             request.Headers.Add("x-correlationId", trackingIds.CorrelationId);
             request.Headers.Add("x-messageId", trackingIds.TransactionId);
 
-            string payload = JsonConvert.SerializeObject(@event);
+            if (headers != null && headers.Any())
+            {
+                foreach(KeyValuePair<string, string> header in headers)
+                {
+                    if (!request.Headers.Contains(header.Key))
+                        request.Headers.Add(header.Key, header.Value);
+                }
+            }
+            
             request.Content = new StringContent(payload, Encoding.UTF8, "application/json");
             dependency.RequestDetails = payload;
 

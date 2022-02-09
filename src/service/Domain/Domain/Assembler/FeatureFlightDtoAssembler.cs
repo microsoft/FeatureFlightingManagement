@@ -35,6 +35,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                     LastEvaluatedOn = flight.EvaluationMetrics.LastEvaluatedOn,
                     LastEvaluatedBy = flight.EvaluationMetrics.LastEvaluatedBy,
                     EvaluationCount = flight.EvaluationMetrics.EvaluationCount,
+                    TotalEvaluations = flight.EvaluationMetrics.TotalEvaluations,
                     AverageLatency = flight.EvaluationMetrics.Performance != null ? flight.EvaluationMetrics.Performance.AverageLatency : -1,
                     P90Latency = flight.EvaluationMetrics.Performance != null ? flight.EvaluationMetrics.Performance.Percentile90Latency : -1,
                     P95Latency = flight.EvaluationMetrics.Performance != null ? flight.EvaluationMetrics.Performance.Percentile95Latency : -1,

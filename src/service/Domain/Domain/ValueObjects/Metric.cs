@@ -26,5 +26,33 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
             StartedOn = evaluationMetrics.From;
             CompletedOn = evaluationMetrics.To;
         }
+
+        public void Update(EvaluationMetricsDto metrics)
+        {   
+            EvaluationCount = metrics.EvaluationCount;
+            if (LastEvaluatedOn == null)
+            {
+                LastEvaluatedOn = metrics.LastEvaluatedOn != DateTime.MinValue ? metrics.LastEvaluatedOn : null;
+                LastEvaluatedBy = metrics.LastEvaluatedBy;
+            }
+            else if (metrics.LastEvaluatedOn != null && metrics.LastEvaluatedOn > LastEvaluatedOn)
+            {
+                LastEvaluatedOn = metrics.LastEvaluatedOn;
+                LastEvaluatedBy = metrics.LastEvaluatedBy;
+            }
+
+            if (metrics.From >= CompletedOn.AddHours(-1))
+            {
+                TotalEvaluations += metrics.EvaluationCount;
+            }
+
+            if (metrics.P95Latency > 0 || metrics.P90Latency > 0 || metrics.AverageLatency > 0)
+            {
+                Performance = new(metrics.P95Latency, metrics.P90Latency, metrics.AverageLatency);
+            }
+
+            StartedOn = metrics.From;
+            CompletedOn = metrics.To;
+        }
     }
 }

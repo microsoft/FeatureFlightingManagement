@@ -150,6 +150,14 @@ namespace Microsoft.FeatureFlighting.API.Extensions
                 });
             }
 
+            if (!string.IsNullOrWhiteSpace(configuration["Kusto:Endpoint:BaseEndpoint"]))
+            {
+                services.AddHttpClient(configuration["Kusto:Endpoint:WebhookId"], httpClient =>
+                {
+                    httpClient.BaseAddress = new System.Uri(configuration["Kusto:Endpoint:BaseEndpoint"]);
+                });
+            }
+
             IConfigurationSection tenantConfigurationSection = configuration.GetSection("Tenants");
             IEnumerable<IConfigurationSection> tenantConfigurations = tenantConfigurationSection.GetChildren();
 

@@ -59,6 +59,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
         public IntelligentAlertConfiguration IntelligentAlerts { get; set; }
 
         /// <summary>
+        /// Configuration to update the metrics
+        /// </summary>
+        public MetricConfiguration Metrics { get; set; }
+
+        /// <summary>
         /// Email address for contacting the tenant
         /// </summary>
         public string Contact { get; set; }
@@ -78,7 +83,8 @@ namespace Microsoft.FeatureFlighting.Common.Config
                 Evaluation = FlagEvaluationConfiguration.GetDefault(),
                 FlightsDatabase = new CosmosDbConfiguration(),
                 Optimization = FlightOptimizationConfiguration.GetDefault(),
-                ChangeNotificationSubscription = TenantChangeNotificationConfiguration.GetDefault()
+                ChangeNotificationSubscription = TenantChangeNotificationConfiguration.GetDefault(),
+                Metrics = MetricConfiguration.GetDefault()
             };
         }
 
@@ -133,6 +139,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
                 IntelligentAlerts = defaultTenantConfiguration.IntelligentAlerts;
             else
                 IntelligentAlerts.MergeWithDefault(defaultTenantConfiguration.IntelligentAlerts);
+
+            if (Metrics == null)
+                Metrics = defaultTenantConfiguration.Metrics;
+            else
+                Metrics.MergeWithDefault(defaultTenantConfiguration.Metrics);
 
         }
 

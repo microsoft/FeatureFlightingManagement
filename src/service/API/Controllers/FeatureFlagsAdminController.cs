@@ -367,5 +367,38 @@ namespace Microsoft.FeatureFlighting.API.Controllers
             await _commandBus.Send(command);
             return new NoContentResult();
         }
+
+        /// <summary>
+        /// Updates the evaluation metrics of a feature flight with data from kusto DB
+        /// </summary>
+        /// <param name="featureName">Name of the feature flight</param>
+        /// <param name="timespanDays">Period over which the metrics are calculated</param>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        /// PATCH api/v1/featureflags/flag_1/metrics?timespanDays=7
+        /// </remarks>
+        /// <response code="200">Succesfull metrics update</response>
+        /// <response code="400">Missing/inconsistent information from client</response>
+        /// <response code="401">Unauthorized caller</response>
+        /// <response code="404">No flag found for the tenant</response>
+        /// <response code="500">Unhandled exception</response>
+        [Produces(contentType: "application/json", Type = typeof(EvaluationMetricsDto))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPatch]
+        [Route("{featureName}/metrics")]
+        public async Task<IActionResult> UpdateEvaluationMetrics([FromRoute] string featureName, [FromQuery] int timespanDays = 7)
+        {
+            var (tenant, environment, correlationId, transactionId, channel) = GetHeaders();
+            UpdateMetricsCommand command = new(featureName, tenant, environment, timespanDays, correlationId, transactionId, channel);
+            MetricsCommandResult result = await _commandBus.Send(command);
+            if (result.IsSuccesfull)
+                return new OkObjectResult(result.Metrics);
+            return new NoContentResult();
+        }
     }
 }

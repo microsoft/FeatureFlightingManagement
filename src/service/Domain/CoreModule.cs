@@ -202,6 +202,10 @@ namespace Microsoft.FeatureFlighting.Core
                 .As<QueryHandler<GetRegisteredTenantsQuery, IEnumerable<TenantConfiguration>>>()
                 .SingleInstance();
 
+            builder.RegisterType<GetEvaluationMetricsQueryHandler>()
+                .As<QueryHandler<GetEvaluationMetricsQuery, EvaluationMetricsDto>>()
+                .SingleInstance();
+
             builder.RegisterType<QueryService>()
                 .As<IQueryService>()
                 .SingleInstance();
@@ -247,6 +251,10 @@ namespace Microsoft.FeatureFlighting.Core
 
             builder.RegisterType<UnsubscribeAlertsCommandHandler>()
                 .As<CommandHandler<UnsubscribeAlertsCommand, IdCommandResult>>()
+                .SingleInstance();
+
+            builder.RegisterType<UpdateMetricsCommandHandler>()
+                .As<CommandHandler<UpdateMetricsCommand, MetricsCommandResult>>()
                 .SingleInstance();
 
             builder.RegisterType<CommandBus>()
@@ -333,6 +341,10 @@ namespace Microsoft.FeatureFlighting.Core
             builder.RegisterType<ReportGeneratedTelemetryHandler>()
                 .As<EventHandler<ReportGenerated>>()
                 .SingleInstance();
+
+            builder.RegisterType<FeatureMetricsUpdatedTelemetryHandler>()
+                .As<EventHandler<FeatureFlightMetricsUpdated>>()
+                .SingleInstance();
         }
 
         private void RegisterWebhookEventHandlers(ContainerBuilder builder)
@@ -375,6 +387,10 @@ namespace Microsoft.FeatureFlighting.Core
 
             builder.RegisterType<FeatureFlightAlertsDisabledWebhookHandler>()
                 .As<EventHandler<FeatureFlightAlertsDisabled>>()
+                .SingleInstance();
+
+            builder.RegisterType<FeatureFlightMetricsUpdatedWebhookHandler>()
+                .As<EventHandler<FeatureFlightMetricsUpdated>>()
                 .SingleInstance();
         }
     }

@@ -35,6 +35,8 @@ namespace Microsoft.FeatureFlighting.Api.ExceptionHandler
 
                 httpContext.Response.Clear();
                 httpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                httpContext.Response.Headers.Add("x-correlationId", correlationId);
+                httpContext.Response.Headers.Add("x-transactionId", transactionId);
                 httpContext.Response.WriteAsync(accessForbiddenException.DisplayMessage).Wait();
             }
         }

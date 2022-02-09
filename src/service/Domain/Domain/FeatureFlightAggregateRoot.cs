@@ -190,14 +190,12 @@ namespace Microsoft.FeatureFlighting.Core.Domain
         public void GenerateReport(string requestedBy, LoggerTrackingIds trackingIds)
         {
             DateTime now = DateTime.UtcNow;
-            int modifiedSince = Audit?.LastModifiedOn != null ? (int)(now - Audit.LastModifiedOn).TotalDays : 0;
             Status.UpdateActiveStatus(Condition);
 
             int activePeriod = 0;
             if (Report.Settings.VerifyActivationPeriod && Status.Enabled && Status.IsActive && Audit.EnabledOn != null)
             {
                 activePeriod = (int)(now - Audit.EnabledOn).Value.TotalDays;
-                activePeriod = Math.Min(activePeriod, modifiedSince);
             }
 
             int inactivePeriod = 0;
@@ -246,6 +244,16 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Report.Settings.DisableAlerts();
             Audit.Update(unsubscribedBy, DateTime.UtcNow, "Disabled Alerts");
             ApplyChange(new FeatureFlightAlertsDisabled(this, trackingIds, source));
+        }
+
+        public void UpdateEvaluationMetrics(EvaluationMetricsDto weeklyMetrics, string updatedBy, string source, LoggerTrackingIds trackingIds)
+        {
+            if (EvaluationMetrics == null)
+                EvaluationMetrics = new(weeklyMetrics);
+
+            EvaluationMetrics.Update(weeklyMetrics);
+            Audit.Update(updatedBy, DateTime.UtcNow, "Metrics updated");
+            ApplyChange(new FeatureFlightMetricsUpdated(this, trackingIds, source));
         }
 
         private string GetFlightId()
