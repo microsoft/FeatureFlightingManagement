@@ -180,6 +180,9 @@ namespace Microsoft.FeatureFlighting.Core.Queries
             if (!double.TryParse(metric, out double metricValue))
                 return defaultValue;
 
+            if(double.IsNaN(metricValue))
+                return defaultValue;
+
             return metricValue;
         }
     }
