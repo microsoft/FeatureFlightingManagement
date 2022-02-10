@@ -64,6 +64,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain
 
         public void CreateFeatureFlag(IFlightOptimizer optimizer, string createdBy, string source, LoggerTrackingIds trackingIds)
         {
+            Feature.Validate(trackingIds);
             Audit = new Audit(createdBy, System.DateTime.UtcNow, Status.Enabled);
             Version = new ValueObjects.Version();
             Status.UpdateActiveStatus(Condition);

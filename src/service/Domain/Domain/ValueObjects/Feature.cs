@@ -1,4 +1,7 @@
-﻿namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
+﻿using Microsoft.FeatureFlighting.Common;
+using Microsoft.FeatureFlighting.Common.AppExceptions;
+
+namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
 {
     public class Feature
     {
@@ -9,6 +12,12 @@
         {
             Name = featureName;
             Description = featureDescription;
+        }
+
+        public void Validate(LoggerTrackingIds trackingIds)
+        {
+            if (Name.Contains("__") || Name.Contains("."))
+                throw new DomainException($"Feature name cannot contain `__` or`.`", "CREATE_NAME_001", trackingIds.CorrelationId, trackingIds.TransactionId, "Feature:Validate");
         }
     }
 }
