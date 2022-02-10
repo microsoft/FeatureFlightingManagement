@@ -17,6 +17,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
         /// Alternate/Short name of the tenant
         /// </summary>
         public string ShortName { get; set; }
+
+        /// <summary>
+        /// Indicates if the tenant was added dynamically or part of the configuration
+        /// </summary>
+        public bool IsDyanmic { get; set; }
         
         /// <summary>
         /// Configuration for authorizing apps to administer the tenant's feature flags in Azure App Configuration

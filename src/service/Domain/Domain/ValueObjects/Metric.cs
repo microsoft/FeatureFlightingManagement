@@ -41,12 +41,12 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
                 LastEvaluatedBy = metrics.LastEvaluatedBy;
             }
 
-            if (CompletedOn == DateTime.MinValue || metrics.From >= CompletedOn.AddHours(-1))
+            if (TotalEvaluations == 0|| CompletedOn == DateTime.MinValue || metrics.From >= CompletedOn.AddHours(-1))
             {
                 TotalEvaluations += metrics.EvaluationCount;
             }
 
-            if (metrics.P95Latency > 0 || metrics.P90Latency > 0 || metrics.AverageLatency > 0)
+            if (Performance == null || metrics.P95Latency > 0 || metrics.P90Latency > 0 || metrics.AverageLatency > 0)
             {
                 Performance = new(metrics.P95Latency, metrics.P90Latency, metrics.AverageLatency);
             }

@@ -29,6 +29,7 @@ namespace Microsoft.FeatureFlighting.API.Controllers
         /// <summary>
         /// Gets a list of tenants
         /// </summary>
+        /// <param name="includeDynamic">Includes dynamic tenants in the response</param>
         /// <remarks>
         /// 
         /// Sample Request: 
@@ -36,21 +37,19 @@ namespace Microsoft.FeatureFlighting.API.Controllers
         /// GET api/tenants
         /// </remarks>
         /// <response code="200">List of registered tenants</response>
-        /// <response code="400">Missing information from client</response>
         /// <response code="401">Unauthorized caller</response>
         /// <response code="404">No tenants are found</response>
         /// <response code="500">Unhandled exception</response>
-        [Produces(contentType: "application/json", Type =typeof(IEnumerable<TenantConfiguration>))]
+        [Produces(contentType: "application/json", Type = typeof(IEnumerable<TenantConfiguration>))]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [Route("")]
-        public async Task<IActionResult> GetTenants()
+        public async Task<IActionResult> GetTenants([FromQuery]bool includeDynamic = false)
         {
-            GetRegisteredTenantsQuery query = new();
+            GetRegisteredTenantsQuery query = new(includeDynamic);
             IEnumerable<TenantConfiguration> tenants = await _queryService.Query(query);
             if (tenants == null || !tenants.Any())
                 return new NotFoundObjectResult("No registered tenants found");

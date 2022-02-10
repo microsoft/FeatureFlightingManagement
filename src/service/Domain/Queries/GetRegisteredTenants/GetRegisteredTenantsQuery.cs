@@ -13,10 +13,12 @@ namespace Microsoft.FeatureFlighting.Core.Queries
         public override string DisplayName => nameof(GetRegisteredTenantsQuery);
 
         public override string Id { get; }
+        public bool IncludeDynamicTenants { get; set; }
 
-        public GetRegisteredTenantsQuery()
+        public GetRegisteredTenantsQuery(bool includeDynamicTenants)
         {
             Id = Guid.NewGuid().ToString();
+            IncludeDynamicTenants = includeDynamicTenants;
         }
 
         public override bool Validate(out string ValidationErrorMessage)

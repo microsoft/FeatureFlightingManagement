@@ -27,6 +27,8 @@ namespace Microsoft.FeatureFlighting.Core.Queries
         {
             IEnumerable<TenantConfiguration> tenants = await Task.Run(() => _tenantConfigurationProvider.GetAllTenants());
             tenants = tenants.Distinct(TenantConfigurationComparer.Default as IEqualityComparer<TenantConfiguration>);
+            if (!query.IncludeDynamicTenants)
+                tenants = tenants.Where(tenant => !tenant.IsDyanmic).ToList();
             return tenants;
         }
     }

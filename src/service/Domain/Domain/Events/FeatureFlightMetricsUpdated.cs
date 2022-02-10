@@ -28,9 +28,9 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
             MetricsCalculationEndTime = flight.EvaluationMetrics.CompletedOn;
             WeeklyEvaluationCount = flight.EvaluationMetrics.EvaluationCount;
             TotalEvaluations = flight.EvaluationMetrics.TotalEvaluations;
-            AverageLatency = flight.EvaluationMetrics.Performance.AverageLatency;
-            P95Latency = flight.EvaluationMetrics.Performance.Percentile95Latency;
-            P90Latency = flight.EvaluationMetrics.Performance.Percentile90Latency;
+            AverageLatency = flight.EvaluationMetrics.Performance?.AverageLatency ?? 0.0;
+            P95Latency = flight.EvaluationMetrics.Performance?.Percentile95Latency ?? 0.0;
+            P90Latency = flight.EvaluationMetrics.Performance?.Percentile90Latency ?? 0.0;
             MetricsUpdatedBy = flight.Audit.LastModifiedBy;
         }
 

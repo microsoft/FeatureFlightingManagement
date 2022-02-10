@@ -42,6 +42,7 @@ namespace Microsoft.FeatureFlighting.Common.Config
             TenantConfiguration tenantConfiguration = (TenantConfiguration)_defaultTenantConfiguration.Clone();
             tenantConfiguration.Name = tenantName;
             tenantConfiguration.ShortName = tenantName;
+            tenantConfiguration.IsDyanmic = true;
             _configurationCache.Add(tenantName.ToLowerInvariant(), tenantConfiguration);
             return Task.FromResult(tenantConfiguration);
         }
@@ -56,6 +57,7 @@ namespace Microsoft.FeatureFlighting.Common.Config
             IConfigurationSection tenantConfigurationSection = _configuration.GetSection("Tenants");
             IEnumerable<IConfigurationSection> rawTenantConfigurations = tenantConfigurationSection.GetChildren();
             _defaultTenantConfiguration = _configuration.GetSection("Tenants:Default").Get<TenantConfiguration>();
+            _defaultTenantConfiguration.IsDyanmic = true;
             AddFlightsDatabaseConfiguration(_defaultTenantConfiguration);
             AddChangeNotificationWebhook(_defaultTenantConfiguration);
             AddMetricsConfiguration(_defaultTenantConfiguration);
@@ -77,6 +79,7 @@ namespace Microsoft.FeatureFlighting.Common.Config
                 AddChangeNotificationWebhook(tenantConfiguration);
                 AddMetricsConfiguration(tenantConfiguration);
                 tenantConfiguration.MergeWithDefault(_defaultTenantConfiguration);
+                tenantConfiguration.IsDyanmic = false;
 
                 _configurationCache.AddOrUpdate(tenantConfiguration.Name.ToLowerInvariant(), tenantConfiguration);
                 _configurationCache.AddOrUpdate(tenantConfiguration.ShortName.ToLowerInvariant(), tenantConfiguration);
