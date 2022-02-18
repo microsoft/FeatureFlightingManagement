@@ -74,29 +74,38 @@ namespace Microsoft.FeatureFlighting.Core.Queries
 
             KustoRequest kustoRequest = new()
             {
+                Tenant = kustoConfiguration.KustoTenant,
                 Query = performanceQuery,
-                Columns = new List<Column>
+                Schema = new()
                 {
-                    new Column
-                    {
-                        ColumnName = kustoConfiguration.Column_Count,
-                        DisplayName = kustoConfiguration.Column_Transformed_Count,
-                    },
-                    new Column
-                    {
-                        ColumnName = kustoConfiguration.Column_AvgTime,
-                        DisplayName = kustoConfiguration.Column_Transformed_AvgTime,
-                    },
-                    new Column
-                    {
-                        ColumnName = kustoConfiguration.Column_P95,
-                        DisplayName = kustoConfiguration.Column_Transformed_P95,
-                    },
-                    new Column
-                    {
-                        ColumnName = kustoConfiguration.Column_P90,
-                        DisplayName = kustoConfiguration.Column_Transformed_P90,
-                    }
+                  Name = "EvaluationResult",
+                  Properties = new List<PropertyMetadata>()
+                  {   
+                      new PropertyMetadata()
+                      {
+                          PropertyName = kustoConfiguration.Column_Count,
+                          PropertyDisplayName = kustoConfiguration.Column_Transformed_Count,
+                          IsMandatory = true
+                      },
+                      new PropertyMetadata()
+                      {
+                          PropertyName = kustoConfiguration.Column_AvgTime,
+                          PropertyDisplayName = kustoConfiguration.Column_Transformed_AvgTime,
+                          IsMandatory = true
+                      },
+                      new PropertyMetadata()
+                      {
+                          PropertyName = kustoConfiguration.Column_P95,
+                          PropertyDisplayName = kustoConfiguration.Column_Transformed_P95,
+                          IsMandatory = true
+                      },
+                      new PropertyMetadata()
+                      {
+                          PropertyName = kustoConfiguration.Column_P90,
+                          PropertyDisplayName = kustoConfiguration.Column_Transformed_P90,
+                          IsMandatory = true
+                      }
+                  }
                 }
             };
 
@@ -124,19 +133,26 @@ namespace Microsoft.FeatureFlighting.Core.Queries
 
             KustoRequest kustoRequest = new()
             {
+                Tenant = kustoConfiguration.KustoTenant,
                 Query = lastUsageQuery,
-                Columns = new List<Column>
+                Schema = new()
                 {
-                    new Column
-                    {
-                        ColumnName = kustoConfiguration.Column_Timestamp,
-                        DisplayName = kustoConfiguration.Column_Transformed_Timestamp,
-                    },
-                    new Column
-                    {
-                        ColumnName = kustoConfiguration.Column_UserId,
-                        DisplayName = kustoConfiguration.Column_Transformed_UserId,
-                    }
+                   Name = "UsageMetrics",
+                   Properties = new List<PropertyMetadata>()
+                   {
+                       new PropertyMetadata()
+                       {
+                           PropertyName = kustoConfiguration.Column_Timestamp,
+                           PropertyDisplayName = kustoConfiguration.Column_Transformed_Timestamp,
+                           IsMandatory = true
+                       },
+                       new PropertyMetadata()
+                       {
+                           PropertyName = kustoConfiguration.Column_UserId,
+                           PropertyDisplayName = kustoConfiguration.Column_Transformed_UserId,
+                           IsMandatory = true
+                       }
+                   }
                 }
             };
 

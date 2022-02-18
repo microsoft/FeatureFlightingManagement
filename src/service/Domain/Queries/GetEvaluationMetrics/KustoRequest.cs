@@ -4,13 +4,21 @@ namespace Microsoft.FeatureFlighting.Core.Queries.GetEvaluationMetrics
 {
     internal class KustoRequest
     {
+        public string Tenant { get; set; }
         public string Query { get; set; }
-        public List<Column> Columns { get; set; }
+        public Schema Schema { get; set; }
     }
 
-    internal class Column
+    internal class Schema
     {
-        public string ColumnName { get; set; }
-        public string DisplayName { get; set; }
+        public string Name { get; set; }
+        public List<PropertyMetadata> Properties { get; set; }
+    }
+
+    internal class PropertyMetadata
+    {
+        public string PropertyName { get; set; }
+        public string? PropertyDisplayName { get; set; }
+        public bool IsMandatory { get; set; } = true;
     }
 }
