@@ -32,7 +32,7 @@ namespace Microsoft.FeatureFlighting.Core.Queries
             return (await GetFlagFromRepository(query, tenantConfiguration)) ?? (await GetFlagFromAzureAppConfig(query, tenantConfiguration));
         }
 
-        private async Task<AzureFeatureFlag?> GetFlagFromRepository(GetAzureFeatureFlagQuery query, TenantConfiguration tenantConfiguration)
+        private async Task<AzureCustomFeatureFlag?> GetFlagFromRepository(GetAzureFeatureFlagQuery query, TenantConfiguration tenantConfiguration)
         {
             if (tenantConfiguration.FlightsDatabase == null || tenantConfiguration.FlightsDatabase.Disabled)
                 return null;

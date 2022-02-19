@@ -56,9 +56,9 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
             return azureFlag;
         }
 
-        public static AzureFeatureFlag Assemble(FeatureFlightDto flight)
+        public static AzureCustomFeatureFlag Assemble(FeatureFlightDto flight)
         {
-            AzureFeatureFlag azureFlag = new()
+            AzureCustomFeatureFlag azureFlag = new()
             {
                 Id = flight.Id,
                 Name = flight.Name,
@@ -73,7 +73,17 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                 {
                     Client_Filters = new AzureFilter[] { }
                 },
-                UsageReport = flight.UsageReport
+                Insights = new AzureFlagInsights()
+                {
+                    LastEvaluatedBy = flight.EvaluationMetrics?.LastEvaluatedBy,
+                    LastEvaluatedOn = flight.EvaluationMetrics?.LastEvaluatedOn,
+                    AverageEvaluationLatency = flight.EvaluationMetrics?.AverageLatency ?? 0,
+                    TotalEvaluations = flight.EvaluationMetrics?.TotalEvaluations ?? 0,
+                    WeeklyEvaluations = flight.EvaluationMetrics?.EvaluationCount ?? 0,
+                    ShowWarning = flight.UsageReport?.ShowAlert ?? false,
+                    WarningStatement = flight.UsageReport?.UsageStatement,
+                    MetricsLastUpdatedOn = flight.EvaluationMetrics?.To
+                }
             };
 
             if (flight.Stages == null || !flight.Stages.Any())

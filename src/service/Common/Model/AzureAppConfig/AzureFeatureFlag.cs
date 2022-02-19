@@ -43,9 +43,6 @@ namespace Microsoft.FeatureFlighting.Common.Model.AzureAppConfig
         [JsonProperty("version")]
         public string Version { get; set; }
 
-        [JsonProperty("usageReport")]
-        public FeatureUsageReportDto UsageReport { get; set; }
-
 
         public AzureFeatureFlag() { }
         public AzureFeatureFlag(string name)

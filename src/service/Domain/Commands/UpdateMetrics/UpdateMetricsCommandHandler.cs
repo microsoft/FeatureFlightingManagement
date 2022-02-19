@@ -9,7 +9,6 @@ using Microsoft.FeatureFlighting.Common.Storage;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Core.Domain.Assembler;
 using Microsoft.FeatureFlighting.Common.Authentication;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.FeatureFlighting.Core.Commands
 {
