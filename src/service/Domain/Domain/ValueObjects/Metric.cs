@@ -41,7 +41,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
                 LastEvaluatedBy = metrics.LastEvaluatedBy;
             }
 
-            if (TotalEvaluations == 0|| CompletedOn == DateTime.MinValue || metrics.From >= CompletedOn.AddHours(-1))
+            if (TotalEvaluations == 0 || CompletedOn == DateTime.MinValue || metrics.From >= CompletedOn.AddHours(-1))
             {
                 TotalEvaluations += metrics.EvaluationCount;
             }

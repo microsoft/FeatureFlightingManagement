@@ -43,6 +43,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
                 return new MetricsCommandResult();
 
             FeatureFlightAggregateRoot flight = await GetFeatureFlight(command, tenantConfiguration);
+            command.AdjustTimespan(flight.EvaluationMetrics?.CompletedOn, defaultTimespan: 7);
             EvaluationMetricsDto evaluationMetrics = await GetEvaluationMetrics(command, tenantConfiguration);
 
             flight.UpdateEvaluationMetrics(evaluationMetrics, _identityContext.GetCurrentUserPrincipalName(), command.Source, command.TrackingIds);

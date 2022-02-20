@@ -1,4 +1,5 @@
-﻿using CQRS.Mediatr.Lite;
+﻿using System;
+using CQRS.Mediatr.Lite;
 using Microsoft.FeatureFlighting.Common;
 
 namespace Microsoft.FeatureFlighting.Core.Commands
@@ -38,10 +39,20 @@ namespace Microsoft.FeatureFlighting.Core.Commands
                 ValidationErrorMessage = "Tenant cannot be null or empty | ";
             if (string.IsNullOrWhiteSpace(Environment))
                 ValidationErrorMessage = "Environment cannot be null or empty";
-            if (TimespanInDays <= 0)
-                ValidationErrorMessage = "Timespan cannot be zero or negative";
 
             return string.IsNullOrWhiteSpace(ValidationErrorMessage);
+        }
+
+        public void AdjustTimespan(DateTime? lastMetricsGeneratedOn, int defaultTimespan)
+        {
+            if (TimespanInDays > 0)
+                return;
+
+            if (lastMetricsGeneratedOn == null || lastMetricsGeneratedOn == DateTime.MinValue)
+                TimespanInDays = defaultTimespan;
+
+            int daysSinceMetricsGenerated = (int)(DateTime.UtcNow - lastMetricsGeneratedOn.Value).TotalDays;
+            TimespanInDays = daysSinceMetricsGenerated > 0 && daysSinceMetricsGenerated <= defaultTimespan ? daysSinceMetricsGenerated : defaultTimespan;
         }
     }
 }

@@ -247,6 +247,11 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             ApplyChange(new FeatureFlightAlertsDisabled(this, trackingIds, source));
         }
 
+        public bool IsMetricsGenerated()
+        {
+            return EvaluationMetrics != null || EvaluationMetrics.CompletedOn > DateTime.MinValue;
+        }
+
         public void UpdateEvaluationMetrics(EvaluationMetricsDto weeklyMetrics, string updatedBy, string source, LoggerTrackingIds trackingIds)
         {
             if (EvaluationMetrics == null)
