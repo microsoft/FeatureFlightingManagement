@@ -17,6 +17,7 @@ using Microsoft.FeatureFlighting.Core.Events.CacheHandlers;
 using Microsoft.FeatureFlighting.Core.Events.WebhookHandlers;
 using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
 using Microsoft.FeatureFlighting.Core.Events.TelemetryHandlers;
+using Microsoft.FeatureFlighting.Common.Cache;
 
 namespace Microsoft.FeatureFlighting.Core
 {
@@ -124,6 +125,7 @@ namespace Microsoft.FeatureFlighting.Core
 
             builder.RegisterType<RulesEngineManager>()
                 .As<IRulesEngineManager>()
+                .As<IBackgroundCacheable>()
                 .SingleInstance();
 
             builder.RegisterType<RulesEngineEvaluator>()

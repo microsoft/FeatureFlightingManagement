@@ -14,6 +14,7 @@ using Microsoft.FeatureFlighting.Api.Middlewares;
 using Microsoft.FeatureFlighting.API.Controllers;
 using AppInsights.EnterpriseTelemetry.Web.Extension;
 using AppInsights.EnterpriseTelemetry.Web.Extension.Filters;
+using Microsoft.FeatureFlighting.API.Background;
 
 namespace Microsoft.PS.Services.FlightingService.Api
 {
@@ -47,6 +48,8 @@ namespace Microsoft.PS.Services.FlightingService.Api
             AddMvc(services);
             services.AddHttpClients(Configuration);
             services.AddFeatureFilters();
+
+            services.AddHostedService<RecacheHostedService>();
         }
 
         /// <summary>

@@ -13,13 +13,16 @@ using Microsoft.FeatureFlighting.Infrastructure.Webhook;
 using Microsoft.FeatureFlighting.Infrastructure.AppConfig;
 using Microsoft.FeatureFlighting.Infrastructure.Authorization;
 using Microsoft.FeatureFlighting.Infrastructure.Authentication;
+using Microsoft.FeatureFlighting.Common.Cache;
+using Autofac.Core;
+using System.Collections.Generic;
 
 namespace Microsoft.FeatureFlighting.Infrastructure
 {
     /// <summary>
     /// <see cref="Module"/> for registering infrastructure dependencies
     /// </summary>
-    public class InfrastructureModule: Module
+    public class InfrastructureModule : Module
     {
         protected override void Load(ContainerBuilder builder)
         {
@@ -68,8 +71,15 @@ namespace Microsoft.FeatureFlighting.Infrastructure
             builder.RegisterType<FlightingCacheFactory>()
                 .As<ICacheFactory>()
                 .SingleInstance();
+
+            builder.RegisterType<BackgroundCacheManager>()
+                .As<IBackgroundCacheManager>()
+                .WithParameter(new ResolvedParameter(
+                    (pi, ctx) => pi.ParameterType == typeof(IEnumerable<IBackgroundCacheable>),
+                    (pi, ctx) => ctx.Resolve<IEnumerable<IBackgroundCacheable>>()
+                    ));
         }
-        
+
         private void RegisterGraph(ContainerBuilder builder)
         {
             builder.RegisterType<GraphGroupVerificationService>()

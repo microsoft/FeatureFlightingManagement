@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using RulesEngine.Interfaces;
 using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Core.Spec;
+using Microsoft.FeatureFlighting.Common.Cache;
 using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Common.Caching;
 using Microsoft.FeatureFlighting.Common.Storage;
@@ -13,11 +14,15 @@ using Microsoft.FeatureFlighting.Common.AppExceptions;
 namespace Microsoft.FeatureFlighting.Core.RulesEngine
 {   
     /// <inheritdoc>/>
-    public class RulesEngineManager: IRulesEngineManager
+    public class RulesEngineManager: IRulesEngineManager, IBackgroundCacheable<IRulesEngineEvaluator>
     {   
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
         private readonly IBlobProviderFactory _blobProviderFactory;
         private readonly ICacheFactory _cacheFactory;
+
+        public string CacheableServiceId => nameof(RulesEngineManager);
+
+        public event EventHandler<BackgroundCacheParameters> ObjectCached;
 
         public RulesEngineManager(IOperatorStrategy operatorEvaluatorStrategy, ITenantConfigurationProvider tenantConfigurationProvider, IBlobProviderFactory blobProviderFactory, ICacheFactory cacheFactory)
         {
@@ -41,24 +46,67 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
             if (cachedRuleEngine != null)
                 return cachedRuleEngine;
 
-            IBlobProvider blobProvider = await _blobProviderFactory.CreateBreWorkflowProvider(tenant);
-            string workflowJson = await blobProvider.Get($"{workflowName}.json", trackingIds);
-            if (string.IsNullOrWhiteSpace(workflowJson))
-                throw new RuleEngineException(workflowName, tenant, "Rule engine not found in the configured storage location", "FeatureFlighting.RuleEngineManager.Build", trackingIds.CorrelationId, trackingIds.TransactionId);
+            IRulesEngineEvaluator evaluator = await CreateRulesEngine(workflowName, tenant, trackingIds);
 
-            IRulesEngine ruleEngine = new RE.RulesEngine(
-                jsonConfig: new string[] { workflowJson },
-                reSettings: new ReSettings() { CustomTypes = new Type[] { typeof(Operator) } },
-                logger: null);
+            //IBlobProvider blobProvider = await _blobProviderFactory.CreateBreWorkflowProvider(tenant);
+            //string workflowJson = await blobProvider.Get($"{workflowName}.json", trackingIds);
+            //if (string.IsNullOrWhiteSpace(workflowJson))
+            //    throw new RuleEngineException(workflowName, tenant, "Rule engine not found in the configured storage location", "FeatureFlighting.RuleEngineManager.Build", trackingIds.CorrelationId, trackingIds.TransactionId);
 
-            IRulesEngineEvaluator evaluator = new RulesEngineEvaluator(ruleEngine, workflowName, tenantConfiguration);
+            //IRulesEngine ruleEngine = new RE.RulesEngine(
+            //    jsonConfig: new string[] { workflowJson },
+            //    reSettings: new ReSettings() { CustomTypes = new Type[] { typeof(Operator) } },
+            //    logger: null);
+
+            //IRulesEngineEvaluator evaluator = new RulesEngineEvaluator(ruleEngine, workflowName, tenantConfiguration);
             await CacheRuleEvaluator((RulesEngineEvaluator)evaluator, tenant, workflowName, tenantConfiguration.BusinessRuleEngine.CacheDuration, trackingIds);
             return evaluator;
         }
 
-        private async Task<IRulesEngineEvaluator> GetCachedRuleEvaluator(string tenant, string workflowName, LoggerTrackingIds trackingIds)
+        private Task<IRulesEngineEvaluator> GetCachedRuleEvaluator(string tenant, string workflowName, LoggerTrackingIds trackingIds)
         {
-            ICache breCache = _cacheFactory.Create(tenant, nameof(TenantConfiguration.Cache.RulesEngine), trackingIds.CorrelationId, trackingIds.TransactionId);
+            BackgroundCacheParameters cacheParameters = new()
+            {
+                CacheKey = $"{tenant}_{workflowName}",
+                ObjectId = workflowName,
+                Tenant = tenant
+            };
+            return GetCachedObject(cacheParameters, trackingIds);
+
+            //ICache breCache = _cacheFactory.Create(tenant, nameof(TenantConfiguration.Cache.RulesEngine), trackingIds.CorrelationId, trackingIds.TransactionId);
+            //if (breCache == null)
+            //    return null;
+
+            //IRulesEngineEvaluator cachedRuleEngine = await breCache.Get<RulesEngineEvaluator>(workflowName, trackingIds.CorrelationId, trackingIds.TransactionId);
+            //return cachedRuleEngine;
+        }
+
+        private Task CacheRuleEvaluator(RulesEngineEvaluator ruleEvaluator, string tenant, string workflowName, int cacheDuration, LoggerTrackingIds trackingIds)
+        {
+            BackgroundCacheParameters cacheParameters = new()
+            {
+                CacheKey = $"{tenant}_{workflowName}",
+                ObjectId = workflowName,
+                Tenant = tenant,
+                CacheDuration = cacheDuration
+            };
+            BackgroundCacheableObject<IRulesEngineEvaluator> cacheableObject = new()
+            {
+                Object = ruleEvaluator,
+                CacheParameters = cacheParameters
+            };
+            return SetCacheObject(cacheableObject, trackingIds);
+
+            //ICache breCache = _cacheFactory.Create(tenant, nameof(TenantConfiguration.Cache.RulesEngine), trackingIds.CorrelationId, trackingIds.TransactionId);
+            //if (breCache == null)
+            //    return;
+            //await breCache.Set(workflowName, ruleEvaluator, trackingIds.CorrelationId, trackingIds.TransactionId, relativeExpirationMins: cacheDuration);
+        }
+
+        public async Task<IRulesEngineEvaluator> GetCachedObject(BackgroundCacheParameters cacheParameters, LoggerTrackingIds trackingIds)
+        {
+            string workflowName = cacheParameters.ObjectId;
+            ICache breCache = _cacheFactory.Create(cacheParameters.Tenant, nameof(TenantConfiguration.Cache.RulesEngine), trackingIds.CorrelationId, trackingIds.TransactionId);
             if (breCache == null)
                 return null;
 
@@ -66,12 +114,59 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
             return cachedRuleEngine;
         }
 
-        private async Task CacheRuleEvaluator(RulesEngineEvaluator ruleEvaluator, string tenant, string workflowName, int cacheDuration, LoggerTrackingIds trackingIds)
+        public async Task SetCacheObject(BackgroundCacheableObject<IRulesEngineEvaluator> cacheableObject, LoggerTrackingIds trackingIds)
         {
-            ICache breCache = _cacheFactory.Create(tenant, nameof(TenantConfiguration.Cache.RulesEngine), trackingIds.CorrelationId, trackingIds.TransactionId);
+            string workflowName = cacheableObject.CacheParameters.ObjectId;
+            TenantConfiguration tenantConfiguration = await _tenantConfigurationProvider.Get(cacheableObject.CacheParameters.Tenant);
+            ICache breCache = _cacheFactory.Create(cacheableObject.CacheParameters.Tenant, nameof(TenantConfiguration.Cache.RulesEngine), trackingIds.CorrelationId, trackingIds.TransactionId);
             if (breCache == null)
                 return;
-            await breCache.Set(workflowName, ruleEvaluator, trackingIds.CorrelationId, trackingIds.TransactionId, relativeExpirationMins: cacheDuration);
+
+            await breCache.Set(workflowName, cacheableObject.Object, trackingIds.CorrelationId, trackingIds.TransactionId, relativeExpirationMins: tenantConfiguration.BusinessRuleEngine.CacheDuration);
+            ObjectCached?.Invoke(this, cacheableObject.CacheParameters);
+        }
+
+        private async Task<IRulesEngineEvaluator> CreateRulesEngine(string workflowName, string tenant, LoggerTrackingIds trackingIds)
+        {
+            BackgroundCacheParameters cacheParameters = new()
+            {
+                ObjectId = workflowName,
+                Tenant = tenant,
+                CacheKey = $"{tenant}_{workflowName}"
+            };
+            return (await CreateCacheableObject(cacheParameters, trackingIds)).Object;
+        }
+
+        public async Task<BackgroundCacheableObject<IRulesEngineEvaluator>> CreateCacheableObject(BackgroundCacheParameters cacheParameters, LoggerTrackingIds trackingIds)
+        {
+            string workflowName = cacheParameters.ObjectId;
+            TenantConfiguration tenantConfiguration = await _tenantConfigurationProvider.Get(cacheParameters.Tenant);
+            cacheParameters.CacheDuration = tenantConfiguration.BusinessRuleEngine.CacheDuration;
+
+            IBlobProvider blobProvider = await _blobProviderFactory.CreateBreWorkflowProvider(cacheParameters.Tenant);
+            string workflowJson = await blobProvider.Get($"{workflowName}.json", trackingIds);
+            if (string.IsNullOrWhiteSpace(workflowJson))
+                throw new RuleEngineException(workflowName, cacheParameters.Tenant, "Rule engine not found in the configured storage location", "FeatureFlighting.RuleEngineManager.Build", trackingIds.CorrelationId, trackingIds.TransactionId);
+
+            IRulesEngine ruleEngine = new RE.RulesEngine(
+                jsonConfig: new string[] { workflowJson },
+                reSettings: new ReSettings() { CustomTypes = new Type[] { typeof(Operator) } },
+                logger: null);
+
+            
+            IRulesEngineEvaluator evaluator = new RulesEngineEvaluator(ruleEngine, workflowName, tenantConfiguration);
+            BackgroundCacheableObject<IRulesEngineEvaluator> cacheableRulesEngineEvaluator = new()
+            {
+                Object = evaluator,
+                CacheParameters = cacheParameters
+            };
+            return cacheableRulesEngineEvaluator;
+        }
+
+        public async Task Recache(BackgroundCacheParameters cacheParameters, LoggerTrackingIds trackingIds)
+        {
+            BackgroundCacheableObject<IRulesEngineEvaluator> cacheableObject = await CreateCacheableObject(cacheParameters, trackingIds);
+            await SetCacheObject(cacheableObject, trackingIds);
         }
     }
 }
