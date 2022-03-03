@@ -49,7 +49,7 @@ namespace Microsoft.PS.Services.FlightingService.Api
             services.AddHttpClients(Configuration);
             services.AddFeatureFilters();
 
-            services.AddHostedService<RecacheHostedService>();
+            services.AddHostedService<CacheBuilderBackgroundService>();
         }
 
         /// <summary>

@@ -6,9 +6,9 @@ using RulesEngine.Interfaces;
 using System.Collections.Generic;
 using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Core.Spec;
+using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
-using Microsoft.FeatureFlighting.Common.Config;
 
 namespace Microsoft.FeatureFlighting.Core.RulesEngine
 {   
