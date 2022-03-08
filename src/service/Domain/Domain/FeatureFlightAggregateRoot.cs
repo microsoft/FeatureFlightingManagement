@@ -182,7 +182,10 @@ namespace Microsoft.FeatureFlighting.Core.Domain
 
         public void ReBuild(string triggeredBy, string reason, IFlightOptimizer optimizer, string source, LoggerTrackingIds trackingIds)
         {
-            Audit.Update(triggeredBy, DateTime.UtcNow, $"Flight Rebuild - {reason}");
+            if (Audit == null)
+                Audit = new("SYSTEM", DateTime.UtcNow, triggeredBy, DateTime.UtcNow, $"Flight Rebuild - {reason}");
+            else
+                Audit.Update(triggeredBy, DateTime.UtcNow, $"Flight Rebuild - {reason}");
             Version.UpdateMinor();
             ProjectAzureFlag(optimizer, trackingIds);
             ApplyChange(new FeatureFlightRebuilt(this, reason, trackingIds, source));

@@ -57,7 +57,7 @@ namespace Microsoft.FeatureFlighting.Core.Commands
                 throw new DomainException("No feature flight found", "RECOMPTE_001");
 
             List<Task> updateTasks = new();
-            foreach(FeatureFlightAggregateRoot featureFlight in featureFlights)
+            foreach (FeatureFlightAggregateRoot featureFlight in featureFlights)
             {
                 featureFlight.ReBuild(_identityContext.GetCurrentUserPrincipalName(), command.Reason, _flightOptimizer, command.Source, command.TrackingIds);
                 updateTasks.Add(SaveFlag(featureFlight, tenantConfiguration, command.TrackingIds));
@@ -99,9 +99,20 @@ namespace Microsoft.FeatureFlighting.Core.Commands
 
         private async Task<IEnumerable<FeatureFlightAggregateRoot>> GetAzureFeatureFlags(RebuildFlightsCommand command, TenantConfiguration tenantConfiguration)
         {
-            return (await _azureFeatureManager.Get(tenantConfiguration.Name, command.Environment))
-                .Select(flag => FeatureFlightAggregateRootAssembler.Assemble(flag, tenantConfiguration))
-                .ToList();
+            if (command.FeatureNames == null || !command.FeatureNames.Any())
+                return (await _azureFeatureManager.Get(tenantConfiguration.Name, command.Environment))
+                    .Select(flag => FeatureFlightAggregateRootAssembler.Assemble(flag, tenantConfiguration))
+                    .ToList();
+
+            List<FeatureFlightAggregateRoot> flights = new();
+
+            foreach (string featureName in command.FeatureNames)
+            {
+                flights.Add(FeatureFlightAggregateRootAssembler.Assemble(
+                    await _azureFeatureManager.Get(featureName, tenantConfiguration.Name, command.Environment, command.TrackingIds),
+                    tenantConfiguration));
+            }
+            return flights;
         }
 
         private async Task SaveFlag(FeatureFlightAggregateRoot flight, TenantConfiguration tenantConfiguration, LoggerTrackingIds trackingIds)
