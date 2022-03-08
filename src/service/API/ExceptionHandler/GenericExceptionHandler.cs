@@ -28,7 +28,7 @@ namespace Microsoft.FeatureFlighting.Api.ExceptionHandler
 
             var baseException = exception is BaseAppException
                 ? exception as BaseAppException
-                : new GeneralException(exception);
+                : new GeneralException(exception, correlationId, transactionId, "GlobalExceptionHandler");
 
             var exceptionContext = new ExceptionContext(baseException);
             _logger.Log(exceptionContext);
@@ -38,6 +38,8 @@ namespace Microsoft.FeatureFlighting.Api.ExceptionHandler
 
             httpContext.Response.Clear();
             httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            httpContext.Response.Headers.Add("x-correlationId", correlationId);
+            httpContext.Response.Headers.Add("x-transactionId", transactionId);
             httpContext.Response.WriteAsync(baseException.DisplayMessage).Wait();
         }
     }

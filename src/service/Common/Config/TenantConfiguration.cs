@@ -17,6 +17,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
         /// Alternate/Short name of the tenant
         /// </summary>
         public string ShortName { get; set; }
+
+        /// <summary>
+        /// Indicates if the tenant was added dynamically or part of the configuration
+        /// </summary>
+        public bool IsDyanmic { get; set; }
         
         /// <summary>
         /// Configuration for authorizing apps to administer the tenant's feature flags in Azure App Configuration
@@ -34,9 +39,39 @@ namespace Microsoft.FeatureFlighting.Common.Config
         public BusinessRuleEngineConfiguration BusinessRuleEngine { get; set; }
 
         /// <summary>
+        /// Configuration for flights database
+        /// </summary>
+        public CosmosDbConfiguration FlightsDatabase { get; set; }
+
+        /// <summary>
+        /// Configuration for optimizing feature flags when saving to Azure
+        /// </summary>
+        public FlightOptimizationConfiguration Optimization { get; set; }
+
+        /// <summary>
         /// Configuration when feature flags are evaluated
         /// </summary>
         public FlagEvaluationConfiguration Evaluation { get; set; }
+
+        /// <summary>
+        /// Configuration to subscribe to change notifications
+        /// </summary>
+        public TenantChangeNotificationConfiguration ChangeNotificationSubscription { get; set; }
+
+        /// <summary>
+        /// Configuration to send alerts
+        /// </summary>
+        public IntelligentAlertConfiguration IntelligentAlerts { get; set; }
+
+        /// <summary>
+        /// Configuration to update the metrics
+        /// </summary>
+        public MetricConfiguration Metrics { get; set; }
+
+        /// <summary>
+        /// Email address for contacting the tenant
+        /// </summary>
+        public string Contact { get; set; }
 
         /// <summary>
         /// Gets a default <see cref="TenantConfiguration"/>
@@ -50,7 +85,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
                 ShortName = "Default",
                 Authorization = new AuthorizationConfiguration(),
                 Cache = new CacheConfiguration(),
-                Evaluation = FlagEvaluationConfiguration.GetDefault()
+                Evaluation = FlagEvaluationConfiguration.GetDefault(),
+                FlightsDatabase = new CosmosDbConfiguration(),
+                Optimization = FlightOptimizationConfiguration.GetDefault(),
+                ChangeNotificationSubscription = TenantChangeNotificationConfiguration.GetDefault(),
+                Metrics = MetricConfiguration.GetDefault()
             };
         }
 
@@ -83,13 +122,49 @@ namespace Microsoft.FeatureFlighting.Common.Config
             else
                 Cache.MergeWithDefault(defaultTenantConfiguration.Cache);
 
+            if (FlightsDatabase == null)
+                FlightsDatabase = defaultTenantConfiguration.FlightsDatabase;
+            else
+                FlightsDatabase.MergeWithDefault(defaultTenantConfiguration.FlightsDatabase);
+
+            if (Optimization == null)
+                Optimization = defaultTenantConfiguration.Optimization;
+            else
+                Optimization.MergeWithDefault(defaultTenantConfiguration.Optimization);
+
+            if (ChangeNotificationSubscription == null)
+                ChangeNotificationSubscription = defaultTenantConfiguration.ChangeNotificationSubscription;
+            else
+                ChangeNotificationSubscription.MergeOrDefault(defaultTenantConfiguration.ChangeNotificationSubscription);
+
             if (Evaluation == null)
                 Evaluation = defaultTenantConfiguration.Evaluation;
+
+            if (IntelligentAlerts == null)
+                IntelligentAlerts = defaultTenantConfiguration.IntelligentAlerts;
+            else
+                IntelligentAlerts.MergeWithDefault(defaultTenantConfiguration.IntelligentAlerts);
+
+            if (Metrics == null)
+                Metrics = defaultTenantConfiguration.Metrics;
+            else
+                Metrics.MergeWithDefault(defaultTenantConfiguration.Metrics);
+
         }
 
+        /// <summary>
+        /// Checks if BRE is enabled for the tenant
+        /// </summary>
+        /// <returns>True of BRE is enabled for the tenant</returns>
         public bool IsBusinessRuleEngineEnabled()
         {
             return BusinessRuleEngine != null && BusinessRuleEngine.Enabled && BusinessRuleEngine.Storage != null;
+        }
+
+        public bool IsReportingEnabled()
+        {
+            return IntelligentAlerts != null && IntelligentAlerts.Enabled &&
+                (IntelligentAlerts.MaximumActivePeriodAlertEnabled || IntelligentAlerts.MaximumDisabledPeriodAlertEnabled || IntelligentAlerts.MaximumUnusedPeriodAlertEnabled);
         }
     }
 }

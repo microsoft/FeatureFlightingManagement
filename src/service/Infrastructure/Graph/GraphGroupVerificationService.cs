@@ -17,7 +17,7 @@ using Microsoft.FeatureFlighting.Common.AppExceptions;
 namespace Microsoft.FeatureFlighting.Infrastructure.Graph
 {   
     /// <inheritdoc>/>
-    public class GraphGroupVerificationService: IGroupVerificationService
+    internal class GraphGroupVerificationService: IGroupVerificationService
     {
         private readonly IGraphServiceClient _graphServiceClient;
         private readonly ICacheFactory _cacheFactory;
@@ -29,8 +29,8 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
         {
             _cacheFactory = cacheFactory;
             _logger = logger;
-            _cacheInterval = configuration.GetValue<int>("Graph:CacheExpiration");
-            _isCachingEnabled = cacheFactory != null && _cacheInterval > 0 && configuration.GetValue<bool>("Graph:CachingEnabled");
+            _cacheInterval = int.Parse(configuration["Graph:CacheExpiration"]);
+            _isCachingEnabled = cacheFactory != null && _cacheInterval > 0 && bool.Parse(configuration["Graph:CachingEnabled"]);
             _graphServiceClient = CreateGraphClient(configuration);
         }
 
@@ -188,14 +188,14 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
         {
             try
             {
-                string tenant = configuration.GetValue<string>("Graph:Tenant");
-                string authority = string.Format(configuration.GetValue<string>("Graph:Authority"), tenant);
-                string[] scopes = new string[] { configuration.GetValue<string>("Graph:Scope") };
-                string secretLocation = configuration.GetValue<string>("Graph:ClientSecretLocation");
-                string clientSecret = configuration.GetValue<string>(secretLocation);
+                string tenant = configuration["Graph:Tenant"];
+                string authority = string.Format(configuration["Graph:Authority"], tenant);
+                string[] scopes = new string[] { configuration["Graph:Scope"] };
+                string secretLocation = configuration["Graph:ClientSecretLocation"];
+                string clientSecret = configuration[secretLocation];
 
                 IConfidentialClientApplication confidentialClient = ConfidentialClientApplicationBuilder
-                    .Create(configuration.GetValue<string>("Graph:ClientId"))
+                    .Create(configuration["Graph:ClientId"])
                     .WithAuthority(authority)
                     .WithClientSecret(clientSecret)
                     .Build();

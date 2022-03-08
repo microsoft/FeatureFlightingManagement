@@ -4,17 +4,19 @@ using System.Threading.Tasks;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Common.Authorization;
 
+[assembly: InternalsVisibleTo("Microsoft.FeatureFlighting.Infrastructure.Tests")]
+
 namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
-{
-    
+{   
     /// <inheritdoc/>
-    public class AuthorizationService : IAuthorizationService
+    internal class AuthorizationService : IAuthorizationService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
@@ -29,9 +31,9 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
             _tenantConfigurationProvider = tenantConfigurationProvider;
             _configuration = configuration;
 
-            _adminClaimType = _configuration.GetValue<string>("Authorization:AdminClaimType")?.ToLowerInvariant() ?? "Experimentation";
-            _adminClaimValue = _configuration.GetValue<string>("Authorization:AdminClaimValue")?.ToLowerInvariant() ?? "All";
-            _tenantAdminClaimValue = _configuration.GetValue<string>("Authorization:TenantAdminClaimValue")?.ToLowerInvariant() ?? "manageexperimentation";
+            _adminClaimType = _configuration["Authorization:AdminClaimType"]?.ToLowerInvariant() ?? "Experimentation";
+            _adminClaimValue = _configuration["Authorization:AdminClaimValue"]?.ToLowerInvariant() ?? "All";
+            _tenantAdminClaimValue = _configuration["Authorization:TenantAdminClaimValue"]?.ToLowerInvariant() ?? "manageexperimentation";
         }
 
         /// <inheritdoc/>

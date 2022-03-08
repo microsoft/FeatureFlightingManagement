@@ -11,7 +11,7 @@ using static Microsoft.FeatureFlighting.Common.Cache.CacheConstants;
 namespace Microsoft.FeatureFlighting.Infrastructure.Cache
 {
     /// <inheritdoc/>
-    public class FlightingCacheFactory : ICacheFactory
+    internal class FlightingCacheFactory : ICacheFactory
     {
         private readonly IMemoryCache _memoryCache;
         private readonly IConfiguration _configuration;
@@ -82,7 +82,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
             if (tenantConfiguration.Cache == null || tenantConfiguration.Cache.Redis == null)
                 return null;
 
-            string connectionString = _configuration.GetValue<string>(tenantConfiguration.Cache.Redis.ConnectionStringLocation);
+            string connectionString = _configuration[tenantConfiguration.Cache.Redis.ConnectionStringLocation];
             int timeout = tenantConfiguration.Cache.Redis.Timeout;
             return new RedisCache(connectionString, timeout, _logger);
         }
@@ -94,7 +94,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
                 return null;
 
             UrpConfiguration urp = tenantConfiguration.Cache.URP;
-            string secret = _configuration.GetValue<string>(urp.SecretKey);
+            string secret = _configuration[urp.SecretKey];
             return new UnifiedRedisCache(urp.Cluster, urp.App, secret, urp.Location, _logger);
         }
     }

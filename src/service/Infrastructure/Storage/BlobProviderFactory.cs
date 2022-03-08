@@ -10,7 +10,7 @@ using Microsoft.FeatureFlighting.Common.Storage;
 namespace Microsoft.FeatureFlighting.Infrastructure.Storage
 {   
     /// <inheritdoc/>
-    public class BlobProviderFactory: IBlobProviderFactory
+    internal class BlobProviderFactory: IBlobProviderFactory
     {   
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
         private readonly ILogger _logger;

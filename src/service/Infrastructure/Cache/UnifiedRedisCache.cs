@@ -7,7 +7,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
     /// Unified Redis cache
     /// </summary>
     /// <remarks>https://github.com/microsoft/UnifiedRedisPlatform.Core</remarks>
-    public class UnifiedRedisCache: RedisCache
+    internal class UnifiedRedisCache: RedisCache
     {
         public UnifiedRedisCache(string cluster, string app, string appSecret, string location, ILogger logger)
             :base(UnifiedConnectionMultiplexer.Connect(cluster, app, appSecret, preferredLocation: location), logger, $"{cluster}-{app}")

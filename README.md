@@ -1,14 +1,21 @@
-# Project
+# Feature Flighting Management System
+Feature toggles is a technique using which you can turn "on" or "off" a feature without a complete system deployment. It's a great technique for controlled feature rollout, conducting A/B tests and implementing Canary cohorts.
+This is a centralized feature flighting management system which leverages Azure App Configuration's Feature Management.
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+## Capabilities
+1. REST APIs for evaluating Feature Flags
+2. Support for multi-tenancy (without additional infrastructure)
+3. Ring-based feature rollout
+4. REST APIs for managing feature flightings (CRUD)
+5. Integration with Graph API for evaluating flags based on Groups
 
-As the maintainer of this project, please make a few updates:
+## References
+- ### [Control Ring Rollout](https://www.devcompost.com/post/control-rollout-1)
+- ### [Designing a Centralized Feature flighting system](https://www.devcompost.com/post/control-rollout-2)
+- ### [Official Documentation](https://github.com/microsoft/FeatureFlightingManagement/wiki)
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+## Flighting in a nutshell
+![Feature Flighting Architecture Diagram](https://github.com/microsoft/FeatureFlightingManagement/blob/main/assets/static/images/FLighting%20Flowchart.jpg)
 
 ## Contributing
 

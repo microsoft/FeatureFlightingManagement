@@ -1,0 +1,99 @@
+parameters:
+- name: KeyVault 
+  type: string 
+- name: AppService 
+  type: string   
+- name: ResourceGroup 
+  type: string  
+- name: FunctionalTestRunSettingsFile
+  type: string
+- name: AppServiceStaging
+  type: string
+- name: DeploymentAppSettings
+  type: string  
+
+steps:
+- checkout: self
+- task: DownloadBuildArtifacts@0
+  inputs:
+    buildType: 'current'
+    downloadType: 'all'
+    downloadPath: '$(System.ArtifactsDirectory)'
+
+- task: 7zExtract@1
+  enabled: false
+  displayName: 'Extract Functional Tests package'
+  inputs:
+    Archive: '$(System.ArtifactsDirectory)/drop/Microsoft.FXP.Flighting.Tests.FunctionalTest.zip'
+    Folder: '$(System.ArtifactsDirectory)/drop/FunctionalTests'
+
+- task: UseDotNet@2
+  displayName: 'Use .Net Core sdk 3.1.x'
+  inputs:
+    version: 3.1.x    
+
+- task: AzureKeyVault@1
+  displayName: 'Azure Key Vault: Download Secrets'
+  inputs:
+    azureSubscription: 'FXP-Azure-Subscription (SPA)'
+    KeyVaultName: '${{parameters.KeyVault}}'
+    SecretsFilter: 'Authentication-Secret' 
+
+- task: AzureAppServiceManage@0
+  displayName: 'Stop Azure App Service: ${{parameters.AppService}} Staging'
+  inputs:
+    azureSubscription: 'FXP-Azure-Subscription (SPA)'
+    Action: 'Stop Azure App Service'
+    WebAppName: '${{parameters.AppService}}'
+    SpecifySlotOrASE: true
+    ResourceGroupName: '${{parameters.ResourceGroup}}'
+    Slot: staging  
+
+- task: AzureRmWebAppDeployment@4
+  displayName: 'Azure App Service Deploy: ${{parameters.AppService}} Staging'
+  inputs:
+    azureSubscription: 'FXP-Azure-Subscription (SPA)'
+    WebAppName: '${{parameters.AppService}}'
+    deployToSlotOrASE: true
+    ResourceGroupName: '${{parameters.ResourceGroup}}'
+    SlotName: staging
+    packageForLinux: '$(System.ArtifactsDirectory)/drop/Api.zip'
+    AppSettings: '${{parameters.DeploymentAppSettings}}'
+    enableCustomDeployment: true
+    DeploymentType: zipDeploy
+          
+- task: AzureAppServiceManage@0
+  displayName: 'Start Azure App Service: ${{parameters.AppService}} Staging'
+  inputs:
+    azureSubscription: 'FXP-Azure-Subscription (SPA)'
+    Action: 'Start Azure App Service'
+    WebAppName: '${{parameters.AppService}}'
+    SpecifySlotOrASE: true
+    ResourceGroupName: '${{parameters.ResourceGroup}}'
+    Slot: staging
+
+- powershell: |
+    'Start-Sleep -Seconds 60'
+  displayName: 'Pause: 1 min (Warming up app service)'
+
+- task: VSTest@2
+  displayName: 'Test Staging'
+  inputs:
+    testAssemblyVer2: |
+        **\Microsoft.FeatureFlighting.Tests.Functional.dll
+        **\Microsoft.FeatureFlighting.Tests.Functional.runtimeconfig
+    searchFolder: '$(System.ArtifactsDirectory)/drop/FunctionalTests'
+    runSettingsFile: '$(System.DefaultWorkingDirectory)/tests/functional/Tests/${{parameters.FunctionalTestRunSettingsFile}}'
+    overrideTestrunParameters: '-FunctionalTest:InvalidAAD:ClientSecret "$(MS-Graph-Secret)" -FunctionalTest:AAD:ClientSecret "$(Authentication-Secret)" -FunctionalTest:FxpFlighting:Endpoint https://${{parameters.AppServiceStaging}}.azurewebsites.net'
+    runInParallel: true
+    runTestsInIsolation: true
+    otherConsoleOptions: '/Framework:.NETCoreApp,Version=v3.1'
+    rerunFailedTests: true
+
+- task: AzureAppServiceManage@0
+  displayName: 'Swap Azure App Service: ${{parameters.AppService}}'
+  inputs:
+    azureSubscription: 'FXP-Azure-Subscription (SPA)'
+    WebAppName: '${{parameters.AppService}}'
+    ResourceGroupName: '${{parameters.ResourceGroup}}'
+    SourceSlot: staging

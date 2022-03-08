@@ -6,9 +6,9 @@ using RulesEngine.Interfaces;
 using System.Collections.Generic;
 using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Core.Spec;
+using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
-using Microsoft.FeatureFlighting.Common.Config;
 
 namespace Microsoft.FeatureFlighting.Core.RulesEngine
 {   
@@ -43,12 +43,9 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
                     string failureMessage =
                         string.Join(',', ruleResult.Where(result => !result.IsSuccess)
                             .Select(failedRule => failedRule.ExceptionMessage ?? failedRule.Rule.ErrorMessage).ToArray());
-                    return new EvaluationResult(result: false, failureMessage);
+                    return new EvaluationResult(isSuccess: false, failureMessage);
                 }
-                return new EvaluationResult(result: true)
-                {
-                    Message = $"{_workflowName} rule engine passsed"
-                };
+                return new EvaluationResult(true, $"{_workflowName} rule engine passsed");
             }
             catch (Exception exception)
             {

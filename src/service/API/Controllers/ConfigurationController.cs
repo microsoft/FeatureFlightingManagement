@@ -1,30 +1,49 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
-using Microsoft.FeatureFlighting.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Core.Spec;
+using Microsoft.FeatureFlighting.API.Controllers;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 
 namespace Microsoft.FeatureFlighting.Api.Controllers
 {
+    /// <summary>
+    /// Configuration Controller
+    /// </summary>
     [Route("api/v1/[controller]")]
-    [ApiController]
-    [AspNetCore.Authorization.Authorize]
-    public class ConfigurationController : ControllerBase
+    public class ConfigurationController : BaseController
     {
-        private readonly IConfiguration _configuration;
         private readonly IOperatorStrategy _operatorEvaluatorStrategy;
 
-        public ConfigurationController(IConfiguration configuration, IOperatorStrategy operatorEvaluatorStrategy)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public ConfigurationController(IOperatorStrategy operatorEvaluatorStrategy, IConfiguration configuration)
+            : base(configuration)
         {
-            _configuration = configuration;
             _operatorEvaluatorStrategy = operatorEvaluatorStrategy;
         }
 
+        /// <summary>
+        /// Get collection of all the operators used for creating flighting rules
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// Sample Request: 
+        /// 
+        /// GET api/operators
+        /// </remarks>
+        /// <response code="200">Collection of operators</response>
+        /// <response code="401">Unauthorized caller</response>
+        /// <response code="500">Unhandled exception</response>
+        [Produces(contentType: "application/json", Type = typeof(IEnumerable<string[]>))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
-        [Produces(typeof(string[]))]
         [Route("operators")]
         public IActionResult GetOperators()
         {
@@ -32,26 +51,52 @@ namespace Microsoft.FeatureFlighting.Api.Controllers
             return Ok(operators);
         }
 
+        /// <summary>
+        /// Get collection of all filters used for flighting
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// Sample Request: 
+        /// 
+        /// GET api/filters
+        /// </remarks>
+        /// <response code="200">Collection of filters</response>
+        /// <response code="401">Unauthorized caller</response>
+        /// <response code="500">Unhandled exception</response>
+        [Produces(contentType: "application/json", Type = typeof(IEnumerable<string[]>))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
-        [Produces(typeof(string[]))]
         [Route("filters")]
         public async Task<IActionResult> GetFilters()
         {
-            string tenant = Request?.Headers.GetOrDefault(Constants.Flighting.APP_HEADER, "Default").ToString() ?? "Default";
-            string correlationId = Request?.Headers.GetOrDefault("x-CorrelationId", Guid.NewGuid().ToString()).ToString();
-            string transactionId = Request?.Headers.GetOrDefault("x-MessageId", Guid.NewGuid().ToString()).ToString();
+            var (tenant, _, correlationId, transactionId, _) = GetHeaders(validateHeaders: false);
             IDictionary<string, List<string>> map = await _operatorEvaluatorStrategy.GetFilterOperatorMapping(tenant, correlationId, transactionId);
             return Ok(map.Keys);
         }
 
-        [HttpGet]
+        /// <summary>
+        /// Gets all the filters with the operators that can operated on the filter
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// Sample Request: 
+        /// 
+        /// GET api/filters/operators/map
+        /// </remarks>
+        /// <response code="200">Collection of filters and the operators</response>
+        /// <response code="401">Unauthorized caller</response>
+        /// <response code="500">Unhandled exception</response>
         [Produces(typeof(Dictionary<string, List<string>>))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet]
         [Route("filters/operators/map")]
         public async Task<IActionResult> GetFilterOperatorMapping()
         {
-            string tenant = Request?.Headers.GetOrDefault(Constants.Flighting.APP_HEADER, "Default").ToString() ?? "Default";
-            string correlationId = Request?.Headers.GetOrDefault("x-CorrelationId", Guid.NewGuid().ToString()).ToString();
-            string transactionId = Request?.Headers.GetOrDefault("x-MessageId", Guid.NewGuid().ToString()).ToString();
+            var (tenant, _, correlationId, transactionId, _) = GetHeaders(validateHeaders: false);
             IDictionary<string, List<string>> map = await _operatorEvaluatorStrategy.GetFilterOperatorMapping(tenant, correlationId, transactionId);
             return Ok(map);
         }

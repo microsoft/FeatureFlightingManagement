@@ -21,6 +21,12 @@
         public bool AddDisabledContext { get; set; }
 
         /// <summary>
+        /// Configuraion for parallel feature flag evaluation
+        /// </summary>
+        public ParallelEvaluationConfiguration ParallelEvaluation { get; set; }
+        
+
+        /// <summary>
         /// Gets a default <see cref="FlagEvaluationConfiguration"/>
         /// </summary>
         /// <returns></returns>
@@ -30,7 +36,8 @@
             {
                 IgnoreException = false,
                 AddDisabledContext = false,
-                AddEnabledContext = false
+                AddEnabledContext = false,
+                ParallelEvaluation = ParallelEvaluationConfiguration.GetDefault(),
             };
         }
     }
