@@ -70,9 +70,11 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                         ActivePeriod = flight.Report.ActivePeriod,
                         InactivePeriod = flight.Report.InactivePeriod,
                         UnusedPeriod = flight.Report.UnusedPeriod,
+                        LaunchedPeriod = flight.Report.LaunchedPeriod,
                         HasActivationPeriodExceeded = flight.Report.HasActivePeriodCrossed,
                         HasDisabledPeriodExceeded = flight.Report.HasInactivePeriodCrossed,
                         HasUnsedPeriodExceeded = flight.Report.HasUnusedPeriodCrossed,
+                        HasLaunchedPeriodExceeded = flight.Report.HasLaunchedPeriodCrossed,
                         ShowAlert = flight.Report.TriggerAlert
                     }
                     : null

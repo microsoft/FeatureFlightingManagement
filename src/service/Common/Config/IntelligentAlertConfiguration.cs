@@ -20,6 +20,9 @@
         public int MaximumUnusedPeriod { get; set; }
         public bool MaximumUnusedPeriodAlertEnabled { get; set; }
 
+        public int MaximumLaunchedPeriod { get; set; }
+        public bool MaxLaunchedPeriodAlertEnabled { get; set; }
+
         public static IntelligentAlertConfiguration GetDefault()
         {
             return new IntelligentAlertConfiguration
@@ -37,7 +40,10 @@
                 MaximumDisabledPeriodAlertEnabled = true,
 
                 MaximumUnusedPeriod = 30,
-                MaximumUnusedPeriodAlertEnabled = false
+                MaximumUnusedPeriodAlertEnabled = false,
+
+                MaximumLaunchedPeriod = 15,
+                MaxLaunchedPeriodAlertEnabled = true
             };
         }
 

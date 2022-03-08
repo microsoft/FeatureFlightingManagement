@@ -17,6 +17,9 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
         public bool VerifyUnusedPeriod { get; private set; }
         public int MaximumUnusedPeriod { get; private set; }
 
+        public bool VerifyLaunchedPeriod { get; private set; }
+        public int MaximumLaunchedPeriod { get; private set; }
+
         public ReportSettings(TenantConfiguration tenantConfiguration, bool enableAlerts)
         {
             if (tenantConfiguration.IntelligentAlerts == null)
@@ -33,6 +36,9 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
 
             VerifyUnusedPeriod = tenantConfiguration.IntelligentAlerts.MaximumUnusedPeriodAlertEnabled;
             MaximumUnusedPeriod = tenantConfiguration.IntelligentAlerts.MaximumUnusedPeriod;
+
+            VerifyLaunchedPeriod = tenantConfiguration.IntelligentAlerts.MaxLaunchedPeriodAlertEnabled;
+            MaximumLaunchedPeriod = tenantConfiguration.IntelligentAlerts.MaximumLaunchedPeriod;
         }
 
         public void DisableAlerts()

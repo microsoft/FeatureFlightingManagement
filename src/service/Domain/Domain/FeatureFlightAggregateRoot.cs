@@ -218,10 +218,16 @@ namespace Microsoft.FeatureFlighting.Core.Domain
                 unusedPeriod = (int)(now - EvaluationMetrics.LastEvaluatedOn).Value.TotalDays;
             }
 
+            int launchedPeriod = 0;
+            if (Report.Settings.VerifyLaunchedPeriod && Condition != null && Condition.IsLaunched())
+            {
+                launchedPeriod = (int)(now - Condition.GetHighestActiveStage().ActivatedOn).Value.TotalDays;
+            }
+
             int createdSince = (int)(now - Audit.CreatedOn).TotalDays;
             bool isNew = createdSince < 10;
 
-            Report.UpdateStatus(isNew, activePeriod, inactivePeriod, unusedPeriod, requestedBy, now);
+            Report.UpdateStatus(isNew, activePeriod, inactivePeriod, unusedPeriod, launchedPeriod, requestedBy, now);
         }
 
         public void Subscribe(string unsubscribedBy, string source, LoggerTrackingIds trackingIds)

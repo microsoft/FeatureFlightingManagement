@@ -89,6 +89,22 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
             return isUpdated;
         }
 
+        public bool IsLaunched() 
+        {
+            if (!IsActive)
+                return false;
+
+            Filter alwaysEnabledFilter = Filters.FirstOrDefault(filter =>
+                filter.Name.ToLowerInvariant() == "enabled".ToLowerInvariant() ||
+                filter.Name.ToLowerInvariant() == "enable".ToLowerInvariant() ||
+                filter.Name.ToLowerInvariant() == "enableflighting".ToLowerInvariant());
+
+            if (alwaysEnabledFilter == null)
+                return false;
+
+            return alwaysEnabledFilter.Value == "1";
+        }
+
         private void UpdateAuditDates()
         {
             ActivatedOn = IsActive ? DateTime.UtcNow : ActivatedOn;
