@@ -1,7 +1,10 @@
 ﻿using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
+
+[assembly: InternalsVisibleTo("Microsoft.PS.FlightingService.Core.Tests")]
 
 namespace Microsoft.FeatureFlighting.Core.Spec
 {

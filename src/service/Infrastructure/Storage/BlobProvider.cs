@@ -11,7 +11,7 @@ using Microsoft.FeatureFlighting.Common.AppExceptions;
 namespace Microsoft.FeatureFlighting.Infrastructure.Storage
 {   
     /// <inheritdoc/>
-    public class BlobProvider: IBlobProvider
+    internal class BlobProvider: IBlobProvider
     {
         private readonly BlobContainerClient _blobContainerClient;
         private readonly ILogger _logger;

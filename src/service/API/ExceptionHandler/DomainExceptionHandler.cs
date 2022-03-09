@@ -31,6 +31,8 @@ namespace Microsoft.FeatureFlighting.Api.ExceptionHandler
 
                 httpContext.Response.Clear();
                 httpContext.Response.Headers.Add("x-error-code", domainException.ExceptionCode?.ToString());
+                httpContext.Response.Headers.Add("x-correlationId", correlationId);
+                httpContext.Response.Headers.Add("x-transactionId", transactionId);
                 if (domainException.ExceptionCode.ToLowerInvariant() == Constants.Exception.DomainException.FlagDoesntExist.ExceptionCode.ToLowerInvariant())
                     httpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
                 else

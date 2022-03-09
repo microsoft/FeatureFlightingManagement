@@ -1,13 +1,15 @@
 ﻿using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Microsoft.FeatureFlighting.Common.Caching;
 
+[assembly: InternalsVisibleTo("Microsoft.PS.FlightingService.Core.Tests")]
 namespace Microsoft.FeatureFlighting.Infrastructure.Cache
 {
     /// <summary>
     /// Dummy cache for non cacheable scenarios
     /// </summary>
-    public class NoCache : ICache
+    internal class NoCache : ICache
     {
         public Task Delete(string key, string correlationId, string transactionId)
         {

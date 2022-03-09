@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.FeatureFlighting.Common.Config
-{   
+{
     /// <inheritdoc/>
     public class TenantConfigurationProvider : ITenantConfigurationProvider
     {
@@ -21,7 +21,7 @@ namespace Microsoft.FeatureFlighting.Common.Config
             _configuration = configuration;
             Load();
         }
-        
+
         /// <summary>
         /// Creates the tenant configurarion provider for a single tenant. Used in SDK.
         /// </summary>
@@ -42,8 +42,14 @@ namespace Microsoft.FeatureFlighting.Common.Config
             TenantConfiguration tenantConfiguration = (TenantConfiguration)_defaultTenantConfiguration.Clone();
             tenantConfiguration.Name = tenantName;
             tenantConfiguration.ShortName = tenantName;
+            tenantConfiguration.IsDyanmic = true;
             _configurationCache.Add(tenantName.ToLowerInvariant(), tenantConfiguration);
             return Task.FromResult(tenantConfiguration);
+        }
+
+        public IEnumerable<TenantConfiguration> GetAllTenants()
+        {
+            return _configurationCache.Values;
         }
 
         private void Load()
@@ -51,6 +57,10 @@ namespace Microsoft.FeatureFlighting.Common.Config
             IConfigurationSection tenantConfigurationSection = _configuration.GetSection("Tenants");
             IEnumerable<IConfigurationSection> rawTenantConfigurations = tenantConfigurationSection.GetChildren();
             _defaultTenantConfiguration = _configuration.GetSection("Tenants:Default").Get<TenantConfiguration>();
+            _defaultTenantConfiguration.IsDyanmic = true;
+            AddFlightsDatabaseConfiguration(_defaultTenantConfiguration);
+            AddChangeNotificationWebhook(_defaultTenantConfiguration);
+            AddMetricsConfiguration(_defaultTenantConfiguration);
 
             foreach (IConfigurationSection rawTenantConfiguration in rawTenantConfigurations)
             {
@@ -64,25 +74,85 @@ namespace Microsoft.FeatureFlighting.Common.Config
                 if (string.IsNullOrWhiteSpace(tenantConfiguration.ShortName))
                     tenantConfiguration.ShortName = tenantConfiguration.Name;
 
-                if (tenantConfiguration.BusinessRuleEngine != null && tenantConfiguration.BusinessRuleEngine.Enabled)
-                {
-                    if (tenantConfiguration.BusinessRuleEngine.Storage == null)
-                    {
-                        tenantConfiguration.BusinessRuleEngine.Enabled = false;
-                    }
-                    else
-                    {
-                        string storageKeyLocation = tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionStringKey;
-                        string storageConnectionString = _configuration.GetValue<string>(storageKeyLocation);
-                        tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionString = storageConnectionString;
-                    }
-                }
-
+                AddBusinessRuleEngineConfiguration(tenantConfiguration);
+                AddFlightsDatabaseConfiguration(tenantConfiguration);
+                AddChangeNotificationWebhook(tenantConfiguration);
+                AddMetricsConfiguration(tenantConfiguration);
                 tenantConfiguration.MergeWithDefault(_defaultTenantConfiguration);
+                tenantConfiguration.IsDyanmic = false;
 
                 _configurationCache.AddOrUpdate(tenantConfiguration.Name.ToLowerInvariant(), tenantConfiguration);
                 _configurationCache.AddOrUpdate(tenantConfiguration.ShortName.ToLowerInvariant(), tenantConfiguration);
             }
+        }
+
+        private void AddFlightsDatabaseConfiguration(TenantConfiguration tenantConfiguration)
+        {
+            if (tenantConfiguration.FlightsDatabase != null && !tenantConfiguration.FlightsDatabase.Disabled)
+            {
+                tenantConfiguration.FlightsDatabase.PrimaryKey = _configuration.GetValue<string>(tenantConfiguration.FlightsDatabase.PrimaryKeyLocation);
+            }
+        }
+
+        private void AddMetricsConfiguration(TenantConfiguration tenantConfiguration)
+        {
+            if (tenantConfiguration.Metrics == null || !tenantConfiguration.Metrics.Enabled)
+                return;
+
+            tenantConfiguration.Metrics.Kusto = _configuration.GetSection("Kusto").Get<KustoConfiguraton>();
+            tenantConfiguration.Metrics.Kusto.SetDefault();
+
+            if (tenantConfiguration.Metrics.MetricSource == null ||
+                tenantConfiguration.Metrics.MetricSource.WebhookId.ToLowerInvariant() == "KustoAPI".ToLowerInvariant())
+            {
+                tenantConfiguration.Metrics.MetricSource = GetWebhook(webhookSection: "Kusto:Endpoint");
+                return;
+            }
+
+            string clientSecretLocation = tenantConfiguration.Metrics.MetricSource.ClientSecretLocation;
+            string clientSecret = !string.IsNullOrWhiteSpace(clientSecretLocation) ? _configuration[clientSecretLocation] : null;
+            tenantConfiguration.Metrics.MetricSource.ClientSecret = clientSecret;
+        }
+
+        private void AddChangeNotificationWebhook(TenantConfiguration tenantConfiguration)
+        {
+            if (tenantConfiguration.ChangeNotificationSubscription == null || tenantConfiguration.ChangeNotificationSubscription.IsSubscribed == false)
+                return;
+
+            if (tenantConfiguration.ChangeNotificationSubscription?.Webhook == null ||
+                tenantConfiguration.ChangeNotificationSubscription.Webhook.WebhookId.ToLowerInvariant() == "EventStore".ToLowerInvariant())
+            {
+                tenantConfiguration.ChangeNotificationSubscription.Webhook = GetWebhook(webhookSection: "EventStore");
+                return;
+            }
+
+            string clientSecretLocation = tenantConfiguration.ChangeNotificationSubscription.Webhook.ClientSecretLocation;
+            string clientSecret = !string.IsNullOrWhiteSpace(clientSecretLocation) ? _configuration[clientSecretLocation] : null;
+            tenantConfiguration.ChangeNotificationSubscription.Webhook.ClientSecret = clientSecret;
+        }
+
+        private WebhookConfiguration GetWebhook(string webhookSection)
+        {
+            WebhookConfiguration eventStoreWebhook = _configuration.GetSection(webhookSection).Get<WebhookConfiguration>();
+            string clientSecretLocation = eventStoreWebhook.ClientSecretLocation;
+            string clientSecret = _configuration[clientSecretLocation];
+            eventStoreWebhook.ClientSecret = clientSecret;
+            return eventStoreWebhook;
+        }
+
+        private void AddBusinessRuleEngineConfiguration(TenantConfiguration tenantConfiguration)
+        {
+            if (tenantConfiguration.BusinessRuleEngine == null || !tenantConfiguration.BusinessRuleEngine.Enabled)
+                return;
+
+            if (tenantConfiguration.BusinessRuleEngine.Storage == null)
+            {
+                tenantConfiguration.BusinessRuleEngine.Enabled = false;
+                return;
+            }
+            string storageKeyLocation = tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionStringKey;
+            string storageConnectionString = _configuration.GetValue<string>(storageKeyLocation);
+            tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionString = storageConnectionString;
         }
     }
 }

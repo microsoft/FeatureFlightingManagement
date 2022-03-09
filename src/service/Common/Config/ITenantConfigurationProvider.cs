@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Microsoft.FeatureFlighting.Common.Config
 {
@@ -13,5 +14,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
         /// <param name="tenantName">Tenant Name (or the short name)</param>
         /// <returns cref="TenantConfiguration">Tenant Configuration</returns>
         Task<TenantConfiguration> Get(string tenantName);
+
+        /// <summary>
+        /// Gets all tenant configurations
+        /// </summary>
+        /// <returns cref="IEnumerable{TenantConfiguration}">Collection of <see cref="TenantConfiguration"/></returns>
+        IEnumerable<TenantConfiguration> GetAllTenants();
     }
 }

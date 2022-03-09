@@ -135,7 +135,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
         {
             if (string.IsNullOrWhiteSpace(settings.Value) ||
                 string.IsNullOrWhiteSpace(settings.Operator) ||
-                (int.TryParse(settings.StageId, out int stage) && stage < 0))
+                (int.TryParse(settings.StageId, out int stage) && stage < -1))
             {
                 var context = new ExceptionContext()
                 {

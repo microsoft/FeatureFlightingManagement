@@ -1,4 +1,6 @@
-﻿namespace Microsoft.FeatureFlighting.Common
+﻿using System.Threading;
+
+namespace Microsoft.FeatureFlighting.Common
 {
     public struct Constants
     {
@@ -25,6 +27,14 @@
                 public const string Production = "Production";
                 public const string PreProduction = "PPE";
             }
+        }
+
+        public struct EvaluationStrategies
+        {
+            public const string None = "NONE";
+            public const string Full = "FULL";
+            public const string AsyncBatch = "ASYNC_BATCH";
+            public const string SyncParallelBatch = "SYNC_PARALLEL_BATCH";
         }
 
         public struct Logging

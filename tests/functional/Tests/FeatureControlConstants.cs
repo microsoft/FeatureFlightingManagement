@@ -7,7 +7,7 @@
         public const string FLIGHT_CONTEXT_HEADER = "X-FlightContext";
         public const string ContentTypeHeader = "Content-Type";
         public const string JsonContentHeaderValue = "application/json";
-        public const string FeatureFlagsRoute = "/api/v1/featureflags/";
+        public const string FeatureFlagsRoute = "/api/v1/featureflags";
         public const string FeatureConfigurationRoute = "/api/v1/configuration/";
         public const string GetOperatorsRoute = "operators";
         public const string GetFiltersRoute = "filters";

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Hosting;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Configuration.AzureKeyVault;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
@@ -20,6 +21,7 @@ namespace Microsoft.PS.Services.FlightingService.Api
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.ConfigureAppConfiguration((context, config) =>

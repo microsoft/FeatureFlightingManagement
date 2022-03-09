@@ -111,6 +111,17 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Helper
                                   'flightContextKey': 'Date'
                                 }
                              },
+{
+                                'name': 'Role',
+                                'parameters': {
+                                  'operator': 'In',
+                                  'value': 'Manager,Architect',
+                                  'isActive': 'false',
+                                  'stageId': '1',
+                                  'stageName': 'stg2',
+                                  'flightContextKey': 'Role'
+                                }
+                             }
                             ]
                           }
                     }";

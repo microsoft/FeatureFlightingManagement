@@ -6,7 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AppInsights.EnterpriseTelemetry" Version="1.1.0" />
+    <PackageReference Include="AppInsights.EnterpriseTelemetry" Version="2.0.0" />
+    <PackageReference Include="Autofac" Version="6.3.0" />
+    <PackageReference Include="CQRS.Mediatr.Lite" Version="1.2.0" />
   </ItemGroup>
 
 </Project>

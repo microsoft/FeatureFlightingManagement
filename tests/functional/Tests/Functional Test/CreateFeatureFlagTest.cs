@@ -28,6 +28,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
             string environment = _testContext.Properties["FunctionalTest:Application:Environment"].ToString();
             string app = _testContext.Properties["FunctionalTest:Application"].ToString();
             string featureName = _testContext.Properties["FunctionalTest:FlagName:Enabled"].ToString();
+            await flightingClient.DeleteFeatureFlag(app, environment, featureName, false);
 
             FeatureFlag featureFlagData = new()
             {
@@ -71,7 +72,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
         [TestMethod]
         [Priority(3)]
         [Description("Test Case ID - 5676062")]
-        public async Task Verify_CreateFeatureFlag_returns_unauthorized_response_for_correct_flagData_for_correct_env_incorrect_app_to_user()
+        public async Task Verify_CreateFeatureFlag_returns_bad_request_response_for_correct_flagData_for_correct_env_incorrect_app_to_user()
         {
             //Arrange
             FeatureFlagClient flightingClient = ClientCreator.CreateFeatureFlagClient(_testContext);
@@ -110,7 +111,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
             //Act
             var result = await flightingClient.CreateFeatureFlag(featureFlagData, "Invalid", environment, useAlternateAccount: true);
             //Assert
-            Assert.AreEqual(HttpStatusCode.Forbidden.ToString(), result);
+            Assert.AreEqual(HttpStatusCode.BadRequest.ToString(), result);
         }
 
         [TestCategory("Functional")]
