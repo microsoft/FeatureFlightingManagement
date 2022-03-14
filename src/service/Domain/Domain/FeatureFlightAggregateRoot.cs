@@ -31,6 +31,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Tenant tenant,
             Settings settings,
             Condition condition,
+            Audit audit,
             ValueObjects.Version version) : base(null)
         {
             Feature = feature;
@@ -38,6 +39,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Tenant = tenant;
             Settings = settings;
             Condition = condition;
+            Audit = audit;
             Version = version;
             _id = GetFlightId();
         }
@@ -55,9 +57,9 @@ namespace Microsoft.FeatureFlighting.Core.Domain
                 tenant,
                 settings,
                 condition,
+                audit,
                 version)
-        {
-            Audit = audit;
+        {   
             EvaluationMetrics = evaluationMetrics;
             Report = report;
         }

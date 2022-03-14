@@ -94,7 +94,16 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                 Enabled = azureFeatureFlag.Enabled,
                 Version = azureFeatureFlag.Version,
                 IsAzureFlightOptimized = false,
-                Audit = null,
+                Audit = azureFeatureFlag.LastModifiedOn != null ? new AuditDto()
+                {
+                    CreatedBy = "SYSTEM",
+                    CreatedOn = azureFeatureFlag.LastModifiedOn.Value,
+                    EnabledOn = azureFeatureFlag.Enabled ? azureFeatureFlag.LastModifiedOn.Value : null,
+                    DisabledOn = !azureFeatureFlag.Enabled ? azureFeatureFlag.LastModifiedOn.Value : null,
+                    LastModifiedBy = "SYSTEM",
+                    LastModifiedOn = azureFeatureFlag.LastModifiedOn.Value,
+                    LastUpdateType = "Flag Created"
+                } : null,
                 EvaluationMetrics = null
             };
 

@@ -43,6 +43,9 @@ namespace Microsoft.FeatureFlighting.Common.Model.AzureAppConfig
         [JsonProperty("version")]
         public string Version { get; set; }
 
+        [JsonProperty("lastModifiedOn")]
+        public DateTime? LastModifiedOn { get; set; }
+
 
         public AzureFeatureFlag() { }
         public AzureFeatureFlag(string name)

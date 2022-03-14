@@ -15,6 +15,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                 tenant: new Tenant(tenantConfiguration.Name, flag.Environment),
                 settings: new Settings(tenantConfiguration?.Optimization),
                 condition: new Condition(flag.IncrementalRingsEnabled, flag.Conditions),
+                audit: new Audit("SYSTEM", flag.LastModifiedOn ?? System.DateTime.UtcNow, flag.Enabled),
                 version: new Version(flag.Version));
             return aggregateRoot;
         }
