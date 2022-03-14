@@ -24,15 +24,12 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
 
         public event EventHandler<BackgroundCacheParameters> ObjectCached;
 
-        public RulesEngineManager(IOperatorStrategy operatorEvaluatorStrategy, ITenantConfigurationProvider tenantConfigurationProvider, IBlobProviderFactory blobProviderFactory, ICacheFactory cacheFactory)
+        public RulesEngineManager(IOperatorStrategy operatorEvaluatorStrategy!!, ITenantConfigurationProvider tenantConfigurationProvider!!, IBlobProviderFactory blobProviderFactory!!, ICacheFactory cacheFactory!!)
         {
-            if (operatorEvaluatorStrategy == null)
-                throw new ArgumentNullException(nameof(operatorEvaluatorStrategy));
-
             Operator.Initialize(operatorEvaluatorStrategy);
-            _tenantConfigurationProvider = tenantConfigurationProvider ?? throw new ArgumentNullException(nameof(tenantConfigurationProvider));
-            _blobProviderFactory = blobProviderFactory ?? throw new ArgumentNullException(nameof(blobProviderFactory));
-            _cacheFactory = cacheFactory ?? throw new ArgumentNullException(nameof(cacheFactory));
+            _tenantConfigurationProvider = tenantConfigurationProvider;
+            _blobProviderFactory = blobProviderFactory;
+            _cacheFactory = cacheFactory;
         }
 
         /// <inheritdoc>/>
@@ -48,6 +45,18 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
 
             IRulesEngineEvaluator evaluator = await CreateRulesEngine(workflowName, tenant, trackingIds);
             await CacheRuleEvaluator((RulesEngineEvaluator)evaluator, tenant, workflowName, tenantConfiguration.BusinessRuleEngine.CacheDuration, trackingIds);
+            return evaluator;
+        }
+
+        /// <inheritdoc>/>
+        public async Task<IRulesEngineEvaluator> Build(string tenant, string workflowName, string workflowPayload)
+        {
+            TenantConfiguration tenantConfiguration = await _tenantConfigurationProvider.Get(tenant);
+            IRulesEngine ruleEngine = new RE.RulesEngine(
+                jsonConfig: new string[] { workflowPayload },
+                reSettings: new ReSettings() { CustomTypes = new Type[] { typeof(Operator) } },
+                logger: null);
+            IRulesEngineEvaluator evaluator = new RulesEngineEvaluator(ruleEngine, workflowName, tenantConfiguration);
             return evaluator;
         }
 

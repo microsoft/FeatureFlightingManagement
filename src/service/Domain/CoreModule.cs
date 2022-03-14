@@ -208,6 +208,10 @@ namespace Microsoft.FeatureFlighting.Core
                 .As<QueryHandler<GetEvaluationMetricsQuery, EvaluationMetricsDto>>()
                 .SingleInstance();
 
+            builder.RegisterType<VerifyRulesEngineQueryHandler>()
+                .As<QueryHandler<VerifyRulesEngineQuery, EvaluationResult>>()
+                .SingleInstance();
+
             builder.RegisterType<QueryService>()
                 .As<IQueryService>()
                 .SingleInstance();

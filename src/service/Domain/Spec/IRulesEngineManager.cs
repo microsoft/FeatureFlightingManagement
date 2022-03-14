@@ -16,5 +16,15 @@ namespace Microsoft.FeatureFlighting.Core.Spec
         /// <param name="trackingIds">Tracking IDs</param>
         /// <returns cref="IRulesEngineEvaluator">Rule engine evaluator</returns>
         Task<IRulesEngineEvaluator> Build(string tenant, string workflowName, LoggerTrackingIds trackingIds);
+
+
+        /// <summary>
+        /// Builds a <see cref="IRulesEngineEvaluator"/> for the given payload
+        /// </summary>
+        /// <param name="tenant">Name of the tenant</param>
+        /// <param name="workflowName">Name of the workflow</param>
+        /// <param name="workflowPayload">Rule engine payload</param>
+        /// <returns></returns>
+        Task<IRulesEngineEvaluator> Build(string tenant, string workflowName, string workflowPayload);
     }
 }

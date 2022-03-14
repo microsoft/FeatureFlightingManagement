@@ -19,11 +19,11 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
         private readonly string _workflowName;
         private readonly TenantConfiguration _tenantConfiguration;
 
-        public RulesEngineEvaluator(IRulesEngine ruleEngine, string workflowName, TenantConfiguration tenantConfiguration)
+        public RulesEngineEvaluator(IRulesEngine ruleEngine!!, string workflowName!!, TenantConfiguration tenantConfiguration!!)
         {
-            _ruleEngine = ruleEngine ?? throw new ArgumentNullException(nameof(ruleEngine));
-            _workflowName = workflowName ?? throw new ArgumentNullException(nameof(workflowName));
-            _tenantConfiguration = tenantConfiguration ?? throw new ArgumentNullException(nameof(tenantConfiguration));
+            _ruleEngine = ruleEngine;
+            _workflowName = workflowName;
+            _tenantConfiguration = tenantConfiguration;
         }
 
         /// <inheritdoc/>

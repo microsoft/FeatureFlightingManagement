@@ -15,6 +15,7 @@ using Microsoft.FeatureFlighting.API.Controllers;
 using AppInsights.EnterpriseTelemetry.Web.Extension;
 using AppInsights.EnterpriseTelemetry.Web.Extension.Filters;
 using Microsoft.FeatureFlighting.API.Background;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.PS.Services.FlightingService.Api
 {
@@ -101,9 +102,10 @@ namespace Microsoft.PS.Services.FlightingService.Api
             services.AddSingleton<ProbeController, ProbeController>();
 
             services.AddMvc(options =>
-            {   
+            {
                 options.Filters.Add<TrackingPropertiesFilterAttribute>();
-            }).AddControllersAsServices();
+            }).AddControllersAsServices()
+            .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
         }
     }
 }
