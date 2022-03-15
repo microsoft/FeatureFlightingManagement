@@ -17,13 +17,9 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
 
             IEnumerable<AzureFilter> activeInFilters = GetActiveFilters(flag, Operator.In);
             IEnumerable<AzureFilter> activeNotInFilters = GetActiveFilters(flag, Operator.NotIn);
-            IEnumerable<AzureFilter> activeSgMemberFilters = GetActiveFilters(flag, Operator.MemberOfSecurityGroup);
-            IEnumerable<AzureFilter> activeNotSgMemberFilters = GetActiveFilters(flag, Operator.NotMemberOfSecurityGroup);
 
             RemoveDuplicateValues(activeInFilters);
             RemoveDuplicateValues(activeNotInFilters);
-            RemoveDuplicateValues(activeSgMemberFilters);
-            RemoveDuplicateValues(activeNotSgMemberFilters);
 
             return true;
         }
