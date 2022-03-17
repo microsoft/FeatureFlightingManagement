@@ -75,9 +75,9 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
         {
             BackgroundCacheParameters cacheParameters = new()
             {
+                CacheKey = $"{tenant}_{workflowName}",
                 ObjectId = workflowName,
-                Tenant = tenant,
-                CacheKey = $"{tenant}_{workflowName}"
+                Tenant = tenant
             };
             return (await CreateCacheableObject(cacheParameters, trackingIds)).Object;
         }
@@ -100,25 +100,23 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
         }
 
         public async Task<IRulesEngineEvaluator> GetCachedObject(BackgroundCacheParameters cacheParameters, LoggerTrackingIds trackingIds)
-        {
-            string workflowName = cacheParameters.ObjectId;
+        {   
             ICache breCache = _cacheFactory.Create(cacheParameters.Tenant, nameof(TenantConfiguration.Cache.RulesEngine), trackingIds.CorrelationId, trackingIds.TransactionId);
             if (breCache == null)
                 return null;
 
-            IRulesEngineEvaluator cachedRuleEngine = await breCache.Get<RulesEngineEvaluator>(workflowName, trackingIds.CorrelationId, trackingIds.TransactionId);
+            IRulesEngineEvaluator cachedRuleEngine = await breCache.Get<RulesEngineEvaluator>(cacheParameters.CacheKey, trackingIds.CorrelationId, trackingIds.TransactionId);
             return cachedRuleEngine;
         }
 
         public async Task SetCacheObject(BackgroundCacheableObject<IRulesEngineEvaluator> cacheableObject, LoggerTrackingIds trackingIds)
-        {
-            string workflowName = cacheableObject.CacheParameters.ObjectId;
+        {   
             TenantConfiguration tenantConfiguration = await _tenantConfigurationProvider.Get(cacheableObject.CacheParameters.Tenant);
             ICache breCache = _cacheFactory.Create(cacheableObject.CacheParameters.Tenant, nameof(TenantConfiguration.Cache.RulesEngine), trackingIds.CorrelationId, trackingIds.TransactionId);
             if (breCache == null)
                 return;
 
-            await breCache.Set(workflowName, cacheableObject.Object, trackingIds.CorrelationId, trackingIds.TransactionId, relativeExpirationMins: tenantConfiguration.BusinessRuleEngine.CacheDuration);
+            await breCache.Set(cacheableObject.CacheParameters.CacheKey, cacheableObject.Object, trackingIds.CorrelationId, trackingIds.TransactionId, relativeExpirationMins: tenantConfiguration.BusinessRuleEngine.CacheDuration);
             ObjectCached?.Invoke(this, cacheableObject.CacheParameters);
         }
 

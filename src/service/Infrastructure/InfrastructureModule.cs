@@ -84,6 +84,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure
         {
             builder.RegisterType<GraphGroupVerificationService>()
                 .As<IGroupVerificationService>()
+                .As<IBackgroundCacheable>()
                 .SingleInstance();
         }
 
