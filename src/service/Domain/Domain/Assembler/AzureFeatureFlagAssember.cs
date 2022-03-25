@@ -83,6 +83,16 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                     ShowWarning = flight.UsageReport?.ShowAlert ?? false,
                     WarningStatement = flight.UsageReport?.UsageStatement,
                     MetricsLastUpdatedOn = flight.EvaluationMetrics?.To
+                },
+                Audit = new AzureFlagAudit()
+                {
+                    CreatedOn = flight.Audit?.CreatedOn,
+                    CreatedBy = flight.Audit?.CreatedBy,
+                    LastModifiedOn = flight.Audit?.LastModifiedOn,
+                    LastModifiedBy = flight.Audit?.LastModifiedBy,
+                    LastUpdateType = flight.Audit?.LastUpdateType,
+                    EnabledOn = flight.Audit?.EnabledOn,
+                    DisabledOn = flight.Audit?.DisabledOn
                 }
             };
 
