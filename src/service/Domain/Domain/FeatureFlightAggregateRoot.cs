@@ -78,7 +78,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain
         public void UpdateFeatureFlag(IFlightOptimizer optimizer, AzureFeatureFlag updatedFlag, string updatedBy, LoggerTrackingIds trackingIds, string source, out bool isUpdated)
         {
             FeatureFlightDto originalFlag = FeatureFlightDtoAssembler.Assemble(this);
-            Status newStatus = new(updatedFlag.Enabled, updatedFlag.IsFlagOptimized);
+            Status newStatus = new(updatedFlag.Enabled, updatedFlag.IsFlagOptimized, updatedFlag.Optimizations);
             bool isStatusUpdated = false;
             if (Status.Enabled != newStatus.Enabled)
             {
@@ -290,7 +290,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             if (Settings.EnableOptimization)
             {
                 optimizer.Optmize(ProjectedFlag, Settings.OptimizationRules, trackingIds);
-                Status.SetOptimizationStatus(ProjectedFlag.IsFlagOptimized);
+                Status.SetOptimizationStatus(ProjectedFlag);
             }
         }
 

@@ -69,6 +69,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                 Version = flight.Version,
                 IncrementalRingsEnabled = flight.IsIncremental,
                 IsFlagOptimized = flight.IsAzureFlightOptimized,
+                Optimizations = flight.Optimizations,
                 Conditions = new AzureFilterCollection()
                 {
                     Client_Filters = new AzureFilter[] { }

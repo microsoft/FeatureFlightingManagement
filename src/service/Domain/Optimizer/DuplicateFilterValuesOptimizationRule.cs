@@ -1,8 +1,8 @@
-﻿using Microsoft.FeatureFlighting.Common;
-using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
-using Microsoft.FeatureFlighting.Core.FeatureFilters;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
+using Microsoft.FeatureFlighting.Common;
+using Microsoft.FeatureFlighting.Core.FeatureFilters;
+using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
 
 namespace Microsoft.FeatureFlighting.Core.Optimizer
 {
@@ -18,10 +18,11 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
             IEnumerable<AzureFilter> activeInFilters = GetActiveFilters(flag, Operator.In);
             IEnumerable<AzureFilter> activeNotInFilters = GetActiveFilters(flag, Operator.NotIn);
 
-            RemoveDuplicateValues(activeInFilters);
-            RemoveDuplicateValues(activeNotInFilters);
+            bool isOptimized = false;
+            isOptimized |= RemoveDuplicateValues(activeInFilters);
+            isOptimized |= RemoveDuplicateValues(activeNotInFilters);
 
-            return true;
+            return isOptimized;
         }
 
         private IEnumerable<AzureFilter> GetActiveFilters(AzureFeatureFlag flag, Operator @operator)
@@ -31,19 +32,23 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
                 .ToList();
         }
 
-        private void RemoveDuplicateValues(IEnumerable<AzureFilter> filters)
+        private bool RemoveDuplicateValues(IEnumerable<AzureFilter> filters)
         {
             if (filters == null || !filters.Any())
-                return;
+                return false;
 
+            bool isOptimized = false;
             foreach(AzureFilter filter in filters)
             {
                 if (string.IsNullOrWhiteSpace(filter.Parameters.Value))
                     continue;
 
                 List<string> values = filter.Parameters.Value.Split(',').Distinct().ToList();
+                string optimizedFilterValue = string.Join(',', values);
+                isOptimized |= filter.Parameters.Value != optimizedFilterValue;
                 filter.Parameters.Value = string.Join(',', values);
             }
+            return isOptimized;
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using CQRS.Mediatr.Lite.SDK.Domain;
+using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
 
 namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
 {
@@ -8,12 +10,14 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
         public bool Enabled { get; private set; }
         public bool IsActive { get; private set; }
         public bool IsOptimized { get; private set; }
+        public List<string> Optimizations { get; private set; }
 
-        public Status(bool enabled, bool isOptimized)
+        public Status(bool enabled, bool isOptimized, List<string> optimizations)
         {
             Enabled = enabled;
             IsActive = false;
             IsOptimized = isOptimized;
+            Optimizations = optimizations;
         }
 
         public void Toggle()
@@ -26,9 +30,10 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
             IsActive = Enabled && condition != null && condition.IsActive();
         }
 
-        public void SetOptimizationStatus(bool isFlagOptimized)
+        public void SetOptimizationStatus(AzureFeatureFlag flag)
         {
-            IsOptimized = isFlagOptimized;
+            IsOptimized = flag.IsFlagOptimized;
+            Optimizations = flag.Optimizations;
         }
 
         public override bool Equals(object obj)

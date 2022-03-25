@@ -20,6 +20,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                 IsIncremental = flight.Condition.IncrementalActivation,
                 Version = flight.Version.ToString(),
                 IsAzureFlightOptimized = flight.Status.IsOptimized,
+                Optimizations = flight.Status.Optimizations,
                 Audit = flight.Audit != null ? new AuditDto
                 {
                     CreatedBy = flight.Audit.CreatedBy,
@@ -93,7 +94,8 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                 Environment = azureFeatureFlag.Environment,
                 Enabled = azureFeatureFlag.Enabled,
                 Version = azureFeatureFlag.Version,
-                IsAzureFlightOptimized = false,
+                IsAzureFlightOptimized = azureFeatureFlag.IsFlagOptimized,
+                Optimizations = azureFeatureFlag.Optimizations,
                 Audit = azureFeatureFlag.LastModifiedOn != null ? new AuditDto()
                 {
                     CreatedBy = "SYSTEM",
