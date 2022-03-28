@@ -24,6 +24,8 @@ namespace Microsoft.FeatureFlighting.Common.Model
 
         public bool IsAzureFlightOptimized { get; set; }
 
+        public List<string> Optimizations { get; set; }
+
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string Version { get; set; }
 

@@ -109,7 +109,8 @@ namespace Microsoft.FeatureFlighting.Core.Commands
             {
                 ActivePeriodThreshold = tenantConfiguration.IntelligentAlerts.MaximumActivePeriod,
                 InactivePeriodThreshold = tenantConfiguration.IntelligentAlerts.MaximumDisabledPeriod,
-                UnusedPeriodThreshold = tenantConfiguration.IntelligentAlerts.MaximumUnusedPeriod
+                UnusedPeriodThreshold = tenantConfiguration.IntelligentAlerts.MaximumUnusedPeriod,
+                GloballyLaunchedFeaturesThreshold = tenantConfiguration.IntelligentAlerts.MaximumLaunchedPeriod,
             };
             report.ActiveFeatures = flights
                 .Where(flight => flight.Status.Enabled && flight.Status.IsActive)
@@ -123,6 +124,11 @@ namespace Microsoft.FeatureFlighting.Core.Commands
 
             report.InactiveFeatures = flights
                 .Where(flight => !flight.Status.Enabled || !flight.Status.IsActive)
+                .Select(flight => flight.Feature.Name)
+                .ToList();
+
+            report.GloballyLaunchedFeatures = flights
+                .Where(flight => flight.Condition != null && flight.Condition.IsLaunched())
                 .Select(flight => flight.Feature.Name)
                 .ToList();
 
@@ -167,6 +173,20 @@ namespace Microsoft.FeatureFlighting.Core.Commands
                     Environment = command.Environment,
                     Threshold = flight.Report.Settings.MaximumActivationPeriod,
                     Value = flight.Report.ActivePeriod,
+                    ThresholdUnit = "Days"
+                })
+                .OrderByDescending(flight => flight.Value)
+                .ToList();
+
+            report.LongLaunchedFeatures = flights
+                .Where(flight => flight.Report.HasLaunchedPeriodCrossed && flight.Report.TriggerAlert)
+                .Select(flight => new ThresholdExceededReportDto()
+                {
+                    FeatureId = flight.Id,
+                    FeatureName = flight.Feature.Name,
+                    Environment = command.Environment,
+                    Threshold = flight.Report.Settings.MaximumLaunchedPeriod,
+                    Value = flight.Report.LaunchedPeriod,
                     ThresholdUnit = "Days"
                 })
                 .OrderByDescending(flight => flight.Value)

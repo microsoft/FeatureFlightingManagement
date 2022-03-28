@@ -66,6 +66,21 @@ namespace Microsoft.FeatureFlighting.Common.Model
         public int UnusedPeriodThreshold { get; set; }
 
         /// <summary>
+        ///  List features globally launched
+        /// </summary>
+        public List<string> GloballyLaunchedFeatures { get; set; }
+        
+        /// <summary>
+        /// Count of globally launched features
+        /// </summary>
+        public int GloballyLaunchedFeaturesCount => GloballyLaunchedFeatures != null ? GloballyLaunchedFeatures.Count : 0;
+        
+        /// <summary>
+        /// Maximum period for keeping a globally launched feature
+        /// </summary>
+        public int GloballyLaunchedFeaturesThreshold { get; set; }
+
+        /// <summary>
         /// Total number of flag evaluations
         /// </summary>
         public int TotalEvaluations { get; set; }
@@ -89,6 +104,11 @@ namespace Microsoft.FeatureFlighting.Common.Model
         /// List of active feature flights that hasn't been executed for a long time
         /// </summary>
         public List<ThresholdExceededReportDto> UnusedFeatures { get; set; }
+
+        /// <summary>
+        /// List of feature flights that has been launched for a long time
+        /// </summary>
+        public List<ThresholdExceededReportDto> LongLaunchedFeatures { get; set; }
 
         /// <summary>
         /// Indicates if action is needed by tenant admin
@@ -154,6 +174,16 @@ namespace Microsoft.FeatureFlighting.Common.Model
                     continue;
                 }
                 flightSelector.Add(activeFeature.FeatureName, $"{{{{{activeFeature.FeatureName}.value}}}}");
+            }
+
+            foreach (ThresholdExceededReportDto longLaunchedFeature in LongLaunchedFeatures)
+            {
+                if (flightSelector.ContainsKey(longLaunchedFeature.FeatureName))
+                {   
+                    UnusedFeatures.Remove(longLaunchedFeature);
+                    continue;
+                }
+                flightSelector.Add(longLaunchedFeature.FeatureName, $"{{{{{longLaunchedFeature.FeatureName}.value}}}}");
             }
 
             FlightSelectorBody = JsonConvert.SerializeObject(JsonConvert.SerializeObject(flightSelector));

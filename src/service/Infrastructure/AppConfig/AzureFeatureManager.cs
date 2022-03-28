@@ -11,6 +11,7 @@ using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common.AppConfig;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
+using System;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.AppConfig
 {
@@ -161,6 +162,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.AppConfig
             AzureFeatureFlag featureflag = JsonConvert.DeserializeObject<AzureFeatureFlag>(configurationSetting.Value);
             featureflag.Name = !string.IsNullOrWhiteSpace(featureflag.Name) ? featureflag.Name : FlagUtilities.GetFeatureFlagName(tenant, environment, featureflag.Id);
             featureflag.Environment = !string.IsNullOrWhiteSpace(featureflag.Environment) ? featureflag.Environment : environment.ToLowerInvariant();
+            featureflag.LastModifiedOn = configurationSetting.LastModified.HasValue ? configurationSetting.LastModified.Value.UtcDateTime : DateTime.UtcNow;
             return featureflag;
         }
     }

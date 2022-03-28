@@ -12,7 +12,7 @@
 
     <!--APPLICATION-->
     <Parameter name="FunctionalTest:Application:Environment" value="dev" />
-    <Parameter name="FunctionalTest:Application" value="field experience (fxp)" />
+    <Parameter name="FunctionalTest:Application" value="TEST" />
     <Parameter name="FunctionalTest:NoFlagsPresent:Application" value="axis" />
 
     <!--FLAG NAMES-->

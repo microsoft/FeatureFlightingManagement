@@ -31,6 +31,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Tenant tenant,
             Settings settings,
             Condition condition,
+            Audit audit,
             ValueObjects.Version version) : base(null)
         {
             Feature = feature;
@@ -38,6 +39,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             Tenant = tenant;
             Settings = settings;
             Condition = condition;
+            Audit = audit;
             Version = version;
             _id = GetFlightId();
         }
@@ -55,9 +57,9 @@ namespace Microsoft.FeatureFlighting.Core.Domain
                 tenant,
                 settings,
                 condition,
+                audit,
                 version)
-        {
-            Audit = audit;
+        {   
             EvaluationMetrics = evaluationMetrics;
             Report = report;
         }
@@ -76,7 +78,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain
         public void UpdateFeatureFlag(IFlightOptimizer optimizer, AzureFeatureFlag updatedFlag, string updatedBy, LoggerTrackingIds trackingIds, string source, out bool isUpdated)
         {
             FeatureFlightDto originalFlag = FeatureFlightDtoAssembler.Assemble(this);
-            Status newStatus = new(updatedFlag.Enabled, updatedFlag.IsFlagOptimized);
+            Status newStatus = new(updatedFlag.Enabled, updatedFlag.IsFlagOptimized, updatedFlag.Optimizations);
             bool isStatusUpdated = false;
             if (Status.Enabled != newStatus.Enabled)
             {
@@ -182,7 +184,10 @@ namespace Microsoft.FeatureFlighting.Core.Domain
 
         public void ReBuild(string triggeredBy, string reason, IFlightOptimizer optimizer, string source, LoggerTrackingIds trackingIds)
         {
-            Audit.Update(triggeredBy, DateTime.UtcNow, $"Flight Rebuild - {reason}");
+            if (Audit == null)
+                Audit = new("SYSTEM", DateTime.UtcNow, triggeredBy, DateTime.UtcNow, $"Flight Rebuild - {reason}");
+            else
+                Audit.Update(triggeredBy, DateTime.UtcNow, $"Flight Rebuild - {reason}");
             Version.UpdateMinor();
             ProjectAzureFlag(optimizer, trackingIds);
             ApplyChange(new FeatureFlightRebuilt(this, reason, trackingIds, source));
@@ -215,10 +220,16 @@ namespace Microsoft.FeatureFlighting.Core.Domain
                 unusedPeriod = (int)(now - EvaluationMetrics.LastEvaluatedOn).Value.TotalDays;
             }
 
+            int launchedPeriod = 0;
+            if (Report.Settings.VerifyLaunchedPeriod && Condition != null && Condition.IsLaunched())
+            {
+                launchedPeriod = (int)(now - Condition.GetHighestActiveStage().ActivatedOn).Value.TotalDays;
+            }
+
             int createdSince = (int)(now - Audit.CreatedOn).TotalDays;
             bool isNew = createdSince < 10;
 
-            Report.UpdateStatus(isNew, activePeriod, inactivePeriod, unusedPeriod, requestedBy, now);
+            Report.UpdateStatus(isNew, activePeriod, inactivePeriod, unusedPeriod, launchedPeriod, requestedBy, now);
         }
 
         public void Subscribe(string unsubscribedBy, string source, LoggerTrackingIds trackingIds)
@@ -279,7 +290,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             if (Settings.EnableOptimization)
             {
                 optimizer.Optmize(ProjectedFlag, Settings.OptimizationRules, trackingIds);
-                Status.SetOptimizationStatus(ProjectedFlag.IsFlagOptimized);
+                Status.SetOptimizationStatus(ProjectedFlag);
             }
         }
 

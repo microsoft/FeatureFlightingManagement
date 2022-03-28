@@ -110,6 +110,13 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
             return Stages == null || !Stages.Any();
         }
 
+        public bool IsLaunched()
+        {
+            return !IsEmpty()
+                && IsActive()
+                && GetActiveStages().Any(activeStage => activeStage.IsLaunched());
+        }
+
         public Tuple<bool, bool, bool, bool> Update(Condition updatedCondition)
         {
             bool areSettingsUpdated = false;

@@ -20,6 +20,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                 IsIncremental = flight.Condition.IncrementalActivation,
                 Version = flight.Version.ToString(),
                 IsAzureFlightOptimized = flight.Status.IsOptimized,
+                Optimizations = flight.Status.Optimizations,
                 Audit = flight.Audit != null ? new AuditDto
                 {
                     CreatedBy = flight.Audit.CreatedBy,
@@ -70,9 +71,11 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                         ActivePeriod = flight.Report.ActivePeriod,
                         InactivePeriod = flight.Report.InactivePeriod,
                         UnusedPeriod = flight.Report.UnusedPeriod,
+                        LaunchedPeriod = flight.Report.LaunchedPeriod,
                         HasActivationPeriodExceeded = flight.Report.HasActivePeriodCrossed,
                         HasDisabledPeriodExceeded = flight.Report.HasInactivePeriodCrossed,
                         HasUnsedPeriodExceeded = flight.Report.HasUnusedPeriodCrossed,
+                        HasLaunchedPeriodExceeded = flight.Report.HasLaunchedPeriodCrossed,
                         ShowAlert = flight.Report.TriggerAlert
                     }
                     : null
@@ -91,8 +94,18 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Assembler
                 Environment = azureFeatureFlag.Environment,
                 Enabled = azureFeatureFlag.Enabled,
                 Version = azureFeatureFlag.Version,
-                IsAzureFlightOptimized = false,
-                Audit = null,
+                IsAzureFlightOptimized = azureFeatureFlag.IsFlagOptimized,
+                Optimizations = azureFeatureFlag.Optimizations,
+                Audit = azureFeatureFlag.LastModifiedOn != null ? new AuditDto()
+                {
+                    CreatedBy = "SYSTEM",
+                    CreatedOn = azureFeatureFlag.LastModifiedOn.Value,
+                    EnabledOn = azureFeatureFlag.Enabled ? azureFeatureFlag.LastModifiedOn.Value : null,
+                    DisabledOn = !azureFeatureFlag.Enabled ? azureFeatureFlag.LastModifiedOn.Value : null,
+                    LastModifiedBy = "SYSTEM",
+                    LastModifiedOn = azureFeatureFlag.LastModifiedOn.Value,
+                    LastUpdateType = "Flag Created"
+                } : null,
                 EvaluationMetrics = null
             };
 

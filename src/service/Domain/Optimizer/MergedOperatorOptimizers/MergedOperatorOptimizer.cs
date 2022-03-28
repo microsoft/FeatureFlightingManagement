@@ -16,7 +16,7 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
         protected abstract Operator OptimizedOperator { get; }
         protected abstract string EventName { get; }
 
-        private readonly ILogger _logger;
+        protected readonly ILogger _logger;
 
         protected MergedOperatorOptimizer(ILogger logger)
         {
@@ -102,7 +102,7 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
 
         private AzureFilter OptimizeDuplicates(IGrouping<string, AzureFilterGroup> duplicateFilters)
         {
-            string joinedFilterValue = string.Join(',', duplicateFilters.Select(group => group.Filter.Parameters.Value).Distinct());
+            string joinedFilterValue = JoinDuplicateValues(duplicateFilters);
             AzureFilter optimizedInFilter = new()
             {
                 Name = duplicateFilters.First().Filter.Name,
@@ -117,6 +117,11 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
                 }
             };
             return optimizedInFilter;
+        }
+
+        protected virtual string JoinDuplicateValues(IGrouping<string, AzureFilterGroup> duplicateFilters)
+        {
+            return string.Join(',', duplicateFilters.Select(group => group.Filter.Parameters.Value).Distinct());
         }
 
         protected void RemoveDuplicateFilters(AzureFeatureFlag flag, IEnumerable<IGrouping<string, AzureFilterGroup>> groupedDuplicateFilters)

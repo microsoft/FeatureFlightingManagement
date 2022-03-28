@@ -24,24 +24,26 @@ namespace Microsoft.FeatureFlighting.Core.Optimizer
         // <inheritdoc/>
         public void Optmize(AzureFeatureFlag flag, List<string> optimizationRules, LoggerTrackingIds trackingIds)
         {
-            bool isFlagOptimized = false;
             if (_optimizationRules == null || !_optimizationRules.Any())
                 return;
 
             if (optimizationRules[0].ToLowerInvariant() == "*".ToLowerInvariant())
                 optimizationRules = GetAllOptimizationRules().ToList();
 
-
+            flag.Optimizations = new List<string>();
             foreach (string optimizationRuleName in optimizationRules)
             {
                 IFlightOptimizationRule optimizationRule = _optimizationRules.FirstOrDefault(rule => rule.RuleName.ToLowerInvariant() == optimizationRuleName.ToLowerInvariant());
                 if (optimizationRule == null)
                 {
                     _logger.Log($"Invalid optimization rule with name {optimizationRuleName} cannot be evaluated");
+                    continue;
                 }
-                isFlagOptimized |= optimizationRule.Optimize(flag, trackingIds);
+                bool isOptimizationRuleApplied = optimizationRule.Optimize(flag, trackingIds);
+                if (isOptimizationRuleApplied)
+                    flag.Optimizations.Add(optimizationRule.RuleName);
             }
-            flag.IsFlagOptimized = isFlagOptimized;
+            flag.IsFlagOptimized = flag.Optimizations != null && flag.Optimizations.Any();
         }
 
         private IEnumerable<string> GetAllOptimizationRules()

@@ -28,6 +28,11 @@ namespace Microsoft.FeatureFlighting.Common.Model
         public int UnusedPeriod { get; set; }
 
         /// <summary>
+        /// Days since the flight has been globally launched
+        /// </summary>
+        public int LaunchedPeriod { get; set; }
+
+        /// <summary>
         /// Indicates if the feature has been active for too long
         /// </summary>
         public bool HasActivationPeriodExceeded { get; set; }
@@ -41,6 +46,11 @@ namespace Microsoft.FeatureFlighting.Common.Model
         /// Indicates if the feature remains unused for too long
         /// </summary>
         public bool HasUnsedPeriodExceeded { get; set; }
+
+        /// <summary>
+        /// Indicates if the feature has been launched for too long
+        /// </summary>
+        public bool HasLaunchedPeriodExceeded { get; set; }
 
         /// <summary>
         /// Indicates of the feature iis newly added

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using Microsoft.Graph;
-using System.Globalization;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using Microsoft.Identity.Client;
@@ -9,21 +9,27 @@ using System.Collections.Generic;
 using AppInsights.EnterpriseTelemetry;
 using Microsoft.FeatureFlighting.Common;
 using Microsoft.Extensions.Configuration;
+using Microsoft.FeatureFlighting.Common.Cache;
 using Microsoft.FeatureFlighting.Common.Group;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common.Caching;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Graph
-{   
+{
     /// <inheritdoc>/>
-    internal class GraphGroupVerificationService: IGroupVerificationService
+    internal class GraphGroupVerificationService : IGroupVerificationService, IBackgroundCacheable<List<string>>
     {
         private readonly IGraphServiceClient _graphServiceClient;
         private readonly ICacheFactory _cacheFactory;
         private readonly bool _isCachingEnabled;
         private readonly int _cacheInterval;
         private readonly ILogger _logger;
+        private readonly bool _verboseLogging;
+
+        public event EventHandler<BackgroundCacheParameters> ObjectCached;
+
+        public string CacheableServiceId => nameof(GraphGroupVerificationService);
 
         public GraphGroupVerificationService(IConfiguration configuration, ICacheFactory cacheFactory, ILogger logger)
         {
@@ -32,158 +38,87 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
             _cacheInterval = int.Parse(configuration["Graph:CacheExpiration"]);
             _isCachingEnabled = cacheFactory != null && _cacheInterval > 0 && bool.Parse(configuration["Graph:CachingEnabled"]);
             _graphServiceClient = CreateGraphClient(configuration);
+            _verboseLogging = configuration["Logging:LogLevel:Default"].ToLowerInvariant() == "Debug".ToLowerInvariant();
         }
 
         /// <inheritdoc>/>
-        public async Task<bool> IsMember(string userUpn, List<string> groupOids, LoggerTrackingIds trackingIds)
+        public async Task<bool> IsMember(string userUpn, List<string> securityGroupIds, LoggerTrackingIds trackingIds)
         {
             try
             {
-                IList<string>? cachedUsers = await GetCachedUserPrincipalNames(securityGroupIds: groupOids, trackingIds);
-                if (cachedUsers != null && cachedUsers.Any())
-                    return cachedUsers.Any(user => userUpn.ToLowerInvariant() == user.ToLowerInvariant());
-
-                var memberGroups = await _graphServiceClient.Users[userUpn]
-                    .CheckMemberGroups(groupOids)
-                    .Request()
-                    .PostAsync();
-
-                await CacheUsers(securityGroupIds: groupOids, trackingIds);
-                return memberGroups.Any();
+               foreach(string securityGroup in securityGroupIds)
+                {
+                    IList<string> groupMembers = await GetGroupMembers(securityGroup, trackingIds);
+                    if (groupMembers.Any(member => member.ToLowerInvariant() == userUpn.ToLowerInvariant()))
+                    {
+                        LogDebugMessage(new StringBuilder().Append(userUpn).Append(" found in ").Append(securityGroup), trackingIds);
+                        return true;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 HandleGraphError(ex, trackingIds);
                 return false;
             }
-        }
-
-        /// <inheritdoc>/>
-        [Obsolete("Checking graph by Alias has issues. Use IsMember and pass the User UPN")]
-        public async Task<bool> IsUserAliasPartOfSecurityGroup(string userAlias, List<string> securityGroupIds, LoggerTrackingIds trackingIds)
-        {
-            IList<string>? cachedUsers = await GetCachedUserPrincipalNames(securityGroupIds, trackingIds);
-            if (cachedUsers != null && cachedUsers.Any())
-            {
-                return cachedUsers.Any(user => user.StartsWith(userAlias, ignoreCase: true, culture: CultureInfo.InvariantCulture));
-            }
-
-            foreach (var securityGroupId in securityGroupIds)
-            {
-                try
-                {
-                    if (string.IsNullOrWhiteSpace(securityGroupId))
-                        return false;
-                    var transitiveMembers = await _graphServiceClient.Groups[securityGroupId]
-                        .TransitiveMembers
-                        .Request()
-                        .GetAsync();
-                    if (transitiveMembers == null || !transitiveMembers.Any())
-                        continue;
-                    do
-                    {
-                        if (transitiveMembers.Any(member => (member is User) && (member as User).UserPrincipalName.StartsWith(userAlias, ignoreCase: true, culture: CultureInfo.InvariantCulture)))
-                        {
-                            await CacheUsers(securityGroupIds, trackingIds);
-                            return true;
-                        }
-                        if (transitiveMembers.NextPageRequest == null)
-                            break;
-                        transitiveMembers = await transitiveMembers.NextPageRequest.GetAsync();
-                    } while (transitiveMembers != null);
-                }
-                catch (Exception ex)
-                {
-                    HandleGraphError(ex, trackingIds);
-                    return false;
-                }
-            }
-            await CacheUsers(securityGroupIds, trackingIds);
             return false;
         }
 
-        private async Task<IList<string>?> GetCachedUserPrincipalNames(List<string> securityGroupIds, LoggerTrackingIds trackingIds)
+        [Obsolete("Use IsMember")]
+        public async Task<bool> IsUserAliasPartOfSecurityGroup(string userAlias, List<string> securityGroupIds, LoggerTrackingIds trackingIds)
         {
             try
             {
-                if (!_isCachingEnabled)
-                    return null;
-
-                var cache = _cacheFactory.Create("Default", "Graph", trackingIds.CorrelationId, trackingIds.TransactionId);
-                var cachingTasks = new List<Task<IList<string>>>();
-                foreach (var securityGroupId in securityGroupIds)
+                foreach (string securityGroup in securityGroupIds)
                 {
-                    string cacheKey = GetUserPrincipalNamesCacheKey(securityGroupId);
-                    cachingTasks.Add(cache.GetList(cacheKey, trackingIds.CorrelationId, trackingIds.TransactionId));
+                    IList<string> groupMembers = await GetGroupMembers(securityGroup, trackingIds);
+                    if (groupMembers.Any(member => member.ToLowerInvariant().StartsWith(userAlias)))
+                    {
+                        return true;
+                    }
                 }
-                await Task.WhenAll(cachingTasks).ConfigureAwait(false);
-                return cachingTasks.SelectMany(task => task.Result ?? new List<string>()).ToList();
             }
             catch (Exception ex)
             {
-                _logger.Log(new Exception("An error ocurred while getting cached UPNs", ex), trackingIds.CorrelationId, trackingIds.TransactionId, "GraphApiAccessProvider:GetCachedUserPrincipalNames");
-                return null;
+                HandleGraphError(ex, trackingIds);
+                return false;
             }
+            return false;
         }
 
-        private async Task CacheUsers(List<string> securityGroupIds, LoggerTrackingIds trackingIds)
+        private void LogDebugMessage(StringBuilder message, LoggerTrackingIds trackingIds)
         {
-            try
-            {
-                var cachingTasks = new List<Task>();
-                foreach (var securityGroupId in securityGroupIds)
-                {
-                    cachingTasks.Add(CacheUsers(securityGroupId, trackingIds));
-                }
-                await Task.WhenAll(cachingTasks);
-            }
-            catch (Exception ex)
-            {
-                _logger.Log(new Exception("An error ocurred while caching users", ex), trackingIds.CorrelationId, trackingIds.TransactionId, "GraphApiAccessProvider:GetCachedUserPrincipalNames");
-            }
+            if (_verboseLogging)
+                _logger.Log(message.ToString(), trackingIds.CorrelationId, trackingIds.TransactionId, "GraphGroupVerificationService");
         }
 
-        private async Task CacheUsers(string securityGroupId, LoggerTrackingIds trackingIds)
+        private async Task<IList<string>> GetGroupMembers(string securityGroupId, LoggerTrackingIds trackingIds)
         {
-            if (!_isCachingEnabled)
-                return;
-            
-            ICache cache = _cacheFactory.Create("Default", "Graph", trackingIds.CorrelationId, trackingIds.TransactionId);
-            List<string> cachedObjectIds = new();
-            List<string> cachedUserPrincipalNames = new();
-
-            var transitiveMembers = await _graphServiceClient.Groups[securityGroupId]
-                    .TransitiveMembers
-                    .Request()
-                    .GetAsync()
-                    .ConfigureAwait(false);
-            var groupMembers = transitiveMembers.ToList();
-            while (transitiveMembers != null && transitiveMembers.NextPageRequest != null)
+            BackgroundCacheParameters userCacheParameter = new()
             {
-                transitiveMembers = await transitiveMembers.NextPageRequest.GetAsync();
-                if (transitiveMembers != null)
-                    groupMembers.AddRange(transitiveMembers.ToList());
-            }
-
-            foreach (var member in groupMembers)
+                CacheKey = string.Format(Common.Constants.Caching.UserUpnKey, securityGroupId),
+                ObjectId = securityGroupId,
+                CacheDuration = _cacheInterval
+            };
+            List<string> groupMembers = await GetCachedObject(userCacheParameter, trackingIds);
+            if (groupMembers != null && groupMembers.Any()) 
             {
-                if (member is not User user)
-                    continue;
-
-                cachedObjectIds.Add(member.Id);
-                cachedUserPrincipalNames.Add(user.UserPrincipalName);
+                LogDebugMessage(new StringBuilder().Append(securityGroupId).Append(" members found in cache"), trackingIds);
+                return groupMembers;
             }
+                
+ 
+            var cacheableGroupMembers = await CreateCacheableObject(userCacheParameter, trackingIds);
+            groupMembers = cacheableGroupMembers?.Object ?? new();
+            if (groupMembers != null && groupMembers.Any())
+            {
+                LogDebugMessage(new StringBuilder().Append(securityGroupId).Append(" members added in cache"), trackingIds);
+                await SetCacheObject(cacheableGroupMembers, trackingIds);
+            }   
 
-            await cache.SetList(GetUserObjectIdsCacheKey(securityGroupId), cachedObjectIds, trackingIds.CorrelationId, trackingIds.TransactionId, _cacheInterval).ConfigureAwait(false);
-            await cache.SetList(GetUserPrincipalNamesCacheKey(securityGroupId), cachedUserPrincipalNames, trackingIds.CorrelationId, trackingIds.TransactionId, _cacheInterval).ConfigureAwait(false);
+            return groupMembers ?? new();
         }
-
-        private string GetUserPrincipalNamesCacheKey(string securityGroupId) =>
-            string.Format(Common.Constants.Caching.UserObjectIdKey, securityGroupId);
-
-        private string GetUserObjectIdsCacheKey(string securityGroupId) =>
-            string.Format(Common.Constants.Caching.UserObjectIdKey, securityGroupId);
-
+      
         private IGraphServiceClient CreateGraphClient(IConfiguration configuration)
         {
             try
@@ -233,6 +168,58 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
                 TransactionId = trackingIds?.TransactionId
             });
             return graphException;
+        }
+
+        public async Task<List<string>> GetCachedObject(BackgroundCacheParameters parameters, LoggerTrackingIds trackingIds)
+        {
+            ICache cache = _cacheFactory.Create("Default", "Graph", trackingIds.CorrelationId, trackingIds.TransactionId);
+            return (await cache.GetList(parameters.CacheKey, trackingIds.CorrelationId, trackingIds.TransactionId))?.ToList() ?? new();
+        }
+
+        public async Task SetCacheObject(BackgroundCacheableObject<List<string>> cacheableObject, LoggerTrackingIds trackingIds)
+        {
+            ICache cache = _cacheFactory.Create("Default", "Graph", trackingIds.CorrelationId, trackingIds.TransactionId);
+            await cache.SetList(cacheableObject.CacheParameters.CacheKey, cacheableObject.Object, trackingIds.CorrelationId, trackingIds.TransactionId, _cacheInterval);
+            ObjectCached?.Invoke(this, cacheableObject.CacheParameters);
+        }
+
+        public async Task<BackgroundCacheableObject<List<string>>> CreateCacheableObject(BackgroundCacheParameters cacheParameters, LoggerTrackingIds trackingIds)
+        {
+            string cacheKey = cacheParameters.CacheKey;
+            string groupId = cacheParameters.ObjectId;
+
+            var transitiveMembers = await _graphServiceClient.Groups[groupId]
+                   .TransitiveMembers
+                   .Request()
+                   .GetAsync()
+                   .ConfigureAwait(false);
+
+            var groupMembers = transitiveMembers?.ToList() ?? new();
+            while (transitiveMembers != null && transitiveMembers.NextPageRequest != null)
+            {
+                transitiveMembers = await transitiveMembers.NextPageRequest.GetAsync().ConfigureAwait(false);
+                if (transitiveMembers != null)
+                    groupMembers.AddRange(transitiveMembers?.ToList() ?? new());
+            }
+
+            List<string> userPrincipalNames = groupMembers
+                .Where(member => member is User)?
+                .Select(member => ((User)member).UserPrincipalName)?
+                .ToList() ?? new();
+
+            BackgroundCacheableObject<List<string>> cacheableGroupMembers = new()
+            {
+                Object = userPrincipalNames,
+                CacheParameters = cacheParameters
+            };
+            return cacheableGroupMembers;
+        }
+
+        public async Task RebuildCache(BackgroundCacheParameters cacheParameters, LoggerTrackingIds trackingIds)
+        {
+            var cacheableObject = await CreateCacheableObject(cacheParameters, trackingIds).ConfigureAwait(false);
+            if (cacheableObject.Object != null && cacheableObject.Object.Any())
+                await SetCacheObject(cacheableObject, trackingIds).ConfigureAwait(false);
         }
     }
 }

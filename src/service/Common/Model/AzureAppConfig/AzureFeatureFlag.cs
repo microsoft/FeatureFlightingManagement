@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
@@ -28,6 +29,9 @@ namespace Microsoft.FeatureFlighting.Common.Model.AzureAppConfig
         [JsonProperty("isFlagOptimized")]
         public bool IsFlagOptimized { get; set; }
 
+        [JsonProperty("optimizations")]
+        public List<string> Optimizations { get; set; }
+
         [JsonProperty("label")]
         public string Label { get; set; }
 
@@ -42,6 +46,9 @@ namespace Microsoft.FeatureFlighting.Common.Model.AzureAppConfig
 
         [JsonProperty("version")]
         public string Version { get; set; }
+
+        [JsonProperty("lastModifiedOn")]
+        public DateTime? LastModifiedOn { get; set; }
 
 
         public AzureFeatureFlag() { }

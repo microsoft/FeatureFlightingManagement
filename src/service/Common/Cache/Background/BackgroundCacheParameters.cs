@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Microsoft.FeatureFlighting.Common.Cache
 {
+    /// <summary>
+    /// Parameters for background caching
+    /// </summary>
     public class BackgroundCacheParameters
     {
         public string CacheKey { get; set; }
@@ -10,20 +13,26 @@ namespace Microsoft.FeatureFlighting.Common.Cache
         public string Tenant { get; set; }
         public int CacheDuration { get; set; }
         public Dictionary<string, string> AdditionalParmeters { get; set; } = null;
-        public DateTime NextRecacheTimestamp { get; private set; }
+        public DateTime NextRebuildTimestamp { get; private set; }
 
-        public void UpdateNextRecacheTimestamp()
+        /// <summary>
+        /// Updates the nexr re-build timestamp
+        /// </summary>
+        public void UpdateRebuildTimestamp()
         {
             if (CacheDuration > 0)
-                NextRecacheTimestamp = DateTime.UtcNow.AddMinutes(CacheDuration);
+                NextRebuildTimestamp = DateTime.UtcNow.AddMinutes(CacheDuration);
             else
-                NextRecacheTimestamp = DateTime.MaxValue;
+                NextRebuildTimestamp = DateTime.MaxValue;
         }
 
-        public bool ShouldRecache(int gracePeriod)
+        /// <summary>
+        /// Verifies if the cache should be re-built
+        /// </summary>
+        public bool ShouldRebuildCache(int gracePeriod)
         {
             DateTime graceTimestamp = DateTime.UtcNow.AddMinutes(gracePeriod);
-            return NextRecacheTimestamp <= graceTimestamp;
+            return NextRebuildTimestamp <= graceTimestamp;
         }
     }
 }
