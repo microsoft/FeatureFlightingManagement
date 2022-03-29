@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using AppInsights.EnterpriseTelemetry;
 using AppInsights.EnterpriseTelemetry.Context;
+using System.ComponentModel;
 
 namespace Microsoft.FeatureFlighting.API.Controllers
 {
@@ -101,11 +102,10 @@ namespace Microsoft.FeatureFlighting.API.Controllers
             if (Request.Headers == null)
                 return null;
 
-            if (!Request.Headers.Any(header => header.Key.ToLowerInvariant() == headerKey.ToLowerInvariant()))
-                return null;
+            if (Request.Headers.TryGetValue(headerKey, out var value))
+                return value.FirstOrDefault()?.ToString();
 
-            var headerValues = Request.Headers.FirstOrDefault(header => header.Key.ToLowerInvariant() == headerKey.ToLowerInvariant());
-            return headerValues.Value.FirstOrDefault();
+            return null;
         }
 
         private void ValidateEnvironment(string envName, string correlationId, string transactionId)
