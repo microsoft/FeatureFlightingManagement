@@ -3,6 +3,7 @@ using CQRS.Mediatr.Lite;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using AppInsights.EnterpriseTelemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common.Model;
 using Microsoft.FeatureFlighting.Core.Commands;
@@ -20,7 +21,7 @@ namespace Microsoft.FeatureFlighting.API.Controllers
         /// <summary>
         /// Constructor
         /// </summary>
-        public ReportsController(ICommandBus commandBus, IConfiguration configuration) : base(configuration)
+        public ReportsController(ICommandBus commandBus, IConfiguration configuration, ILogger logger) : base(configuration, logger)
         {
             _commandBus = commandBus;
         }

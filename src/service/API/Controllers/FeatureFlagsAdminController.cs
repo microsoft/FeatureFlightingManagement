@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using AppInsights.EnterpriseTelemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common.Model;
 using Microsoft.FeatureFlighting.Core.Queries;
@@ -25,8 +26,8 @@ namespace Microsoft.FeatureFlighting.API.Controllers
         /// <summary>
         /// Constructor
         /// </summary>
-        public FeatureFlagsAdminController(IQueryService queryService, ICommandBus commandBus, IConfiguration configuration)
-            :base(configuration)
+        public FeatureFlagsAdminController(IQueryService queryService, ICommandBus commandBus, IConfiguration configuration, ILogger logger)
+            :base(configuration, logger)
         {
             _queryService = queryService;
             _commandBus = commandBus;

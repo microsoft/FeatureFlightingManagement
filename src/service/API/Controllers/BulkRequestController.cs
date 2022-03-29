@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using AppInsights.EnterpriseTelemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Core.Commands;
 
@@ -21,7 +22,7 @@ namespace Microsoft.FeatureFlighting.API.Controllers
         /// <summary>
         /// Constructor
         /// </summary>
-        public BulkRequestController(IConfiguration configuration, ICommandBus commandBus) : base(configuration)
+        public BulkRequestController(IConfiguration configuration, ICommandBus commandBus, ILogger logger) : base(configuration, logger)
         {
             _commandBus = commandBus;
         }

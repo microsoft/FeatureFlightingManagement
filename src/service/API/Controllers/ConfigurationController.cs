@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using AppInsights.EnterpriseTelemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.FeatureFlighting.API.Controllers;
@@ -21,8 +22,8 @@ namespace Microsoft.FeatureFlighting.Api.Controllers
         /// <summary>
         /// Constructor
         /// </summary>
-        public ConfigurationController(IOperatorStrategy operatorEvaluatorStrategy, IConfiguration configuration)
-            : base(configuration)
+        public ConfigurationController(IOperatorStrategy operatorEvaluatorStrategy, IConfiguration configuration, ILogger logger)
+            : base(configuration, logger)
         {
             _operatorEvaluatorStrategy = operatorEvaluatorStrategy;
         }
