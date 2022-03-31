@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using System.Text.Json.Serialization;
 using Microsoft.FeatureFlighting.Core;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.FeatureFlighting.Common;
@@ -9,13 +10,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureFlighting.API.Extensions;
 using Microsoft.FeatureFlighting.Infrastructure;
+using Microsoft.FeatureFlighting.API.Background;
 using Microsoft.FeatureFlighting.Api.Controllers;
 using Microsoft.FeatureFlighting.Api.Middlewares;
 using Microsoft.FeatureFlighting.API.Controllers;
 using AppInsights.EnterpriseTelemetry.Web.Extension;
 using AppInsights.EnterpriseTelemetry.Web.Extension.Filters;
-using Microsoft.FeatureFlighting.API.Background;
-using System.Text.Json.Serialization;
 
 namespace Microsoft.PS.Services.FlightingService.Api
 {
@@ -97,15 +97,11 @@ namespace Microsoft.PS.Services.FlightingService.Api
         }
 
         private void AddMvc(IServiceCollection services)
-        {
-            services.AddSingleton<FeatureFlagsEvaluationController, FeatureFlagsEvaluationController>();
-            services.AddSingleton<ProbeController, ProbeController>();
-
+        {   
             services.AddMvc(options =>
             {
                 options.Filters.Add<TrackingPropertiesFilterAttribute>();
-            }).AddControllersAsServices()
-            .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+            }).AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
         }
     }
 }
