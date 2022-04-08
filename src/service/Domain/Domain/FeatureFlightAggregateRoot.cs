@@ -107,7 +107,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain
             ProjectAzureFlag(optimizer, trackingIds);
             string updateType = GetUpdateType(isStatusUpdated, areStageSettingsUpdated, areStagesUpdated, areStagesAdded, areStagesDeleted);
             Audit.Update(updatedBy, DateTime.UtcNow, updateType);
-            ApplyChange(new FeatureFlightUpdated(this, originalFlag, updateType, trackingIds));
+            ApplyChange(new FeatureFlightUpdated(this, originalFlag, updateType, trackingIds, source));
         }
 
         public void Enable(string enabledBy, IFlightOptimizer optimizer, LoggerTrackingIds trackingIds, string source, out bool isUpdated)

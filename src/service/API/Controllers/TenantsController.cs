@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using AppInsights.EnterpriseTelemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Core.Queries;
 using Microsoft.FeatureFlighting.Common.Config;
@@ -21,7 +22,7 @@ namespace Microsoft.FeatureFlighting.API.Controllers
         /// <summary>
         /// Constructor
         /// </summary>
-        public TenantsController(IQueryService queryService, IConfiguration configuration) : base(configuration)
+        public TenantsController(IQueryService queryService, IConfiguration configuration, ILogger logger) : base(configuration, logger)
         {
             _queryService = queryService;
         }

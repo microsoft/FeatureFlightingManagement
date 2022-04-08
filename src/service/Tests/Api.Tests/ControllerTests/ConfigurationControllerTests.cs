@@ -21,7 +21,7 @@ namespace Microsoft.FeatureFlighting.Api.Tests.ControllerTests
         {
             var configMock = SetConfigurationMock();
 
-            ConfigurationController controller = new ConfigurationController(null, configMock);
+            ConfigurationController controller = new ConfigurationController(null, configMock, null);
 
 
             var operators = controller.GetOperators() as OkObjectResult;
@@ -33,7 +33,7 @@ namespace Microsoft.FeatureFlighting.Api.Tests.ControllerTests
         {
             var configMock = SetConfigurationMock();
             var mockOperatorevaluatorStrategy = SetOpeartorEvaluationStrategy();
-            ConfigurationController controller = new ConfigurationController(mockOperatorevaluatorStrategy.Object, configMock);
+            ConfigurationController controller = new ConfigurationController(mockOperatorevaluatorStrategy.Object, configMock, null);
 
 
             var operators = (await controller.GetFilters()) as OkObjectResult;
@@ -44,7 +44,7 @@ namespace Microsoft.FeatureFlighting.Api.Tests.ControllerTests
         {
             var configMock = SetConfigurationMock();
             var mockOperatorevaluatorStrategy = SetOpeartorEvaluationStrategy();
-            ConfigurationController controller = new ConfigurationController(mockOperatorevaluatorStrategy.Object, configMock);
+            ConfigurationController controller = new ConfigurationController(mockOperatorevaluatorStrategy.Object, configMock, null);
 
 
             var mapping = (await controller.GetFilterOperatorMapping()) as OkObjectResult;

@@ -4,6 +4,7 @@ using CQRS.Mediatr.Lite;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using AppInsights.EnterpriseTelemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Core.Queries;
 using Microsoft.FeatureFlighting.Core.Operators;
@@ -21,8 +22,8 @@ namespace Microsoft.FeatureFlighting.API.Controllers
         /// <summary>
         /// Constructor
         /// </summary>
-        public RulesEngineController(IQueryService queryService, IConfiguration configuration)
-            :base(configuration)
+        public RulesEngineController(IQueryService queryService, IConfiguration configuration, ILogger logger)
+            :base(configuration, logger)
         {
             _queryService = queryService;
         }

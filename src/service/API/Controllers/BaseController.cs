@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
+using AppInsights.EnterpriseTelemetry;
+using AppInsights.EnterpriseTelemetry.Context;
+using System.ComponentModel;
 
 namespace Microsoft.FeatureFlighting.API.Controllers
 {
@@ -15,13 +18,15 @@ namespace Microsoft.FeatureFlighting.API.Controllers
     public class BaseController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public BaseController(IConfiguration configuration)
+        public BaseController(IConfiguration configuration, ILogger logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         /// <summary>
@@ -62,11 +67,45 @@ namespace Microsoft.FeatureFlighting.API.Controllers
         /// <param name="headerKey">Header Key</param>
         /// <param name="defaultValue">Default value if the key is not present</param>
         /// <returns>Header value</returns>
-        protected string GetHeaderValue(string headerKey, string defaultValue = default)
-        {
-            if (Request == null || Request.Headers == null || !Request.Headers.Any(header => header.Key.ToLowerInvariant() == headerKey.ToLowerInvariant()))
+        protected string GetHeaderValue(string headerKey, string defaultValue)
+        {   
+            try
+            {
+                string headerValue = GetHeaderValue(headerKey);
+                if (string.IsNullOrWhiteSpace(headerValue))
+                    return defaultValue;
+                return headerValue;
+            }
+            catch (Exception exception)
+            {
+                // TODO - THE BELOW CODE HAS BEEN KEPT FOR DEBUGGING ERRATIC FAILURES IN PROD
+                _logger.Log(exception);
+                MessageContext messageContext = new($"Error in getting header for {headerKey ?? "INVALID"}", TraceLevel.Error, "", "", "", "", "");
+                _logger.Log(messageContext);
                 return defaultValue;
-            return Request.Headers[headerKey].ToString();
+            }
+        }
+
+        /// <summary>
+        /// Gets the header value from the key
+        /// </summary>
+        /// <param name="headerKey">Header Key</param>
+        /// <returns>Header value</returns>
+        protected string GetHeaderValue(string headerKey)
+        {
+            if (string.IsNullOrWhiteSpace(headerKey))
+                return null;
+
+            if (Request == null)
+                return null;
+
+            if (Request.Headers == null)
+                return null;
+
+            if (Request.Headers.TryGetValue(headerKey, out var value))
+                return value.FirstOrDefault()?.ToString();
+
+            return null;
         }
 
         private void ValidateEnvironment(string envName, string correlationId, string transactionId)

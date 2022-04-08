@@ -16,7 +16,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
         public string UpdateType { get; set; }
         public FeatureFlightDto OriginalPayload { get; set; }
 
-        public FeatureFlightUpdated(FeatureFlightAggregateRoot flight, FeatureFlightDto originalPayload, string updateType, LoggerTrackingIds trackingIds, string source = null)
+        public FeatureFlightUpdated(FeatureFlightAggregateRoot flight, FeatureFlightDto originalPayload, string updateType, LoggerTrackingIds trackingIds, string source)
             : base(flight, trackingIds, source)
         {
             UpdatedBy = flight.Audit.LastModifiedBy;

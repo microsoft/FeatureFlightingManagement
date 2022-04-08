@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using AppInsights.EnterpriseTelemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.FeatureFlighting.Core.Queries;
@@ -27,8 +28,9 @@ namespace Microsoft.FeatureFlighting.API.Controllers
         public FeatureFlagsEvaluationController(IFeatureFlagEvaluator featureFlagEvaluator, 
             IQueryService queryService, 
             IHttpContextAccessor httpContextAccesor, 
-            IConfiguration configuration)
-        :base(configuration)
+            IConfiguration configuration,
+            ILogger logger)
+        :base(configuration, logger)
         {   
             _featureFlagEvaluator = featureFlagEvaluator;
             _queryService = queryService;
