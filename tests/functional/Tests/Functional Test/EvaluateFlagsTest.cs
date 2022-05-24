@@ -348,7 +348,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
             //Act
             var result = await flightingClient.Evaluate(app, environment, featureNameList, context.ToString());
             //Assert
-            Assert.IsTrue(result[featureName]);
+            Assert.IsFalse(result[featureName]);
         }
 
         [TestCategory("Functional")]
@@ -420,7 +420,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
             var result = await flightingClient.Evaluate(app, environment, featureNameList, context.ToString());
 
             //Assert
-            Assert.IsFalse(result[featureName]);
+            Assert.IsTrue(result[featureName]);
         }
 
         [TestCategory("Functional")]
@@ -539,7 +539,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
             var result = await flightingClient.Evaluate(app, environment, featureNameList, context);
 
             //Assert
-            Assert.IsTrue(result[featureName]);
+            Assert.IsFalse(result[featureName]);
         }
 
         [TestCategory("Functional")]
@@ -563,7 +563,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional.Functional_Test
             var result = await flightingClient.Evaluate(app, environment, featureNameList, context);
 
             //Assert
-            Assert.IsFalse(result[featureName]);
+            Assert.IsTrue(result[featureName]);
         }
 
     }
