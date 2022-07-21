@@ -72,7 +72,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
                 foreach (string securityGroup in securityGroupIds)
                 {
                     IList<string> groupMembers = await GetGroupMembers(securityGroup, trackingIds);
-                    if (groupMembers.Any(member => member.ToLowerInvariant().StartsWith(userAlias)))
+                    if (groupMembers.Any(member => member.Split('@')[0].ToLowerInvariant().Equals(userAlias)))
                     {
                         return true;
                     }
