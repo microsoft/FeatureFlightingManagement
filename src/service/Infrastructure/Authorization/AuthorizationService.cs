@@ -3,11 +3,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Identity.Client;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common.Config;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Common.Authorization;
 
@@ -21,6 +22,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
         private readonly IConfiguration _configuration;
+        private readonly ConcurrentDictionary<string, IConfidentialClientApplication> _confidentialApps;
         private readonly string _adminClaimType;
         private readonly string _adminClaimValue;
         private readonly string _tenantAdminClaimValue;
@@ -31,6 +33,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
             _tenantConfigurationProvider = tenantConfigurationProvider;
             _configuration = configuration;
 
+            _confidentialApps = new ConcurrentDictionary<string, IConfidentialClientApplication>();
             _adminClaimType = _configuration["Authorization:AdminClaimType"]?.ToLowerInvariant() ?? "Experimentation";
             _adminClaimValue = _configuration["Authorization:AdminClaimValue"]?.ToLowerInvariant() ?? "All";
             _tenantAdminClaimValue = _configuration["Authorization:TenantAdminClaimValue"]?.ToLowerInvariant() ?? "manageexperimentation";
@@ -70,10 +73,41 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
 
         public async Task<string> GetAuthenticationToken(string authority, string clientId, string clientSecret, string resourceId)
         {
-            AuthenticationContext authContext = new(authority);
-            ClientCredential credentials = new(clientId, clientSecret);
-            AuthenticationResult authResult = await authContext.AcquireTokenAsync(resourceId, clientCredential: credentials);
-            return authResult.AccessToken;
+            AuthenticationResult authenticationResult;
+            const string MsalScopeSuffix = "/.default";
+            string bearerToken = null;
+            try
+            {
+                IConfidentialClientApplication app = GetOrCreateConfidentialApp(authority, clientId, clientSecret);
+                if (app != null)
+                {
+                    var scopes = new[] { resourceId + MsalScopeSuffix };
+                    authenticationResult = await app.AcquireTokenForClient(scopes).ExecuteAsync();
+                    bearerToken = authenticationResult.AccessToken;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return bearerToken;
+        }
+
+        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId, string clientSecret)
+        {
+            string confidentialAppCacheKey = $"{authority}-{clientId}";
+            if (_confidentialApps.ContainsKey(confidentialAppCacheKey))
+            {
+                return _confidentialApps[confidentialAppCacheKey];
+            }
+            IConfidentialClientApplication app =
+                ConfidentialClientApplicationBuilder
+                    .Create(clientId)
+                    .WithClientSecret(clientSecret)
+                    .WithAuthority(new Uri(authority))
+                    .Build();
+            _confidentialApps.TryAdd(confidentialAppCacheKey, app);
+            return app;
         }
 
         public void AugmentAdminClaims(string tenant)
