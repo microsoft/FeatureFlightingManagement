@@ -10,8 +10,8 @@ This is a centralized feature flighting management system which leverages Azure 
 5. Integration with Graph API for evaluating flags based on Groups
 
 ## References
-- ### [Control Ring Rollout](https://www.devcompost.com/post/control-rollout-1)
-- ### [Designing a Centralized Feature flighting system](https://www.devcompost.com/post/control-rollout-2)
+- ### [Control Ring Rollout](https://www.codezap.dev/post/control-rollout-1)
+- ### [Designing a Centralized Feature flighting system](https://www.codezap.dev/post/control-rollout-2)
 - ### [Official Documentation](https://github.com/microsoft/FeatureFlightingManagement/wiki)
 
 ## Flighting in a nutshell
