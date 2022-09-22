@@ -15,7 +15,7 @@ namespace Microsoft.FeatureFlighting.Core.Queries
     {
         private readonly IRulesEngineManager _rulesEngineManager;
 
-        public VerifyRulesEngineQueryHandler(IRulesEngineManager rulesEngineManager!!)
+        public VerifyRulesEngineQueryHandler(IRulesEngineManager rulesEngineManager)
         {
             _rulesEngineManager = rulesEngineManager;
         }
