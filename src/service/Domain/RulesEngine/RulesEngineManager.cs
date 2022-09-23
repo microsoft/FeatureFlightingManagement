@@ -24,7 +24,7 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
 
         public event EventHandler<BackgroundCacheParameters> ObjectCached;
 
-        public RulesEngineManager(IOperatorStrategy operatorEvaluatorStrategy!!, ITenantConfigurationProvider tenantConfigurationProvider!!, IBlobProviderFactory blobProviderFactory!!, ICacheFactory cacheFactory!!)
+        public RulesEngineManager(IOperatorStrategy operatorEvaluatorStrategy, ITenantConfigurationProvider tenantConfigurationProvider, IBlobProviderFactory blobProviderFactory, ICacheFactory cacheFactory)
         {
             Operator.Initialize(operatorEvaluatorStrategy);
             _tenantConfigurationProvider = tenantConfigurationProvider;

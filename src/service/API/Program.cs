@@ -1,12 +1,13 @@
-﻿using System;
-using Microsoft.Azure.KeyVault;
+﻿using Azure;
+using System;
+using Azure.Identity;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Hosting;
 using System.Diagnostics.CodeAnalysis;
+using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Configuration;
 using Autofac.Extensions.DependencyInjection;
-using Microsoft.Azure.Services.AppAuthentication;
-using Microsoft.Extensions.Configuration.AzureKeyVault;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 
 namespace Microsoft.PS.Services.FlightingService.Api
@@ -19,8 +20,9 @@ namespace Microsoft.PS.Services.FlightingService.Api
             CreateHostBuilder(args).Build().Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
@@ -31,21 +33,23 @@ namespace Microsoft.PS.Services.FlightingService.Api
                     });
                     webBuilder.UseStartup<Startup>();
                 });
+        }
 
         private static void AddKeyVault(IConfigurationBuilder config)
         {
             var builtConfig = config.Build();
-            var azureTokenProvider = new AzureServiceTokenProvider();
-            var tokenCallback = new KeyVaultClient.AuthenticationCallback(azureTokenProvider.KeyVaultTokenCallback);
-            var keyVaultClient = new KeyVaultClient(tokenCallback);
 
-            config.AddAzureKeyVault(new AzureKeyVaultConfigurationOptions()
-            {
-                Vault = builtConfig["KeyVault:EndpointUrl"],
-                Client = keyVaultClient,
-                Manager = new DefaultKeyVaultSecretManager(),
-                ReloadInterval = TimeSpan.FromHours(int.Parse(builtConfig["KeyVault:PollingIntervalInHours"]))
-            });
+            config.AddAzureKeyVault(
+                new SecretClient(
+                    new Uri(builtConfig["KeyVault:EndpointUrl"]),
+                    credential: new DefaultAzureCredential()
+                    ),
+                new AzureKeyVaultConfigurationOptions()
+                {
+                    ReloadInterval = TimeSpan.FromHours(int.Parse(builtConfig["KeyVault:PollingIntervalInHours"]))
+                }
+            );
+
         }
 
         private static void AddAzureAppConfiguration(IConfigurationBuilder config)

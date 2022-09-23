@@ -19,7 +19,7 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
         private readonly string _workflowName;
         private readonly TenantConfiguration _tenantConfiguration;
 
-        public RulesEngineEvaluator(IRulesEngine ruleEngine!!, string workflowName!!, TenantConfiguration tenantConfiguration!!)
+        public RulesEngineEvaluator(IRulesEngine ruleEngine, string workflowName, TenantConfiguration tenantConfiguration)
         {
             _ruleEngine = ruleEngine;
             _workflowName = workflowName;
