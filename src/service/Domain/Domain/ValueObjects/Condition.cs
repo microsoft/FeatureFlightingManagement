@@ -159,7 +159,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
             {
                 foreach (Stage updatedStage in updatedStages)
                 {
-                    areStagesUpdated = Stages.First(stage => stage.Id == updatedStage.Id).TryUpdate(updatedStage);
+                    areStagesUpdated = areStagesUpdated || Stages.First(stage => stage.Id == updatedStage.Id).TryUpdate(updatedStage);
                 }
             }
 
