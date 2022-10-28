@@ -8,6 +8,7 @@ using Microsoft.FeatureFlighting.Core.Spec;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Core.Evaluation;
+using System.Collections.ObjectModel;
 
 namespace Microsoft.FeatureFlighting.Core
 {
@@ -35,14 +36,58 @@ namespace Microsoft.FeatureFlighting.Core
 
             PerformanceContext performanceContext = new("Feature Flag Evaluation Time");
             features = features.Distinct().ToList();
-            TenantConfiguration tenantConfiguration = await _tenantConfigurationProvider.Get(applicationName);
+            IEnumerable<TenantConfiguration> tenantConfigurations = _tenantConfigurationProvider.GetAllTenants();
             string context = GetContext();
-            EventContext @event = CreateFeatureFlagsEvaluatedEvent(tenantConfiguration.Name, environment, context, "Azure", features);
-            AddHttpContext(environment, tenantConfiguration);
 
-            IEvaluationStrategy strategy = _strategyBuilder.GetStrategy(features, tenantConfiguration);
-            IDictionary<string, bool> results = await strategy.Evaluate(features, tenantConfiguration, environment, @event);
-            
+            EventContext @event = CreateFeatureFlagsEvaluatedEvent(applicationName, environment, context, "Azure", features);
+
+            Dictionary<string, List<string>> featureToTenantMap = new Dictionary<string, List<string>>(); 
+            foreach (var feature in features)
+            {
+                var featureSplit = feature.Split(':');
+                // For Verge:Snap where Verge is Tenant Name and Snap is the Feature Name
+                if (featureSplit.Length == 2)   
+                {
+                    string tenantName = featureSplit[0], featureName = featureSplit[1]; 
+                    if (!featureToTenantMap.ContainsKey(featureSplit[0]))
+                        featureToTenantMap[tenantName] = new List<string>();
+                    featureToTenantMap[tenantName].Add(featureName);
+                }
+                else
+                {
+                    if(!featureToTenantMap.ContainsKey(applicationName))
+                        featureToTenantMap[applicationName] = new List<string>();
+                    featureToTenantMap[applicationName].Add(feature);
+                }
+            }
+
+            IEvaluationStrategy strategy=null;
+            IDictionary<string, bool> results = new Dictionary<string, bool>();
+            foreach (var tenantName in featureToTenantMap.Keys)
+            {
+                TenantConfiguration tenantConfiguration = tenantConfigurations.FirstOrDefault(t => string.Equals(t.Name,tenantName, System.StringComparison.OrdinalIgnoreCase));
+                if (tenantConfiguration == null)
+                    continue; 
+                AddHttpContext(environment, tenantConfiguration);
+                strategy = _strategyBuilder.GetStrategy(featureToTenantMap[tenantConfiguration.Name], tenantConfiguration);
+                var featureEvaluationResult = await strategy.Evaluate(featureToTenantMap[tenantConfiguration.Name], tenantConfiguration, environment, @event);
+                bool isDefaultTenant = string.Equals(tenantConfiguration.Name, applicationName, System.StringComparison.OrdinalIgnoreCase);
+
+                foreach (var evalResult in featureEvaluationResult)
+                {
+                    var featureKey = isDefaultTenant ? evalResult.Key : $"{tenantConfiguration.Name}:{evalResult.Key}";
+                    if (!results.ContainsKey(featureKey))
+                    {
+                        results.Add(featureKey, evalResult.Value);
+                    }
+                    else
+                    {
+                        results[featureKey] = results[featureKey] || evalResult.Value;
+                    }
+                }
+
+            } 
+
             LogEvaluationResults(performanceContext, @event, strategy);
             return results;
         }
