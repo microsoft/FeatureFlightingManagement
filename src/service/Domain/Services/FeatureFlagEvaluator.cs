@@ -9,6 +9,7 @@ using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Core.Evaluation;
 using System.Collections.ObjectModel;
+using System.Collections.Concurrent;
 
 namespace Microsoft.FeatureFlighting.Core
 {
@@ -62,27 +63,27 @@ namespace Microsoft.FeatureFlighting.Core
             }
 
             IEvaluationStrategy strategy=null;
-            IDictionary<string, bool> results = new Dictionary<string, bool>();
+            IDictionary<string, bool> results = new ConcurrentDictionary<string, bool>();
             foreach (var tenantName in featureToTenantMap.Keys)
             {
-                TenantConfiguration tenantConfiguration = tenantConfigurations.FirstOrDefault(t => string.Equals(t.Name,tenantName, System.StringComparison.OrdinalIgnoreCase));
+                TenantConfiguration tenantConfiguration = tenantConfigurations.FirstOrDefault(t => string.Equals(t.Name,tenantName, System.StringComparison.OrdinalIgnoreCase) || string.Equals(t.ShortName, tenantName, System.StringComparison.OrdinalIgnoreCase));
                 if (tenantConfiguration == null)
                     continue; 
                 AddHttpContext(environment, tenantConfiguration);
-                strategy = _strategyBuilder.GetStrategy(featureToTenantMap[tenantConfiguration.Name], tenantConfiguration);
-                var featureEvaluationResult = await strategy.Evaluate(featureToTenantMap[tenantConfiguration.Name], tenantConfiguration, environment, @event);
-                bool isDefaultTenant = string.Equals(tenantConfiguration.Name, applicationName, System.StringComparison.OrdinalIgnoreCase);
+                strategy = _strategyBuilder.GetStrategy(featureToTenantMap[tenantName], tenantConfiguration);
+                var featureEvaluationResults = await strategy.Evaluate(featureToTenantMap[tenantName], tenantConfiguration, environment, @event);
+                bool isDefaultTenant = string.Equals(tenantName, applicationName, System.StringComparison.OrdinalIgnoreCase);
 
-                foreach (var evalResult in featureEvaluationResult)
+                foreach (var featureEvalResult in featureEvaluationResults)
                 {
-                    var featureKey = isDefaultTenant ? evalResult.Key : $"{tenantConfiguration.Name}:{evalResult.Key}";
+                    var featureKey = isDefaultTenant ? featureEvalResult.Key : $"{tenantConfiguration.Name}:{featureEvalResult.Key}";
                     if (!results.ContainsKey(featureKey))
                     {
-                        results.Add(featureKey, evalResult.Value);
+                        results.Add(featureKey, featureEvalResult.Value);
                     }
                     else
                     {
-                        results[featureKey] = results[featureKey] || evalResult.Value;
+                        results[featureKey] = results[featureKey] || featureEvalResult.Value;
                     }
                 }
 
