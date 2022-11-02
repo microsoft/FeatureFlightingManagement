@@ -21,6 +21,7 @@ namespace Microsoft.FeatureFlighting.Common
             public const string FEATURE_ADD_ENABLED_CONTEXT = "AddEnabledContext";
             public const string FLIGHT_ADD_RESULT_CONTEXT_HEADER = "X-add-result-context";
             public const string ALL = "*";
+            public const string TENANT_FLAG_DELIMITER = "__";
 
             public struct Environment
             {
