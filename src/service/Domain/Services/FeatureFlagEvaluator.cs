@@ -10,6 +10,7 @@ using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Core.Evaluation;
 using System.Collections.ObjectModel;
 using System.Collections.Concurrent;
+using System;
 
 namespace Microsoft.FeatureFlighting.Core
 {
@@ -45,7 +46,7 @@ namespace Microsoft.FeatureFlighting.Core
             Dictionary<string, List<string>> featureToTenantMap = new Dictionary<string, List<string>>(); 
             foreach (var feature in features)
             {
-                var featureSplit = feature.Split(':');
+                var featureSplit = feature.Split(new string[] { Constants.Flighting.TENANT_FLAG_DELIMITER }, StringSplitOptions.None);
                 // For Verge:Snap where Verge is Tenant Name and Snap is the Feature Name
                 if (featureSplit.Length == 2)   
                 {
@@ -76,7 +77,7 @@ namespace Microsoft.FeatureFlighting.Core
 
                 foreach (var featureEvalResult in featureEvaluationResults)
                 {
-                    var featureKey = isDefaultTenant ? featureEvalResult.Key : $"{tenantConfiguration.Name}:{featureEvalResult.Key}";
+                    var featureKey = isDefaultTenant ? featureEvalResult.Key : $"{tenantConfiguration.Name}{Constants.Flighting.TENANT_FLAG_DELIMITER}{featureEvalResult.Key}";
                     if (!results.ContainsKey(featureKey))
                     {
                         results.Add(featureKey, featureEvalResult.Value);
