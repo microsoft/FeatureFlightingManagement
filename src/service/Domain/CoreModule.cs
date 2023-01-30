@@ -58,6 +58,22 @@ namespace Microsoft.FeatureFlighting.Core
                 .As<BaseOperator>()
                 .SingleInstance();
 
+            builder.RegisterType<ArrayAllOperator>()
+                .As<BaseOperator>()
+                .SingleInstance();
+
+            builder.RegisterType<ArrayAnyOperator>()
+                .As<BaseOperator>()
+                .SingleInstance();
+
+            builder.RegisterType<NotArrayAllOperator>()
+               .As<BaseOperator>()
+               .SingleInstance();
+
+            builder.RegisterType<NotArrayAnyOperator>()
+                .As<BaseOperator>()
+                .SingleInstance();
+
             builder.RegisterType<NotInOperator>()
                 .As<BaseOperator>()
                 .SingleInstance();

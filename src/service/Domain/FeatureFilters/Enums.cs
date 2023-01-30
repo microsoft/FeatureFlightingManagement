@@ -13,7 +13,11 @@
         MemberOfSecurityGroup,
         NotMemberOfSecurityGroup,
         Evaluates,
-        NotEvaluates
+        NotEvaluates,
+        ArrayAll,
+        ArrayAny,
+        NotArrayAll,
+        NotArrayAny
     }
 
     public enum Filters
