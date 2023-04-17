@@ -157,7 +157,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
 
             if (updatedStages.Any())
             {
-                foreach (Stage updatedStage in updatedStages)
+                foreach (Stage updatedStage in updatedStages.ToList())
                 {
                     areStagesUpdated = areStagesUpdated || Stages.First(stage => stage.Id == updatedStage.Id).TryUpdate(updatedStage);
                 }
@@ -172,7 +172,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.ValueObjects
             if (deletedStages.Any())
             {
                 areStagesDeleted = true;
-                foreach (Stage deletedStage in deletedStages)
+                foreach (Stage deletedStage in deletedStages.ToList())
                 {
                     Stages.Remove(deletedStage);
                 }
