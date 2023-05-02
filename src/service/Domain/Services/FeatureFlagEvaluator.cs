@@ -69,7 +69,7 @@ namespace Microsoft.FeatureFlighting.Core
             {
                 TenantConfiguration tenantConfiguration = tenantConfigurations.FirstOrDefault(t => string.Equals(t.Name,tenantName, System.StringComparison.OrdinalIgnoreCase) || string.Equals(t.ShortName, tenantName, System.StringComparison.OrdinalIgnoreCase));
                 if (tenantConfiguration == null)
-                    continue; 
+                    tenantConfiguration = await _tenantConfigurationProvider.Get(tenantName); 
                 AddHttpContext(environment, tenantConfiguration);
                 strategy = _strategyBuilder.GetStrategy(featureToTenantMap[tenantName], tenantConfiguration);
                 var featureEvaluationResults = await strategy.Evaluate(featureToTenantMap[tenantName], tenantConfiguration, environment, @event);
