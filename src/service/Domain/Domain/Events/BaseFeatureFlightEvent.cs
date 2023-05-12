@@ -47,6 +47,7 @@ namespace Microsoft.FeatureFlighting.Core.Domain.Events
                 { nameof(FeatureName), FeatureName},
                 { nameof(TenantName), TenantName},
                 { nameof(Environment), Environment },
+                { "EnvironmentName", Environment },
                 { nameof(Enabled), Enabled.ToString() },
                 { nameof(IsIncremental), IsIncremental.ToString() },
                 { nameof(FlightOptimized), FlightOptimized.ToString() },
