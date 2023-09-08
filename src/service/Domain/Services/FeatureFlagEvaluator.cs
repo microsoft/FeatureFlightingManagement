@@ -33,8 +33,10 @@ namespace Microsoft.FeatureFlighting.Core
         // <inheritdoc>
         public async Task<IDictionary<string, bool>> Evaluate(string applicationName, string environment, List<string> features)
         {
-            if (features == null || !features.Any())
+            if (features == null || features.Count == 0)
+            {
                 return new Dictionary<string, bool>();
+            }
 
             PerformanceContext performanceContext = new("Feature Flag Evaluation Time");
             features = features.Distinct().ToList();
@@ -43,52 +45,51 @@ namespace Microsoft.FeatureFlighting.Core
 
             EventContext @event = CreateFeatureFlagsEvaluatedEvent(applicationName, environment, context, "Azure", features);
 
-            Dictionary<string, List<string>> featureToTenantMap = new Dictionary<string, List<string>>(); 
-            foreach (var feature in features)
-            {
-                var featureSplit = feature.Split(new string[] { Constants.Flighting.TENANT_FLAG_DELIMITER }, StringSplitOptions.None);
-                // For Verge:Snap where Verge is Tenant Name and Snap is the Feature Name
-                if (featureSplit.Length == 2)   
+            Dictionary<string, List<string>> featureToTenantMap = features
+                .Select(feature =>
                 {
-                    string tenantName = featureSplit[0], featureName = featureSplit[1]; 
-                    if (!featureToTenantMap.ContainsKey(featureSplit[0]))
-                        featureToTenantMap[tenantName] = new List<string>();
-                    featureToTenantMap[tenantName].Add(featureName);
-                }
-                else
-                {
-                    if(!featureToTenantMap.ContainsKey(applicationName))
-                        featureToTenantMap[applicationName] = new List<string>();
-                    featureToTenantMap[applicationName].Add(feature);
-                }
-            }
+                    var featureSplit = feature.Split(new string[] { Constants.Flighting.TENANT_FLAG_DELIMITER }, StringSplitOptions.None);
+                    string tenantName = featureSplit.Length == 2 ? featureSplit[0] : applicationName;
+                    string featureName = featureSplit.Length == 2 ? featureSplit[1] : feature;
+                    return new { tenantName, featureName };
+                })
+                .GroupBy(x => x.tenantName, x => x.featureName)
+                .ToDictionary(g => g.Key, g => g.ToList());
 
-            IEvaluationStrategy strategy=null;
+            IEvaluationStrategy strategy = null;
             IDictionary<string, bool> results = new ConcurrentDictionary<string, bool>();
+            var tasks = new List<Task>();
             foreach (var tenantName in featureToTenantMap.Keys)
             {
-                TenantConfiguration tenantConfiguration = tenantConfigurations.FirstOrDefault(t => string.Equals(t.Name,tenantName, System.StringComparison.OrdinalIgnoreCase) || string.Equals(t.ShortName, tenantName, System.StringComparison.OrdinalIgnoreCase));
+                TenantConfiguration tenantConfiguration = tenantConfigurations.FirstOrDefault(t => string.Equals(t.Name, tenantName, System.StringComparison.OrdinalIgnoreCase) || string.Equals(t.ShortName, tenantName, System.StringComparison.OrdinalIgnoreCase));
                 if (tenantConfiguration == null)
-                    tenantConfiguration = await _tenantConfigurationProvider.Get(tenantName); 
+                {
+                    tenantConfiguration = await _tenantConfigurationProvider.Get(tenantName);
+                }
                 AddHttpContext(environment, tenantConfiguration);
                 strategy = _strategyBuilder.GetStrategy(featureToTenantMap[tenantName], tenantConfiguration);
-                var featureEvaluationResults = await strategy.Evaluate(featureToTenantMap[tenantName], tenantConfiguration, environment, @event);
-                bool isDefaultTenant = string.Equals(tenantName, applicationName, System.StringComparison.OrdinalIgnoreCase);
-
-                foreach (var featureEvalResult in featureEvaluationResults)
+                tasks.Add(Task.Run(async () =>
                 {
-                    var featureKey = isDefaultTenant ? featureEvalResult.Key : $"{tenantConfiguration.Name}{Constants.Flighting.TENANT_FLAG_DELIMITER}{featureEvalResult.Key}";
-                    if (!results.ContainsKey(featureKey))
+                    var featureEvaluationResults = await strategy.Evaluate(featureToTenantMap[tenantName], tenantConfiguration, environment, @event);
+                    bool isDefaultTenant = string.Equals(tenantName, applicationName, System.StringComparison.OrdinalIgnoreCase);
+
+                    foreach (var featureEvalResult in featureEvaluationResults)
                     {
-                        results.Add(featureKey, featureEvalResult.Value);
-                    }
-                    else
-                    {
-                        results[featureKey] = results[featureKey] || featureEvalResult.Value;
+                        var featureKey = isDefaultTenant ? featureEvalResult.Key : $"{tenantConfiguration.Name}{Constants.Flighting.TENANT_FLAG_DELIMITER}{featureEvalResult.Key}";
+                        if (!results.ContainsKey(featureKey))
+                        {
+                            results.Add(featureKey, featureEvalResult.Value);
+                        }
+                        else
+                        {
+                            results[featureKey] = results[featureKey] || featureEvalResult.Value;
+                        }
                     }
                 }
+                ));
+            }
 
-            } 
+            await Task.WhenAll(tasks);
 
             LogEvaluationResults(performanceContext, @event, strategy);
             return results;
