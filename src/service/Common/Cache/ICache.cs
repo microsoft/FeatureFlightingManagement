@@ -28,6 +28,17 @@ namespace Microsoft.FeatureFlighting.Common.Caching
         Task<IList<string>> GetList(string key, string correlationId, string transactionId);
 
         /// <summary>
+        /// Gets list of cached Objects
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="correlationId"></param>
+        /// <param name="transactionId"></param>
+        /// <returns></returns>
+        Task<IList<T>> GetListObject<T>(string key, string correlationId, string transactionId);
+
+
+        /// <summary>
         /// Caches an item
         /// </summary>
         /// <typeparam name="T">Type of object to be cached</typeparam>
@@ -48,6 +59,18 @@ namespace Microsoft.FeatureFlighting.Common.Caching
         /// <param name="transactionId">Transaction ID of the operation</param>
         /// <param name="relativeExpirationMins">Mins after which the cache will be purged.  -1 indicates forever caching.</param>        
         Task SetList(string key, IList<string> values, string correlationId, string transactionId, int relativeExpirationMins = -1);
+
+        /// <summary>
+        /// Sets a list of objects in the cache
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="values"></param>
+        /// <param name="correlationId"></param>
+        /// <param name="transactionId"></param>
+        /// <param name="relativeExpirationMins"></param>
+        /// <returns></returns>
+        Task SetListObjects<T>(string key, IList<T> values, string correlationId, string transactionId, int relativeExpirationMins = -1);
 
         /// <summary>
         /// Deletes an item in the cache
