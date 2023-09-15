@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.FeatureFlighting.Tests.Functional.Helper;
 using Microsoft.FeatureFlighting.Tests.Functional.Utilities;
+using Azure.Core;
+using Azure.Identity;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.Resources;
 
 namespace Microsoft.FeatureFlighting.Tests.Functional
 {
@@ -239,12 +241,10 @@ namespace Microsoft.FeatureFlighting.Tests.Functional
             if (!string.IsNullOrWhiteSpace(cachedToken))
                 return cachedToken;
 
-            var authContext = new AuthenticationContext(authority);
-            var client = clientId;
-            var key = flightingKey;
-            var credential = new ClientCredential(client, key);
-            var authResult = await authContext.AcquireTokenAsync(flightingResource, credential);
-            return authResult.AccessToken;
+            var tokenCredential = new DefaultAzureCredential();
+            var accessToken = await tokenCredential.GetTokenAsync(
+                new TokenRequestContext(scopes: new string[] { flightingResource + "/.default" }) { });
+            return accessToken.Token;
         }
 
         private static async Task<string> GetAccessTokenAsyncFromAlternateAccount()
@@ -254,12 +254,11 @@ namespace Microsoft.FeatureFlighting.Tests.Functional
             string flightingResource = _testContext.Properties["FunctionalTest:FxpFlighting:AAD:ResourceId"].ToString();
             string authority = _testContext.Properties["FunctionalTest:AAD:Authority"].ToString();
 
-            var authContext = new AuthenticationContext(authority);
-            var client = clientId;
-            var key = flightingKey;
-            var credential = new ClientCredential(client, key);
-            var authResult = await authContext.AcquireTokenAsync(flightingResource, credential);
-            return authResult.AccessToken;
+            var tokenCredential = new DefaultAzureCredential();
+            var accessToken = await tokenCredential.GetTokenAsync(
+                new TokenRequestContext(scopes: new string[] { flightingResource + "/.default" }) { });
+            return accessToken.Token;
+
         }
     }
 }
