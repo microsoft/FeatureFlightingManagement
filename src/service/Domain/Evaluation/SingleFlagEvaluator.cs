@@ -16,6 +16,7 @@ using System.Linq;
 using System.Transactions;
 using CQRS.Mediatr.Lite;
 using Microsoft.Extensions.Configuration;
+using System.Text.Json;
 
 namespace Microsoft.FeatureFlighting.Core.Evaluation
 {
@@ -38,7 +39,7 @@ namespace Microsoft.FeatureFlighting.Core.Evaluation
             _logger = logger;
             _cache = cache;
             _configuration = configuration;
-            _featureFlightResultCacheConfigs = _configuration.GetSection("FeatureFlightResultCacheConfig").Get<Dictionary<string, IList<string>>>();
+            _featureFlightResultCacheConfigs = JsonSerializer.Deserialize<Dictionary<string, IList<string>>>(_configuration.GetSection("FeatureFlightResultCacheConfig").Value);
             isCachingEnabled = _configuration.GetSection("EnableFeatureFlightResultCaching").Get<bool>();
         }
 
