@@ -26,6 +26,11 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
             return Task.FromResult<IList<string>>(null);
         }
 
+        public Task<IList<T>> GetListObject<T>(string key, string correlationId, string transactionId)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public Task Set<T>(string key, T value, string correlationId, string transactionId, int relativeExpirationMins = -1)
         {
             return Task.CompletedTask;
@@ -34,6 +39,11 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
         public Task SetList(string key, IList<string> values, string correlationId, string transactionId, int relativeExpirationMins = -1)
         {
             return Task.CompletedTask;
+        }
+
+        public Task SetListObjects<T>(string key, IList<T> values, string correlationId, string transactionId, int relativeExpirationMins = -1)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

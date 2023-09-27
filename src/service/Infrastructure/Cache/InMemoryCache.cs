@@ -95,5 +95,33 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
 
         private string GetTenantKey(string key) =>
             $"{_tenant}_{key}".ToUpperInvariant();
+
+        public Task<IList<T>> GetListObject<T>(string key, string correlationId, string transactionId)
+        {
+            key = GetTenantKey(key);
+            // NOTE: Get calls are not logged to avoid too much logging
+            _memoryCache.TryGetValue(key, out IList<T> cachedValues);
+            if (cachedValues != null)
+                return Task.FromResult(cachedValues);
+            return Task.FromResult<IList<T>>(null);
+        }
+
+        public Task SetListObjects<T>(string key, IList<T> values, string correlationId, string transactionId, int relativeExpirationMins = -1)
+        {
+            key = GetTenantKey(key);
+            DependencyContext dependencyContext = new(CacheLogContext.GetMetadata("InMemory", "SET_LIST", key));
+            dependencyContext.AddProperty("Relative Expiration", relativeExpirationMins.ToString());
+            dependencyContext.CorrelationId = correlationId;
+            dependencyContext.TransactionId = correlationId;
+
+            if (relativeExpirationMins > 0)
+                _memoryCache.Set(key, values, TimeSpan.FromMinutes(relativeExpirationMins));
+            else
+                _memoryCache.Set(key, values);
+
+            dependencyContext.CompleteDependency();
+            _logger.Log(dependencyContext);
+            return Task.CompletedTask;
+        }
     }
 }
