@@ -52,7 +52,7 @@ namespace Microsoft.FeatureFlighting.Core.Evaluation
             {
                 var isFeatureCachingEnabled = _featureFlightResultCacheConfigs.Where(x => x.Key.ToLowerInvariant() == tenantConfiguration.Name.ToLowerInvariant())
                     .Any(y => y.Value.Any(x => x.ToLowerInvariant() == featureFlag.ToLowerInvariant()));
-                if (isCachingEnabled && isFeatureCachingEnabled) // Todo: As of now feature flight result cacheing is enabled only for FXp platform tenant.
+                if (isCachingEnabled && isFeatureCachingEnabled) // Todo: As of now feature flight result caching is enabled only for FXp platform tenant.
                 {
                     var cachedFlightResult = await _cache.GetFeatureFlightResults(tenantConfiguration.Name, environment, new LoggerTrackingIds { CorrelationId = correlationId, TransactionId = transactionId });
                     if (cachedFlightResult != null)
