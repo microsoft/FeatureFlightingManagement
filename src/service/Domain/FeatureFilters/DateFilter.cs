@@ -9,11 +9,16 @@ using static Microsoft.FeatureFlighting.Common.Constants;
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
     [FilterAlias(FilterKeys.Date)]
-    public class DateFilter : BaseFilter, IFeatureFilter
+    public class DateFilter : BaseFilter, IFeatureFilter, IFilterParametersBinder
     {
         protected override string FilterType => FilterKeys.Date;
         public DateFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorStrategy evaluatorStrategy) : base(configuration, httpContextAccessor, logger, evaluatorStrategy)
         {
+        }
+
+        public object BindParameters(IConfiguration filterParameters)
+        {
+            return filterParameters.Get<FilterSettings>();
         }
 
         public Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context)

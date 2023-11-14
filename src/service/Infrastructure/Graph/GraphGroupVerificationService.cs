@@ -101,7 +101,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
                 CacheDuration = _cacheInterval
             };
             List<string> groupMembers = await GetCachedObject(userCacheParameter, trackingIds);
-            if (groupMembers != null && groupMembers.Any()) 
+            if (groupMembers != null) 
             {
                 LogDebugMessage(new StringBuilder().Append(securityGroupId).Append(" members found in cache"), trackingIds);
                 return groupMembers;
@@ -110,7 +110,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
  
             var cacheableGroupMembers = await CreateCacheableObject(userCacheParameter, trackingIds);
             groupMembers = cacheableGroupMembers?.Object ?? new();
-            if (groupMembers != null && groupMembers.Any())
+            if (groupMembers != null)
             {
                 LogDebugMessage(new StringBuilder().Append(securityGroupId).Append(" members added in cache"), trackingIds);
                 await SetCacheObject(cacheableGroupMembers, trackingIds);
@@ -170,16 +170,16 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
             return graphException;
         }
 
-        public async Task<List<string>> GetCachedObject(BackgroundCacheParameters parameters, LoggerTrackingIds trackingIds)
+        public async Task<List<string>?> GetCachedObject(BackgroundCacheParameters parameters, LoggerTrackingIds trackingIds)
         {
             ICache cache = _cacheFactory.Create("Default", "Graph", trackingIds.CorrelationId, trackingIds.TransactionId);
-            return (await cache.GetList(parameters.CacheKey, trackingIds.CorrelationId, trackingIds.TransactionId))?.ToList() ?? new();
+            return (await cache.GetList(parameters.CacheKey, trackingIds.CorrelationId, trackingIds.TransactionId))?.ToList();
         }
 
         public async Task SetCacheObject(BackgroundCacheableObject<List<string>> cacheableObject, LoggerTrackingIds trackingIds)
         {
             ICache cache = _cacheFactory.Create("Default", "Graph", trackingIds.CorrelationId, trackingIds.TransactionId);
-            await cache.SetList(cacheableObject.CacheParameters.CacheKey, cacheableObject.Object, trackingIds.CorrelationId, trackingIds.TransactionId, _cacheInterval);
+            await cache.SetList(cacheableObject.CacheParameters.CacheKey, cacheableObject.Object, trackingIds.CorrelationId, trackingIds.TransactionId, _cacheInterval + 10);
             ObjectCached?.Invoke(this, cacheableObject.CacheParameters);
         }
 

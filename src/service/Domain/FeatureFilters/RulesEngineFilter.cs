@@ -19,7 +19,7 @@ using static Microsoft.FeatureFlighting.Common.Constants;
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
     [FilterAlias(FilterKeys.RulesEngine)]
-    public class RulesEngineFilter : IFeatureFilter
+    public class RulesEngineFilter : IFeatureFilter, IFilterParametersBinder
     {
         private readonly IRulesEngineManager _rulesEngineManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -36,6 +36,11 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
             _logger = logger;
         }
 
+        public object BindParameters(IConfiguration filterParameters)
+        {
+            return filterParameters.Get<FilterSettings>();
+        }
+
         public async Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context)
         {
             LoggerTrackingIds trackingIds = _httpContextAccessor.HttpContext.Items.ContainsKey(Flighting.FLIGHT_TRACKER_PARAM)
@@ -44,7 +49,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 
             try
             {
-                FilterSettings filterSettings = context.Parameters.Get<FilterSettings>() ?? new FilterSettings();
+                FilterSettings filterSettings = (FilterSettings)context.Settings; //context.Parameters.Get<FilterSettings>() ?? new FilterSettings();
                 if (!ValidateFilterSettings(filterSettings, FilterKeys.RulesEngine, trackingIds))
                     return false;
 
