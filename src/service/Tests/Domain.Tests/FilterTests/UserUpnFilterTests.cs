@@ -58,6 +58,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_Equals_Operator()
         {
             UserUpnFilter UserUpnFilter = new UserUpnFilter(configMock.Object, httpContextAccessorMockInDefinedUserUpn.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorEquals.Settings = UserUpnFilter.BindParameters(featureContextOperatorEquals.Parameters);
             var featureFlagStatus = await UserUpnFilter.EvaluateAsync(featureContextOperatorEquals);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -66,6 +67,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_Equals_Operator()
         {
             UserUpnFilter UserUpnFilter = new UserUpnFilter(configMock.Object, httpContextAccessorMockNotInDefinedUserUpn.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorEquals.Settings = UserUpnFilter.BindParameters(featureContextOperatorEquals.Parameters);
             var featureFlagStatus = await UserUpnFilter.EvaluateAsync(featureContextOperatorEquals);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -74,6 +76,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_NotEquals_Operator()
         {
             UserUpnFilter UserUpnFilter = new UserUpnFilter(configMock.Object, httpContextAccessorMockNotInDefinedUserUpn.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorNotEquals.Settings = UserUpnFilter.BindParameters(featureContextOperatorNotEquals.Parameters);
             var featureFlagStatus = await UserUpnFilter.EvaluateAsync(featureContextOperatorNotEquals);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -82,6 +85,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_NotEquals_Operator()
         {
             UserUpnFilter UserUpnFilter = new UserUpnFilter(configMock.Object, httpContextAccessorMockInDefinedUserUpn.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorNotEquals.Settings = UserUpnFilter.BindParameters(featureContextOperatorNotEquals.Parameters);
             var featureFlagStatus = await UserUpnFilter.EvaluateAsync(featureContextOperatorNotEquals);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -90,6 +94,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_In_Operator()
         {
             UserUpnFilter UserUpnFilter = new UserUpnFilter(configMock.Object, httpContextAccessorMockInDefinedUserUpn.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorIn.Settings = UserUpnFilter.BindParameters(featureContextOperatorIn.Parameters);
             var featureFlagStatus = await UserUpnFilter.EvaluateAsync(featureContextOperatorIn);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -98,6 +103,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_In_Operator()
         {
             UserUpnFilter UserUpnFilter = new UserUpnFilter(configMock.Object, httpContextAccessorMockNotInDefinedUserUpn.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorIn.Settings = UserUpnFilter.BindParameters(featureContextOperatorIn.Parameters);
             var featureFlagStatus = await UserUpnFilter.EvaluateAsync(featureContextOperatorIn);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -106,6 +112,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_NotIn_Operator()
         {
             UserUpnFilter UserUpnFilter = new UserUpnFilter(configMock.Object, httpContextAccessorMockNotInDefinedUserUpn.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorNotIn.Settings = UserUpnFilter.BindParameters(featureContextOperatorNotIn.Parameters);
             var featureFlagStatus = await UserUpnFilter.EvaluateAsync(featureContextOperatorNotIn);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -114,6 +121,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_NotIn_Operator()
         {
             UserUpnFilter UserUpnFilter = new UserUpnFilter(configMock.Object, httpContextAccessorMockInDefinedUserUpn.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorNotIn.Settings = UserUpnFilter.BindParameters(featureContextOperatorNotIn.Parameters);
             var featureFlagStatus = await UserUpnFilter.EvaluateAsync(featureContextOperatorNotIn);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -122,6 +130,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_HttpContext_Has_No_UserUpn()
         {
             UserUpnFilter UserUpnFilter = new UserUpnFilter(configMock.Object, httpContextAccessorMockWithoutUserUpn.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorIn.Settings = UserUpnFilter.BindParameters(featureContextOperatorIn.Parameters);
             var featureFlagStatus = await UserUpnFilter.EvaluateAsync(featureContextOperatorIn);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -130,6 +139,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_Member_Of_Saved_Group_Operator()
         {
             UserUpnFilter userupnFilter = new UserUpnFilter(configMock.Object, httpContextAccessorMockWithUpnMemberOfGroup.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorMemberOfSecurityGroup.Settings = userupnFilter.BindParameters(featureContextOperatorMemberOfSecurityGroup.Parameters);
             var featureFlagStatus = await userupnFilter.EvaluateAsync(featureContextOperatorMemberOfSecurityGroup);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -138,6 +148,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_Member_Of_Saved_Group_Operator()
         {
             UserUpnFilter userupnFilter = new UserUpnFilter(configMock.Object, httpContextAccessorMockWithUpnNotMemberOfGroup.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorMemberOfSecurityGroup.Settings = userupnFilter.BindParameters(featureContextOperatorMemberOfSecurityGroup.Parameters);
             var featureFlagStatus = await userupnFilter.EvaluateAsync(featureContextOperatorMemberOfSecurityGroup);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -146,6 +157,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_Not_Member_Of_Saved_Group_Operator()
         {
             UserUpnFilter userupnFilter = new UserUpnFilter(configMock.Object, httpContextAccessorMockWithUpnMemberOfGroup.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorNotMemberOfSecurityGroup.Settings = userupnFilter.BindParameters(featureContextOperatorNotMemberOfSecurityGroup.Parameters);
             var featureFlagStatus = await userupnFilter.EvaluateAsync(featureContextOperatorNotMemberOfSecurityGroup);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -154,6 +166,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_Not_Member_Of_Saved_Group_Operator()
         {
             UserUpnFilter userupnFilter = new UserUpnFilter(configMock.Object, httpContextAccessorMockWithUpnNotMemberOfGroup.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorNotMemberOfSecurityGroup.Settings = userupnFilter.BindParameters(featureContextOperatorNotMemberOfSecurityGroup.Parameters);
             var featureFlagStatus = await userupnFilter.EvaluateAsync(featureContextOperatorNotMemberOfSecurityGroup);
             Assert.AreEqual(false, featureFlagStatus);
         }

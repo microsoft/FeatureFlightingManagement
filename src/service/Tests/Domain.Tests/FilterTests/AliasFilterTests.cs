@@ -51,6 +51,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_Equals_Operator()
         {
             AliasFilter aliasFilter = new AliasFilter(configMock.Object, httpContextAccessorMockWithAliasMemberOfGroup.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorEquals.Settings = aliasFilter.BindParameters(featureContextOperatorEquals.Parameters);
             var featureFlagStatus = await aliasFilter.EvaluateAsync(featureContextOperatorEquals);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -59,6 +60,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_Equals_Operator()
         {
             AliasFilter aliasFilter = new AliasFilter(configMock.Object, httpContextAccessorMockWithAliasNotMemberOfGroup.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorEquals.Settings = aliasFilter.BindParameters(featureContextOperatorEquals.Parameters);
             var featureFlagStatus = await aliasFilter.EvaluateAsync(featureContextOperatorEquals);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -67,6 +69,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_NotEquals_Operator()
         {
             AliasFilter aliasFilter = new AliasFilter(configMock.Object, httpContextAccessorMockWithAliasNotMemberOfGroup.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorNotEquals.Settings = aliasFilter.BindParameters(featureContextOperatorNotEquals.Parameters);
             var featureFlagStatus = await aliasFilter.EvaluateAsync(featureContextOperatorNotEquals);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -75,6 +78,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_NotEquals_Operator()
         {
             AliasFilter aliasFilter = new AliasFilter(configMock.Object, httpContextAccessorMockWithAliasMemberOfGroup.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorNotEquals.Settings = aliasFilter.BindParameters(featureContextOperatorNotEquals.Parameters);
             var featureFlagStatus = await aliasFilter.EvaluateAsync(featureContextOperatorNotEquals);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -83,6 +87,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_Member_Of_Custom_Group_Operator()
         {
             AliasFilter aliasFilter = new AliasFilter(configMock.Object, httpContextAccessorMockWithAliasMemberOfGroup.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorMemberOfCustomGroup.Settings = aliasFilter.BindParameters(featureContextOperatorMemberOfCustomGroup.Parameters);
             var featureFlagStatus = await aliasFilter.EvaluateAsync(featureContextOperatorMemberOfCustomGroup);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -91,6 +96,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_Member_Of_Custom_Group_Operator()
         {
             AliasFilter aliasFilter = new AliasFilter(configMock.Object, httpContextAccessorMockWithAliasNotMemberOfGroup.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorMemberOfCustomGroup.Settings = aliasFilter.BindParameters(featureContextOperatorMemberOfCustomGroup.Parameters);
             var featureFlagStatus = await aliasFilter.EvaluateAsync(featureContextOperatorMemberOfCustomGroup);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -99,6 +105,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_Not_Member_Of_Custom_Group_Operator()
         {
             AliasFilter aliasFilter = new AliasFilter(configMock.Object, httpContextAccessorMockWithAliasNotMemberOfGroup.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorNotMemberOfCustomGroup.Settings = aliasFilter.BindParameters(featureContextOperatorNotMemberOfCustomGroup.Parameters);
             var featureFlagStatus = await aliasFilter.EvaluateAsync(featureContextOperatorNotMemberOfCustomGroup);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -107,6 +114,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_Not_Member_Of_Custom_Group_Operator()
         {
             AliasFilter aliasFilter = new AliasFilter(configMock.Object, httpContextAccessorMockWithAliasMemberOfGroup.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorNotMemberOfCustomGroup.Settings = aliasFilter.BindParameters(featureContextOperatorNotMemberOfCustomGroup.Parameters);
             var featureFlagStatus = await aliasFilter.EvaluateAsync(featureContextOperatorNotMemberOfCustomGroup);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -117,6 +125,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_HttpContext_Has_No_User()
         {
             AliasFilter aliasFilter = new AliasFilter(configMock.Object, httpContextAccessorMockWithoutAlias.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorNotMemberOfCustomGroup.Settings = aliasFilter.BindParameters(featureContextOperatorNotMemberOfCustomGroup.Parameters);
             var featureFlagStatus = await aliasFilter.EvaluateAsync(featureContextOperatorNotMemberOfCustomGroup);
             Assert.AreEqual(false, featureFlagStatus);
         }

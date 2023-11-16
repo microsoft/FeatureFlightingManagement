@@ -47,7 +47,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
             {
                 var contextValue = string.Empty;
 
-                FilterSettings settings = (FilterSettings)featureFlag.Settings; //GetFilterSettings(featureFlag);
+                FilterSettings settings = (FilterSettings)featureFlag.Settings;
                 string filterKey = !string.IsNullOrWhiteSpace(settings.FlightContextKey)
                     ? settings.FlightContextKey.ToUpperInvariant()
                     : defaultFilterKey.ToUpperInvariant();
