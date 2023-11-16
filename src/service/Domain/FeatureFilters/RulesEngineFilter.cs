@@ -49,7 +49,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 
             try
             {
-                FilterSettings filterSettings = (FilterSettings)context.Settings; //context.Parameters.Get<FilterSettings>() ?? new FilterSettings();
+                FilterSettings filterSettings = (FilterSettings)context.Settings;
                 if (!ValidateFilterSettings(filterSettings, FilterKeys.RulesEngine, trackingIds))
                     return false;
 
