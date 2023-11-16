@@ -15,6 +15,7 @@ using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using static Microsoft.FeatureFlighting.Common.Constants;
+using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
 
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
@@ -46,7 +47,7 @@ namespace Microsoft.FeatureFlighting.Core.FeatureFilters
             {
                 var contextValue = string.Empty;
 
-                FilterSettings settings = GetFilterSettings(featureFlag);
+                FilterSettings settings = (FilterSettings)featureFlag.Settings;
                 string filterKey = !string.IsNullOrWhiteSpace(settings.FlightContextKey)
                     ? settings.FlightContextKey.ToUpperInvariant()
                     : defaultFilterKey.ToUpperInvariant();

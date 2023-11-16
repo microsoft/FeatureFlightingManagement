@@ -45,6 +45,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_LessThan_Operator()
         {
             DateFilter dateFilter = new DateFilter(configMock.Object, httpContextAccessorMock.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorLessThanSuccess.Settings = dateFilter.BindParameters(featureContextOperatorLessThanSuccess.Parameters);
             var featureFlagStatus = await dateFilter.EvaluateAsync(featureContextOperatorLessThanSuccess);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -53,6 +54,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_LessThan_Operator()
         {
             DateFilter dateFilter = new DateFilter(configMock.Object, httpContextAccessorMock.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorLessThanFail.Settings = dateFilter.BindParameters(featureContextOperatorLessThanFail.Parameters);
             var featureFlagStatus = await dateFilter.EvaluateAsync(featureContextOperatorLessThanFail);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -78,6 +80,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
             };
 
             DateFilter dateFilter = new DateFilter(configMock.Object, httpContextAccessorMock.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            context.Settings = dateFilter.BindParameters(context.Parameters);
             var featureFlagStatus = await dateFilter.EvaluateAsync(context);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -86,6 +89,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_GreaterThan_Operator()
         {
             DateFilter dateFilter = new DateFilter(configMock.Object, httpContextAccessorMock.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorGreaterThanSuccess.Settings = dateFilter.BindParameters(featureContextOperatorGreaterThanSuccess.Parameters);
             var featureFlagStatus = await dateFilter.EvaluateAsync(featureContextOperatorGreaterThanSuccess);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -94,6 +98,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_GreaterThan_Operator()
         {
             DateFilter dateFilter = new DateFilter(configMock.Object, httpContextAccessorMock.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorGreaterThanFail.Settings = dateFilter.BindParameters(featureContextOperatorGreaterThanFail.Parameters);
             var featureFlagStatus = await dateFilter.EvaluateAsync(featureContextOperatorGreaterThanFail);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -101,6 +106,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_GreaterThan_Operator_Without_context()
         {
             DateFilter dateFilter = new DateFilter(configMock.Object, httpContextAccessorMockWithoutcontext.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorGreaterThanSuccess.Settings = dateFilter.BindParameters(featureContextOperatorGreaterThanSuccess.Parameters);
             var featureFlagStatus = await dateFilter.EvaluateAsync(featureContextOperatorGreaterThanSuccess);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -109,6 +115,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_GreaterThan_Operator_Without_context()
         {
             DateFilter dateFilter = new DateFilter(configMock.Object, httpContextAccessorMockWithoutcontext.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorGreaterThanFail.Settings = dateFilter.BindParameters(featureContextOperatorGreaterThanFail.Parameters);
             var featureFlagStatus = await dateFilter.EvaluateAsync(featureContextOperatorGreaterThanFail);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -133,6 +140,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
             };
 
             DateFilter dateFilter = new DateFilter(configMock.Object, httpContextAccessorMock.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            context.Settings = dateFilter.BindParameters(context.Parameters);
             var featureFlagStatus = await dateFilter.EvaluateAsync(context);
             Assert.AreEqual(false, featureFlagStatus);
         }

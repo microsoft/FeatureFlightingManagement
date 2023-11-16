@@ -9,11 +9,16 @@ using static Microsoft.FeatureFlighting.Common.Constants;
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
     [FilterAlias(FilterKeys.Region)]
-    public class RegionFilter: BaseFilter, IFeatureFilter
+    public class RegionFilter: BaseFilter, IFeatureFilter, IFilterParametersBinder
     {
         protected override string FilterType => FilterKeys.Region;
         public RegionFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorStrategy evaluatorStrategy) : base(configuration, httpContextAccessor, logger, evaluatorStrategy)
         { }
+
+        public object BindParameters(IConfiguration filterParameters)
+        {
+            return filterParameters.Get<FilterSettings>();
+        }
 
 
 
