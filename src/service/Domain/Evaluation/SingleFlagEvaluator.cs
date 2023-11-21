@@ -48,6 +48,10 @@ namespace Microsoft.FeatureFlighting.Core.Evaluation
         {
             string correlationId = _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault("x-correlationId", Guid.NewGuid().ToString()).ToString();
             string transactionId = _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault("x-messageId", Guid.NewGuid().ToString()).ToString();
+            var featureName = FlagUtilities.GetFeatureFlagId(tenantConfiguration.Name.ToLowerInvariant(), environment.ToLowerInvariant(), featureFlag);
+            var featureList = _configuration.GetSection("FeatureManagement").GetChildren().ToList();
+
+            if (featureList.FirstOrDefault(x => x.Key.Equals(featureName, StringComparison.OrdinalIgnoreCase)) == null) return false;
 
             try
             {
@@ -64,14 +68,14 @@ namespace Microsoft.FeatureFlighting.Core.Evaluation
                             return result.Value;
                         }
                     }
-                    var isEnabled = await _featureManager.IsEnabledAsync(FlagUtilities.GetFeatureFlagId(tenantConfiguration.Name.ToLowerInvariant(), environment.ToLowerInvariant(), featureFlag));
+                    var isEnabled = await _featureManager.IsEnabledAsync(featureName);
                     await _cache.SetFeatureFlightResult(tenantConfiguration.Name, environment, new KeyValuePair<string, bool>(featureFlag.ToLowerInvariant(), isEnabled), cachedFlightResult,
                     new LoggerTrackingIds { CorrelationId = correlationId, TransactionId = transactionId });
                     return isEnabled;
                 }
                 else
                 {
-                    return await _featureManager.IsEnabledAsync(FlagUtilities.GetFeatureFlagId(tenantConfiguration.Name.ToLowerInvariant(), environment.ToLowerInvariant(), featureFlag));
+                    return await _featureManager.IsEnabledAsync(featureName);
                 }
             }
             catch (Exception exception)
