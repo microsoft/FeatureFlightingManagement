@@ -44,14 +44,13 @@ namespace Microsoft.FeatureFlighting.Core.Evaluation
         }
 
         /// <inheritdoc/>
-        public virtual async Task<bool> IsEnabled(string featureFlag, TenantConfiguration tenantConfiguration, string environment)
+        public virtual async Task<bool> IsEnabled(string featureFlag, IEnumerable<string> featureKeysOnAzure, TenantConfiguration tenantConfiguration, string environment)
         {
             string correlationId = _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault("x-correlationId", Guid.NewGuid().ToString()).ToString();
             string transactionId = _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault("x-messageId", Guid.NewGuid().ToString()).ToString();
             var featureName = FlagUtilities.GetFeatureFlagId(tenantConfiguration.Name.ToLowerInvariant(), environment.ToLowerInvariant(), featureFlag);
-            var featureList = _configuration.GetSection("FeatureManagement").GetChildren().ToList();
 
-            if (featureList.FirstOrDefault(x => x.Key.Equals(featureName, StringComparison.OrdinalIgnoreCase)) == null) return false;
+            if (!featureKeysOnAzure.Contains<string>(featureName)) return false;
 
             try
             {

@@ -11,6 +11,7 @@ using Microsoft.FeatureFlighting.Core.Evaluation;
 using System.Collections.ObjectModel;
 using System.Collections.Concurrent;
 using System;
+using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.FeatureFlighting.Core
 {
@@ -21,13 +22,15 @@ namespace Microsoft.FeatureFlighting.Core
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
         private readonly ILogger _logger;
+        private readonly IConfiguration _configuration;
 
-        public FeatureFlagEvaluator(IEvaluationStrategyBuilder strategyBuilder, IHttpContextAccessor httpContextAccessor, ITenantConfigurationProvider tenantConfigurationProvider, ILogger logger)
+        public FeatureFlagEvaluator(IEvaluationStrategyBuilder strategyBuilder, IHttpContextAccessor httpContextAccessor, ITenantConfigurationProvider tenantConfigurationProvider, ILogger logger, IConfiguration configuration)
         {
             _strategyBuilder = strategyBuilder;
             _httpContextAccessor = httpContextAccessor;
             _tenantConfigurationProvider = tenantConfigurationProvider;
             _logger = logger;
+            _configuration = configuration;
         }
 
         // <inheritdoc>
@@ -35,6 +38,8 @@ namespace Microsoft.FeatureFlighting.Core
         {
             if (features == null || !features.Any())
                 return new Dictionary<string, bool>();
+
+            var featureKeysOnAzure = _configuration.GetSection("FeatureManagement").GetChildren().ToList().Select(f => f.Key);
 
             PerformanceContext performanceContext = new("Feature Flag Evaluation Time");
             features = features.Distinct().ToList();
@@ -72,7 +77,7 @@ namespace Microsoft.FeatureFlighting.Core
                     tenantConfiguration = await _tenantConfigurationProvider.Get(tenantName); 
                 AddHttpContext(environment, tenantConfiguration);
                 strategy = _strategyBuilder.GetStrategy(featureToTenantMap[tenantName], tenantConfiguration);
-                var featureEvaluationResults = await strategy.Evaluate(featureToTenantMap[tenantName], tenantConfiguration, environment, @event);
+                var featureEvaluationResults = await strategy.Evaluate(featureToTenantMap[tenantName], featureKeysOnAzure, tenantConfiguration, environment, @event);
                 bool isDefaultTenant = string.Equals(tenantName, applicationName, System.StringComparison.OrdinalIgnoreCase);
 
                 foreach (var featureEvalResult in featureEvaluationResults)
