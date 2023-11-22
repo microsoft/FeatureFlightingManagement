@@ -50,7 +50,7 @@ namespace Microsoft.FeatureFlighting.Core.Evaluation
             string transactionId = _httpContextAccessor.HttpContext.Request.Headers.GetOrDefault("x-messageId", Guid.NewGuid().ToString()).ToString();
             var featureName = FlagUtilities.GetFeatureFlagId(tenantConfiguration.Name.ToLowerInvariant(), environment.ToLowerInvariant(), featureFlag);
 
-            if (!featureKeysOnAzure.Contains<string>(featureName)) return false;
+            if (!featureKeysOnAzure.Any(s => string.Equals(s, featureName, StringComparison.OrdinalIgnoreCase))) return false;
 
             try
             {
