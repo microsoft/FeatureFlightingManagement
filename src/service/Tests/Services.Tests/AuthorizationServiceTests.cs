@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.FeatureFlighting.Common.Authorization;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Infrastructure.Authorization;
+using System;
 
 namespace Services.Tests
 {   
@@ -36,6 +37,7 @@ namespace Services.Tests
         {
             IAuthorizationService authService = new AuthorizationService(httpAccessorMockWithPermissions.Object, _tenantConfigurationProvider, _mockConfiguration);
             authService.EnsureAuthorized("TestApp", "TestOp", "CorrId");
+
         }
 
         [TestMethod]
