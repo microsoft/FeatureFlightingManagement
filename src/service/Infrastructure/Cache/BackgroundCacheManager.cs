@@ -14,7 +14,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
     internal class BackgroundCacheManager : IBackgroundCacheManager
     {
         private readonly IList<IBackgroundCacheable> _cacheables;
-         static readonly Dictionary<string, List<BackgroundCacheParameters>> _backgroundCacheableParams = new();
+        private static readonly Dictionary<string, List<BackgroundCacheParameters>> _backgroundCacheableParams = new();
         private int _period;
         private const int DEFAULT_CACHE_REBUILD_PERIOD = 5;
         private readonly ILogger _logger;
