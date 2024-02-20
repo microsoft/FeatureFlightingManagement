@@ -9,7 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 
-namespace Microsoft.FeatureFlighting.Infrastructure.Tests
+namespace Microsoft.FeatureFlighting.Infrastructure.Tests.StorageTest
 {
     [ExcludeFromCodeCoverage]
     [TestClass]
@@ -25,10 +25,10 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Tests
         public FlightsDbRepositoryFactoryTest()
         {
             _mockTenantConfigurationProvider = new Mock<ITenantConfigurationProvider>();
-            _mockConfiguration= new Mock<IConfiguration>();
+            _mockConfiguration = new Mock<IConfiguration>();
             _mockLogger = new Mock<ILogger>();
 
-            _factory= new FlightsDbRepositoryFactory(_mockTenantConfigurationProvider.Object, _mockConfiguration.Object, _mockLogger.Object);
+            _factory = new FlightsDbRepositoryFactory(_mockTenantConfigurationProvider.Object, _mockConfiguration.Object, _mockLogger.Object);
         }
 
 

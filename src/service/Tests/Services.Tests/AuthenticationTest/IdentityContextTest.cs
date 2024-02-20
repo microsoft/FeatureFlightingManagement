@@ -5,9 +5,11 @@ using Microsoft.FeatureFlighting.Infrastructure.Authentication;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Microsoft.FeatureFlighting.Infrastructure.Tests
+namespace Microsoft.FeatureFlighting.Infrastructure.Tests.AuthenticationTest
 {
+    [ExcludeFromCodeCoverage]
     [TestClass]
     public class IdentityContextTest
     {
@@ -16,13 +18,13 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Tests
             var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
             var iConfiguration = new Mock<IConfiguration>();
             var repositoryMock = new Mock<IList<IBackgroundCacheable>>();
-           return new IdentityContext(iConfiguration.Object, httpContextAccessorMock.Object);
+            return new IdentityContext(iConfiguration.Object, httpContextAccessorMock.Object);
         }
 
         [TestMethod]
         public void GetCurrentUserPrincipalName()
         {
-           Assert.IsNull(Setup().GetCurrentUserPrincipalName());
+            Assert.IsNull(Setup().GetCurrentUserPrincipalName());
         }
 
         [TestMethod]
@@ -35,6 +37,6 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Tests
         {
             Assert.IsNull(Setup().GetSignedInAppId());
         }
-        
+
     }
 }

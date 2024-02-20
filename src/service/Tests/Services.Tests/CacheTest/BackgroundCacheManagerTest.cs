@@ -5,20 +5,23 @@ using Microsoft.FeatureFlighting.Infrastructure.Cache;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
-namespace Microsoft.FeatureFlighting.Infrastructure.Tests
+namespace Microsoft.FeatureFlighting.Infrastructure.Tests.CacheTest
 {
+    [ExcludeFromCodeCoverage]
     [TestClass]
     public class BackgroundCacheManagerTest
     {
 
-        private BackgroundCacheManager Setup() {
+        private BackgroundCacheManager Setup()
+        {
 
             // Arrange
             var repositoryMock = new Mock<IList<IBackgroundCacheable>>();
             var _logger = new Mock<ILogger>();
-           return new BackgroundCacheManager(repositoryMock.Object, _logger.Object); 
+            return new BackgroundCacheManager(repositoryMock.Object, _logger.Object);
         }
 
         // Define the test method
@@ -27,7 +30,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Tests
         {
             // Act
             Setup().Dispose(); // Calling the method under test
-            var result= Setup().GetCacheableServiceIds();
+            var result = Setup().GetCacheableServiceIds();
             Assert.IsNotNull(result);
             // Assert
             Assert.IsNotNull(result);
@@ -41,18 +44,19 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Tests
             LoggerTrackingIds loggerTrackingIds = new LoggerTrackingIds()
             {
                 CorrelationId = "1",
-                TransactionId="2"
+                TransactionId = "2"
             };
 
-         Dictionary<string, List<BackgroundCacheParameters>> _backgroundCacheableParams = new() { 
-             
-         };
+            Dictionary<string, List<BackgroundCacheParameters>> _backgroundCacheableParams = new()
+            {
 
-        var repositoryMock = new Mock<IList<IBackgroundCacheable>>();
+            };
+
+            var repositoryMock = new Mock<IList<IBackgroundCacheable>>();
             var _logger = new Mock<ILogger>();
             var service = new BackgroundCacheManager(repositoryMock.Object, _logger.Object);
-              // Act
-              var result = service.RebuildCache(loggerTrackingIds, cancellationToken = default);
+            // Act
+            var result = service.RebuildCache(loggerTrackingIds, cancellationToken = default);
 
             Assert.IsNotNull(result);
             // Assert
@@ -65,9 +69,9 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Tests
             // Arrange
             var repositoryMock = new Mock<IList<IBackgroundCacheable>>();
             var _logger = new Mock<ILogger>();
-            var service = new BackgroundCacheManager(repositoryMock.Object, _logger.Object); 
+            var service = new BackgroundCacheManager(repositoryMock.Object, _logger.Object);
             // Act
-            service.Init(100); 
+            service.Init(100);
             // Assert
             Assert.IsNotNull(repositoryMock);
         }

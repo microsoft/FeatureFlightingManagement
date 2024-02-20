@@ -11,10 +11,12 @@ using System.Collections.Concurrent;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 
-namespace Microsoft.FeatureFlighting.Infrastructure.Tests
+namespace Microsoft.FeatureFlighting.Infrastructure.Tests.StorageTest
 {
+    [ExcludeFromCodeCoverage]
     [TestCategory("BlobProviderFactory")]
     [TestClass]
     public class BlobProviderFactoryTest
@@ -31,7 +33,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Tests
             _mockTenantConfigurationProvider = new Mock<ITenantConfigurationProvider>();
             _mockLogger = new Mock<ILogger>();
             _mockBlobProvider = new Mock<IBlobProvider>();
-            _mockBlobProviderCache=new Mock<Dictionary<string, IBlobProvider>>();
+            _mockBlobProviderCache = new Mock<Dictionary<string, IBlobProvider>>();
 
             _factory = new BlobProviderFactory(_mockTenantConfigurationProvider.Object, _mockLogger.Object);
         }
@@ -39,9 +41,11 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Tests
         [TestMethod]
         public async Task CreateBreWorkflowProvider_nodata_when_tenantConfiguration_BusinessRuleEngine_is_null()
         {
-            _mockTenantConfigurationProvider.Setup(t => t.Get(It.IsAny<string>())).Returns(Task.FromResult<TenantConfiguration>(
-                new TenantConfiguration { 
-                    BusinessRuleEngine=null}));
+            _mockTenantConfigurationProvider.Setup(t => t.Get(It.IsAny<string>())).Returns(Task.FromResult(
+                new TenantConfiguration
+                {
+                    BusinessRuleEngine = null
+                }));
 
             var result = await _factory.CreateBreWorkflowProvider("test");
             Assert.IsNull(null);
@@ -50,10 +54,14 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Tests
         [TestMethod]
         public async Task CreateBreWorkflowProvider_nodata_when_tenantConfiguration_BusinessRuleEngine_storage_is_null()
         {
-            _mockTenantConfigurationProvider.Setup(t => t.Get(It.IsAny<string>())).Returns(Task.FromResult<TenantConfiguration>(
-                new TenantConfiguration { 
-                    BusinessRuleEngine =new BusinessRuleEngineConfiguration { 
-                        Storage=null} }));
+            _mockTenantConfigurationProvider.Setup(t => t.Get(It.IsAny<string>())).Returns(Task.FromResult(
+                new TenantConfiguration
+                {
+                    BusinessRuleEngine = new BusinessRuleEngineConfiguration
+                    {
+                        Storage = null
+                    }
+                }));
 
             var result = await _factory.CreateBreWorkflowProvider("test");
             Assert.IsNull(null);
@@ -84,8 +92,10 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Tests
         {
             return new TenantConfiguration()
             {
-                BusinessRuleEngine = new BusinessRuleEngineConfiguration {
-                    Storage = new StorageConfiguration {
+                BusinessRuleEngine = new BusinessRuleEngineConfiguration
+                {
+                    Storage = new StorageConfiguration
+                    {
                         StorageConnectionString = "test connection string",
                         ContainerName = "test container name"
                     }

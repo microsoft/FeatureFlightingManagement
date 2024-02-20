@@ -1,28 +1,18 @@
 ﻿using AppInsights.EnterpriseTelemetry;
-using Azure.Storage.Blobs.Models;
 using CQRS.Mediatr.Lite;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.API.Controllers;
+using Microsoft.FeatureFlighting.Common.Model;
+using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
 using Microsoft.FeatureFlighting.Core.Commands;
-using Microsoft.FeatureFlighting.Core.Domain.ValueObjects;
-using Microsoft.FeatureFlighting.Core.Queries;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using static Microsoft.FeatureFlighting.Common.Constants.Flighting;
-using System.Transactions;
-using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
-using Microsoft.FeatureFlighting.Common.Model;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NuGet.Packaging;
-using Microsoft.Graph;
 
 namespace Microsoft.FeatureFlighting.API.Tests.ControllerTests
 {

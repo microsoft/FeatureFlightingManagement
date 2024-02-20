@@ -3,9 +3,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Microsoft.FeatureFlighting.Infrastructure.Tests
+namespace Microsoft.FeatureFlighting.Infrastructure.Tests.AuthenticationTest
 {
+    [ExcludeFromCodeCoverage]
     [TestClass]
     public class AadTokenGeneratorTest
     {
@@ -22,7 +24,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Tests
             var mockUserService = new Mock<AadTokenGenerator>();
             // Act
             var userController = new AadTokenGenerator();
-            var result = userController.GenerateToken("sajchvah","sachagsc","csahcas","xhasgdvghas");
+            var result = userController.GenerateToken("sajchvah", "sachagsc", "csahcas", "xhasgdvghas");
             Assert.IsNotNull(result.Id);
             // Assert
         }
