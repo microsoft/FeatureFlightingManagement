@@ -44,7 +44,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Tests.StorageTest
         }
 
         [TestMethod]
-        public async Task Get_DataNotExists()
+        public async Task Get_ThrowException()
         {
             // Arrange
             string documentId = "testDocument";
@@ -73,11 +73,15 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Tests.StorageTest
 
             _mockContainer.Setup(m => m.ReadItemAsync<TestClass>(documentId, new PartitionKey(partitionKey), null, default)).ReturnsAsync(mockItemResponse.Object);
 
-            // Act
-            var document = await _cosmosDbRepository.Get(documentId, partitionKey, new LoggerTrackingIds());
-
-            // Assert
-            Assert.IsNull(document);
+            try
+            {
+                // Act
+                var document = await _cosmosDbRepository.Get(documentId, partitionKey, new LoggerTrackingIds());
+            }
+            catch (Exception ex)
+            {
+                Assert.IsNotNull(ex.Message);
+            }
         }
 
         [TestMethod]

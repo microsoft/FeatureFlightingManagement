@@ -1,14 +1,18 @@
 ﻿using AppInsights.EnterpriseTelemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.API.Controllers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.FeatureFlighting.API.Tests.ControllerTests
 {
+    [ExcludeFromCodeCoverage]
+    [TestClass]
     public class BaseClassExposedToTest:BaseController
     {
         public BaseClassExposedToTest(IConfiguration configuration, ILogger logger) : base(configuration, logger)

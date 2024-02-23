@@ -7,9 +7,11 @@ using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Api.ExceptionHandler;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.FeatureFlighting.Api.Tests.ExceptionHandlerTests
 {
+    [ExcludeFromCodeCoverage]
     [TestClass]
     public class AccessForbiddenExceptionHandlerTests
     {

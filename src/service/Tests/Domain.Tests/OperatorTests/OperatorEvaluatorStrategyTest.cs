@@ -7,9 +7,11 @@ using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using Microsoft.FeatureFlighting.Infrastructure.Cache;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
 {
+    [ExcludeFromCodeCoverage]
     [TestClass]
     public class OperatorEvaluatorStrategyTest
     {

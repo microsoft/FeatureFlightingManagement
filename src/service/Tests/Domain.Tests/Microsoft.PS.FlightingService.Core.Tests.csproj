@@ -26,4 +26,8 @@
     <ProjectReference Include="..\..\Infrastructure\Microsoft.FeatureFlighting.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="OptimizerTest\" />
+  </ItemGroup>
+
 </Project>

@@ -12,12 +12,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.FeatureFlighting.API.Tests.BackgroundTest
 {
+    [ExcludeFromCodeCoverage]
     [TestCategory("CacheBuilderBackgroundService")]
     [TestClass]
     public class CacheBuilderBackgroundServiceTest

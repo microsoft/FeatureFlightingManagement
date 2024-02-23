@@ -8,9 +8,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
 {
+    [ExcludeFromCodeCoverage]
     [TestClass]
     public class InitializeFilterTests
     {
