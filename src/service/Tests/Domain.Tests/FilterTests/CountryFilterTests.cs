@@ -12,9 +12,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
 {
+    [ExcludeFromCodeCoverage]
     [TestCategory("CountryFilter")]
     [TestClass]
     public class CountryFilterTests : InitializeFilterTests

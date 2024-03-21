@@ -8,9 +8,11 @@ using System;
 using System.Collections.Generic;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Common.Group;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
 {
+    [ExcludeFromCodeCoverage]
     [TestClass]
     public class MemberOfSecurityGroupOperatorTests
     {
