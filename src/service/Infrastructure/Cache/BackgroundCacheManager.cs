@@ -93,5 +93,4 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
             _backgroundCacheableParams.Clear();
         }
     }
-
 }
