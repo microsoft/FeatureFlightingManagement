@@ -39,7 +39,6 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Tests.AuthorizationTest
         {
             IAuthorizationService authService = new AuthorizationService(httpAccessorMockWithPermissions.Object, _tenantConfigurationProvider, _mockConfiguration);
             authService.EnsureAuthorized("TestApp", "TestOp", "CorrId");
-
         }
 
         [TestMethod]
