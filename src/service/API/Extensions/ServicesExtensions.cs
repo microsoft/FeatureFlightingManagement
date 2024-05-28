@@ -14,6 +14,7 @@ using AppInsights.EnterpriseTelemetry.Web.Extension;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using Microsoft.FeatureFlighting.Api.ExceptionHandler;
 using AppInsights.EnterpriseTelemetry.Web.Extension.Middlewares;
+using Microsoft.IdentityModel.Validators;
 
 namespace Microsoft.FeatureFlighting.API.Extensions
 {
@@ -38,6 +39,7 @@ namespace Microsoft.FeatureFlighting.API.Extensions
                        {
                            ValidAudiences = validAudiences
                        };
+                       options.TokenValidationParameters.EnableAadSigningKeyIssuerValidation();
                    })
                     // Adding support for MSAL
                     .AddJwtBearer("MSAL", options =>
@@ -50,8 +52,9 @@ namespace Microsoft.FeatureFlighting.API.Extensions
                         validAudiences.Add(primaryAudience);
                         options.TokenValidationParameters = new IdentityModel.Tokens.TokenValidationParameters
                         {
-                            ValidAudiences = validAudiences
+                            ValidAudiences = validAudiences                            
                         };
+                        options.TokenValidationParameters.EnableAadSigningKeyIssuerValidation();
                     });
         }
 
