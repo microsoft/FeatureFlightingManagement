@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.S2S.Extensions.AspNetCore;
 
 namespace Microsoft.FeatureFlighting.Api.Middlewares
 {
@@ -16,7 +17,7 @@ namespace Microsoft.FeatureFlighting.Api.Middlewares
 
         public async Task Invoke(HttpContext httpContext)
         {
-            var result = await httpContext.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
+            var result = await httpContext.AuthenticateAsync(S2SAuthenticationDefaults.AuthenticationScheme);
             if (!result.Succeeded)
             {
                 result = await httpContext.AuthenticateAsync("MSAL");
