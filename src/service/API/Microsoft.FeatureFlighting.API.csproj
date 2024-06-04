@@ -21,7 +21,7 @@
     <PackageReference Include="AppInsights.EnterpriseTelemetry.AspNetCore.Extension" Version="6.0.0" />    
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.2.0" />    
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.2" />    
-    <PackageReference Include="Azure.Identity" Version="1.6.1" />    
+    <PackageReference Include="Azure.Identity" Version="1.11.3" />    
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.1" />    
     <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.2.0" />    
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
@@ -30,7 +30,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0" />    
     <PackageReference Include="Microsoft.FeatureManagement" Version="2.6.1" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="2.4.0" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.46.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.61.0" />
     <PackageReference Include="Microsoft.IdentityModel.Validators" Version="7.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.8" />

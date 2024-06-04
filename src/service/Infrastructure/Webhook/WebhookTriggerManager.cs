@@ -47,7 +47,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
 
             DependencyContext dependency = CreateDependencyContext(webhook, trackingIds);
             HttpRequestMessage request = new(new HttpMethod(webhook.HttpMethod), webhook.Uri ?? "");
-            string bearerToken = await _tokenGenerator.GenerateToken(webhook.AuthenticationAuthority, webhook.ClientId, webhook.ClientSecret, webhook.ResourceId);
+            string bearerToken = await _tokenGenerator.GenerateToken(webhook.AuthenticationAuthority, webhook.ClientId/*, webhook.ClientSecret*/, webhook.ResourceId);
             request.Headers.Add("Authorization", $"Bearer {bearerToken}");
             request.Headers.Add("x-correlationId", trackingIds.CorrelationId);
             request.Headers.Add("x-messageId", trackingIds.TransactionId);

@@ -32,7 +32,7 @@ namespace Microsoft.FeatureFlighting.Common.Authorization
         /// <param name="clientSecret">AAD Client Secret</param>
         /// <param name="resourceId">AAD Client ID against which the token is acquired</param>
         /// <returns>Bearer token</returns>
-        Task<string> GetAuthenticationToken(string authority, string clientId, string clientSecret, string resourceId);
+        Task<string> GetAuthenticationToken(string authority, string clientId, /*string clientSecret,*/ string resourceId);
         
         /// <summary>
         /// Augments the user identity with the required claims

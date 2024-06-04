@@ -126,13 +126,13 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
                 string tenant = configuration["Graph:Tenant"];
                 string authority = string.Format(configuration["Graph:Authority"], tenant);
                 string[] scopes = new string[] { configuration["Graph:Scope"] };
-                string secretLocation = configuration["Graph:ClientSecretLocation"];
-                string clientSecret = configuration[secretLocation];
+                //string secretLocation = configuration["Graph:ClientSecretLocation"];
+                //string clientSecret = configuration[secretLocation];
 
                 IConfidentialClientApplication confidentialClient = ConfidentialClientApplicationBuilder
                     .Create(configuration["Graph:ClientId"])
                     .WithAuthority(authority)
-                    .WithClientSecret(clientSecret)
+                    //.WithClientSecret(clientSecret)
                     .Build();
 
                 IGraphServiceClient graphServiceClient = new GraphServiceClient(new DelegateAuthenticationProvider(async (requestMessage) =>
