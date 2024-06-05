@@ -29,7 +29,7 @@ jobs:
           
     - name: Restore dependencies
       run: |
-        dotnet nuget add source "https://msazure.pkgs.visualstudio.com/One/_packaging/OneBranch-Consumption%40Local/nuget/v3/index.json" --name IDDP --username ${{ github.actor }} --password ${{ secrets.AZURE_DEVOPS_TOKEN }} --store-password-in-clear-text
+        dotnet nuget add source "https://msazure.pkgs.visualstudio.com/One/_packaging/OneBranch-Consumption%40Local/nuget/v3/index.json" --name IDDP --username smnayak@microsoft.com --password ${{ secrets.AZURE_DEVOPS_TOKEN }} --store-password-in-clear-text
         nuget restore  src/service/Microsoft.FeatureFlighting.sln
     
     - name: Build
