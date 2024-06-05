@@ -29,7 +29,7 @@ jobs:
           
     - name: Restore dependencies
       run: |
-        dotnet nuget add source "https://identitydivision.pkgs.visualstudio.com/_packaging/IDDP/nuget/v3/index.json" --name IDDP --password ${{ secrets.AZURE_DEVOPS_TOKEN }} --store-password-in-clear-text
+        dotnet nuget add source "https://identitydivision.pkgs.visualstudio.com/_packaging/IDDP/nuget/v3/index.json" --name IDDP --username ${{ github.actor }} --password ${{ secrets.AZURE_DEVOPS_TOKEN }} --store-password-in-clear-text
         dotnet restore
     
     - name: Build
