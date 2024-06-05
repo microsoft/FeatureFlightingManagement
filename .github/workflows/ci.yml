@@ -28,7 +28,9 @@ jobs:
       uses: NuGet/setup-nuget@v2.0.0
           
     - name: Restore dependencies
-      run: nuget restore  src/service/Microsoft.FeatureFlighting.sln
+      run: |
+        dotnet nuget add source "https://identitydivision.pkgs.visualstudio.com/_packaging/IDDP/nuget/v3/index.json" --name IDDP --password ${{ secrets.AZURE_DEVOPS_TOKEN }} --store-password-in-clear-text
+        dotnet restore
     
     - name: Build
       run: dotnet build src/service/Microsoft.FeatureFlighting.sln --no-restore
