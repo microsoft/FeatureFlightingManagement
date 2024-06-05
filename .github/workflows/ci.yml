@@ -24,8 +24,11 @@ jobs:
       with:
         dotnet-version: 6.x.x
     
+    - name: Setup NuGet.exe
+      uses: NuGet/setup-nuget@v2.0.0
+          
     - name: Restore dependencies
-      run: dotnet restore  src/service/Microsoft.FeatureFlighting.sln
+      run: nuget restore  src/service/Microsoft.FeatureFlighting.sln
     
     - name: Build
       run: dotnet build src/service/Microsoft.FeatureFlighting.sln --no-restore
