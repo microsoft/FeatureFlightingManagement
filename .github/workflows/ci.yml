@@ -28,9 +28,7 @@ jobs:
       uses: NuGet/setup-nuget@v2.0.0
           
     - name: Restore dependencies
-      run: |
-        dotnet nuget add source "https://msazure.pkgs.visualstudio.com/One/_packaging/OneBranch-Consumption%40Local/nuget/v3/index.json" --name IDDP --username ${{ github.actor }} --password ${{ secrets.AZURE_DEVOPS_TOKEN }} --store-password-in-clear-text
-        dotnet restore  src/service/Microsoft.FeatureFlighting.sln
+      run: dotnet restore  src/service/Microsoft.FeatureFlighting.sln
     
     - name: Build
       run: dotnet build src/service/Microsoft.FeatureFlighting.sln --no-restore
