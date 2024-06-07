@@ -26,9 +26,9 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
         }
 
         // <inheritdoc/>
-        public async Task<string> GenerateToken(string authority, string clientId, /*string clientSecret,*/ string resourceId)
+        public async Task<string> GenerateToken(string authority, string clientId, string resourceId)
         {
-            IConfidentialClientApplication client = GetOrCreateConfidentialApp(authority, clientId/*, clientSecret*/);
+            IConfidentialClientApplication client = GetOrCreateConfidentialApp(authority, clientId);
             var scopes = new string[] { resourceId };
             AuthenticationResult authenticationResult = await client
                 .AcquireTokenForClient(scopes)
@@ -36,7 +36,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
             return authenticationResult.AccessToken;
         }
 
-        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId/*, string clientSecret*/)
+        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId)
         {
             string confidentialAppCacheKey = CreateConfidentialAppCacheKey(authority, clientId);
             if (_cache.ContainsKey(confidentialAppCacheKey))
@@ -50,8 +50,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
             var certificate = GetCertificate("27D6D3122675FCC4FE11E4977A540FC74169E1F1");
             IConfidentialClientApplication client =
                 ConfidentialClientApplicationBuilder
-                    .Create(clientId)
-                    //.WithClientSecret(clientSecret)
+                    .Create(clientId)                    
                     .WithAuthority(AzureCloudInstance.AzurePublic, "microsoft.onmicrosoft.com")
                     .WithCertificate(certificate,true)
                     .Build();

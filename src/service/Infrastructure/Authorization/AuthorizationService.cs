@@ -75,14 +75,14 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
             return false;
         }
 
-        public async Task<string> GetAuthenticationToken(string authority, string clientId/*, string clientSecret*/, string resourceId)
+        public async Task<string> GetAuthenticationToken(string authority, string clientId, string resourceId)
         {
             AuthenticationResult authenticationResult;
             const string MsalScopeSuffix = "/.default";
             string bearerToken = null;
             try
             {
-                IConfidentialClientApplication app = GetOrCreateConfidentialApp(authority, clientId/*, clientSecret*/);
+                IConfidentialClientApplication app = GetOrCreateConfidentialApp(authority, clientId);
                 if (app != null)
                 {
                     var scopes = new[] { resourceId + MsalScopeSuffix };
@@ -97,7 +97,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
             return bearerToken;
         }
 
-        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId/*, string clientSecret*/)
+        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId)
         {
             string confidentialAppCacheKey = $"{authority}-{clientId}";
             if (_confidentialApps.ContainsKey(confidentialAppCacheKey))
@@ -108,8 +108,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
             var certificate = GetCertificate("27D6D3122675FCC4FE11E4977A540FC74169E1F1");
             IConfidentialClientApplication app =
                 ConfidentialClientApplicationBuilder
-                    .Create(clientId)
-                    //.WithClientSecret(clientSecret)
+                    .Create(clientId)                    
                     .WithAuthority(AzureCloudInstance.AzurePublic, "microsoft.onmicrosoft.com")
                     .WithCertificate(certificate, true)
                     .Build();
@@ -118,8 +117,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
 #else
             IConfidentialClientApplication app =
                 ConfidentialClientApplicationBuilder
-                    .Create(clientId)
-                    //.WithClientSecret(clientSecret)
+                    .Create(clientId)                    
                     .WithAuthority(new Uri(authority))
                     .WithClientAssertion((AssertionRequestOptions options) =>
                                                 {
