@@ -31,6 +31,7 @@
     <PackageReference Include="Microsoft.FeatureManagement" Version="2.6.1" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="2.4.0" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.61.0" />
+	<PackageReference Include="Microsoft.Identity.ServiceEssentials.AspNetCore" Version="1.25.0" />
     <PackageReference Include="Microsoft.IdentityModel.Validators" Version="7.5.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.8" />
