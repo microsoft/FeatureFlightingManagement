@@ -20,6 +20,7 @@ namespace Microsoft.FeatureFlighting.Common
             public const string FEATURE_ADD_DISABLED_CONTEXT = "AddDisabledContext";
             public const string FEATURE_ADD_ENABLED_CONTEXT = "AddEnabledContext";
             public const string FLIGHT_ADD_RESULT_CONTEXT_HEADER = "X-add-result-context";
+            public const string BLOB_CONTAINER_URI = "https://{0}.blob.core.windows.net";
             public const string ALL = "*";
             public const string TENANT_FLAG_DELIMITER = "__";
 
