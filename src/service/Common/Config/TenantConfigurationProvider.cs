@@ -101,14 +101,14 @@ namespace Microsoft.FeatureFlighting.Common.Config
 
             tenantConfiguration.Metrics.Kusto = _configuration.GetSection("Kusto").Get<KustoConfiguraton>();
             tenantConfiguration.Metrics.Kusto.SetDefault();
-            if (tenantConfiguration.Metrics.Kusto?.Endpoint != null)
+            if (tenantConfiguration.Metrics.Kusto?.Endpoint != null) 
             {
                 //string kustoClientSecretLocation = tenantConfiguration.Metrics.Kusto.Endpoint.ClientSecretLocation;
                 //string kustoClientSecret = tenantConfiguration.Metrics.Kusto.Endpoint?.ClientSecret
                 //    ?? _configuration[kustoClientSecretLocation];
                 //tenantConfiguration.Metrics.Kusto.Endpoint.ClientSecret = kustoClientSecret;
             }
-
+            
 
             if (tenantConfiguration.Metrics.MetricSource == null ||
                 tenantConfiguration.Metrics.MetricSource.WebhookId.ToLowerInvariant() == "KustoAPI".ToLowerInvariant())
