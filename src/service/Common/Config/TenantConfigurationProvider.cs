@@ -158,9 +158,9 @@ namespace Microsoft.FeatureFlighting.Common.Config
                 tenantConfiguration.BusinessRuleEngine.Enabled = false;
                 return;
             }
-            string storageKeyLocation = tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionStringKey;
-            string storageConnectionString = _configuration.GetValue<string>(storageKeyLocation);
-            tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionString = storageConnectionString;
+            //string storageKeyLocation = tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionStringKey;
+            //string storageConnectionString = _configuration.GetValue<string>(storageKeyLocation);
+            //tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionString = storageConnectionString;
         }
     }
 }
