@@ -1,6 +1,7 @@
 ﻿using System;
 using Azure.Core;
 using Azure.Data.AppConfiguration;
+using Azure.Identity;
 using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.AppConfig
@@ -31,9 +32,8 @@ namespace Microsoft.FeatureFlighting.Infrastructure.AppConfig
                 options.Retry.MaxRetries = 10;
                 options.Retry.Delay = TimeSpan.FromSeconds(1);
 
-                string connectionStringLocation = _configuration["AppConfiguration:ConnectionStringLocation"];
-                string connectionString = _configuration[connectionStringLocation];
-                _configurationClient = new ConfigurationClient(connectionString, options);
+                string appConfigEndpoint = _configuration["AppConfiguration:EndpointUrl"];
+                _configurationClient = new ConfigurationClient(new Uri(appConfigEndpoint), new DefaultAzureCredential());
                 return _configurationClient;
 
             }
