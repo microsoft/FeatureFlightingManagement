@@ -55,8 +55,7 @@ namespace Microsoft.PS.Services.FlightingService.Api
         private static void AddAzureAppConfiguration(IConfigurationBuilder config)
         {
             IConfigurationRoot builtConfig = config.Build();
-            string appConfigurationConnectionStringLocation = builtConfig["AppConfiguration:ConnectionStringLocation"];
-            string appConfigurationConnectionString = builtConfig[appConfigurationConnectionStringLocation];
+            string appConfigurationEndpoint= builtConfig["AppConfiguration:EndpointUrl"];
             string flightingAppConfigLabel = builtConfig["AppConfiguration:FeatureFlightsLabel"];
             string configurationCommonLabel = builtConfig["AppConfiguration:ConfigurationCommonLabel"];
             string configurationEnvLabel = builtConfig["AppConfiguration:ConfigurationEnvLabel"];
@@ -64,7 +63,7 @@ namespace Microsoft.PS.Services.FlightingService.Api
             config.AddAzureAppConfiguration(options =>
             {
                 options
-                    .Connect(appConfigurationConnectionString)
+                    .Connect(new Uri(appConfigurationEndpoint), new DefaultAzureCredential())
                     .UseFeatureFlags(configure =>
                     {
                         configure.Label = flightingAppConfigLabel;
