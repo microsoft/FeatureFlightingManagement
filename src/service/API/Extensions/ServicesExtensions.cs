@@ -29,14 +29,15 @@ namespace Microsoft.FeatureFlighting.API.Extensions
         /// </summary>
         public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddMiseWithDefaultAuthentication(configuration, options =>
-            {
-                options.Authority= configuration["Authentication:Authority"];
-                options.Audiences.Add(configuration["Authentication:Audience"]);
-                options.ClientId = configuration["ClientInfo:ClientId"];
-                options.Instance = configuration["InstanceInfo:Instance"];
-                options.TenantId = configuration["TenantInfo:Tenant"];
-            });
+            services.AddAuthentication(S2SAuthenticationDefaults.AuthenticationScheme)
+                .AddMiseWithDefaultAuthentication(configuration, options =>
+                {
+                    options.Authority= configuration["Authentication:Authority"];
+                    options.Audiences.Add(configuration["Authentication:Audience"]);
+                    options.ClientId = configuration["ClientInfo:ClientId"];
+                    options.Instance = configuration["InstanceInfo:Instance"];
+                    options.TenantId = configuration["TenantInfo:Tenant"];
+                });
 
         }
 
