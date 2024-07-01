@@ -32,8 +32,16 @@ namespace Microsoft.FeatureFlighting.API.Extensions
             services.AddAuthentication(S2SAuthenticationDefaults.AuthenticationScheme)
                 .AddMiseWithDefaultAuthentication(configuration, options =>
                 {
+                    var primaryAudience = configuration["Authentication:Audience"];
+                    IList<string> validAudiences = !string.IsNullOrWhiteSpace(configuration["Authentication:AdditionalAudiences"])
+                     ? configuration["Authentication:AdditionalAudiences"].Split(',').ToList()
+                     : new List<string>();
+                    validAudiences.Add(primaryAudience);
                     options.Authority= configuration["Authentication:Authority"];
-                    options.Audiences.Add(configuration["Authentication:Audience"]);
+                    foreach (var audience in validAudiences)
+                    {
+                        options.Audiences.Add(audience);
+                    }
                     options.ClientId = configuration["ClientInfo:ClientId"];
                     options.Instance = configuration["InstanceInfo:Instance"];
                     options.TenantId = configuration["TenantInfo:Tenant"];
