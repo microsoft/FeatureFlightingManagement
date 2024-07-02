@@ -100,26 +100,13 @@ namespace Microsoft.FeatureFlighting.Common.Config
                 return;
 
             tenantConfiguration.Metrics.Kusto = _configuration.GetSection("Kusto").Get<KustoConfiguraton>();
-            tenantConfiguration.Metrics.Kusto.SetDefault();
-            if (tenantConfiguration.Metrics.Kusto?.Endpoint != null) 
-            {
-                string kustoClientSecretLocation = tenantConfiguration.Metrics.Kusto.Endpoint.ClientSecretLocation;
-                string kustoClientSecret = tenantConfiguration.Metrics.Kusto.Endpoint?.ClientSecret
-                    ?? _configuration[kustoClientSecretLocation];
-                tenantConfiguration.Metrics.Kusto.Endpoint.ClientSecret = kustoClientSecret;
-            }
-            
-
+            tenantConfiguration.Metrics.Kusto.SetDefault();            
             if (tenantConfiguration.Metrics.MetricSource == null ||
                 tenantConfiguration.Metrics.MetricSource.WebhookId.ToLowerInvariant() == "KustoAPI".ToLowerInvariant())
             {
                 tenantConfiguration.Metrics.MetricSource = GetWebhook(webhookSection: "Kusto:Endpoint");
                 return;
             }
-
-            string clientSecretLocation = tenantConfiguration.Metrics.MetricSource.ClientSecretLocation;
-            string clientSecret = !string.IsNullOrWhiteSpace(clientSecretLocation) ? _configuration[clientSecretLocation] : null;
-            tenantConfiguration.Metrics.MetricSource.ClientSecret = clientSecret;
         }
 
         private void AddChangeNotificationWebhook(TenantConfiguration tenantConfiguration)
@@ -133,18 +120,11 @@ namespace Microsoft.FeatureFlighting.Common.Config
                 tenantConfiguration.ChangeNotificationSubscription.Webhook = GetWebhook(webhookSection: "EventStore");
                 return;
             }
-
-            string clientSecretLocation = tenantConfiguration.ChangeNotificationSubscription.Webhook.ClientSecretLocation;
-            string clientSecret = !string.IsNullOrWhiteSpace(clientSecretLocation) ? _configuration[clientSecretLocation] : null;
-            tenantConfiguration.ChangeNotificationSubscription.Webhook.ClientSecret = clientSecret;
         }
 
         private WebhookConfiguration GetWebhook(string webhookSection)
         {
             WebhookConfiguration eventStoreWebhook = _configuration.GetSection(webhookSection).Get<WebhookConfiguration>();
-            string clientSecretLocation = eventStoreWebhook.ClientSecretLocation;
-            string clientSecret = _configuration[clientSecretLocation];
-            eventStoreWebhook.ClientSecret = clientSecret;
             return eventStoreWebhook;
         }
 
@@ -158,9 +138,6 @@ namespace Microsoft.FeatureFlighting.Common.Config
                 tenantConfiguration.BusinessRuleEngine.Enabled = false;
                 return;
             }
-            string storageKeyLocation = tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionStringKey;
-            string storageConnectionString = _configuration.GetValue<string>(storageKeyLocation);
-            tenantConfiguration.BusinessRuleEngine.Storage.StorageConnectionString = storageConnectionString;
         }
     }
 }

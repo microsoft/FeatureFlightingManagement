@@ -5,6 +5,11 @@ using Microsoft.Identity.Client;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using Microsoft.FeatureFlighting.Common.Authentication;
+using System.Security.Cryptography.X509Certificates;
+using System.Linq;
+using Azure.Core;
+using Azure.Identity;
+using System.Threading;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
 {
@@ -21,9 +26,9 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
         }
 
         // <inheritdoc/>
-        public async Task<string> GenerateToken(string authority, string clientId, string clientSecret, string resourceId)
+        public async Task<string> GenerateToken(string authority, string clientId, string resourceId)
         {
-            IConfidentialClientApplication client = GetOrCreateConfidentialApp(authority, clientId, clientSecret);
+            IConfidentialClientApplication client = GetOrCreateConfidentialApp(authority, clientId);
             var scopes = new string[] { resourceId };
             AuthenticationResult authenticationResult = await client
                 .AcquireTokenForClient(scopes)
@@ -31,7 +36,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
             return authenticationResult.AccessToken;
         }
 
-        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId, string clientSecret)
+        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId)
         {
             string confidentialAppCacheKey = CreateConfidentialAppCacheKey(authority, clientId);
             if (_cache.ContainsKey(confidentialAppCacheKey))
@@ -41,17 +46,42 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
                     return cachedClient;
                 }
             }
-            
+#if DEBUG
+            var certificate = GetCertificate("27D6D3122675FCC4FE11E4977A540FC74169E1F1");
             IConfidentialClientApplication client =
                 ConfidentialClientApplicationBuilder
-                    .Create(clientId)
-                    .WithClientSecret(clientSecret)
-                    .WithAuthority(new Uri(authority))
+                    .Create(clientId)                    
+                    .WithAuthority(AzureCloudInstance.AzurePublic, "microsoft.onmicrosoft.com")
+                    .WithCertificate(certificate,true)
                     .Build();
             _cache.Add(confidentialAppCacheKey, client);
             return client;
+
+#else
+            IConfidentialClientApplication client =
+                ConfidentialClientApplicationBuilder
+                    .Create(clientId)
+                    .WithAuthority(new Uri(authority))
+                    .WithClientAssertion((AssertionRequestOptions options) =>
+                                                {
+                                                    var accessToken = new DefaultAzureCredential().GetToken(new TokenRequestContext(new string[] { $"api://AzureADTokenExchange/.default" }), CancellationToken.None);
+                                                    return Task.FromResult(accessToken.Token);
+                                                })
+                    .Build();
+            _cache.Add(confidentialAppCacheKey, client);
+            return client;
+#endif
         }
 
+        public X509Certificate2 GetCertificate(string certificateThumbprint)
+        {
+            var store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+            var cert = store.Certificates.OfType<X509Certificate2>()
+                .FirstOrDefault(x => x.Thumbprint == certificateThumbprint);
+            store.Close();
+            return cert;
+        }
         private string CreateConfidentialAppCacheKey(string authority, string clientId)
         {
             return new StringBuilder()

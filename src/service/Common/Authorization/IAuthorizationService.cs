@@ -28,11 +28,10 @@ namespace Microsoft.FeatureFlighting.Common.Authorization
         /// Creates the bearer token
         /// </summary>
         /// <param name="authority">IDP authority</param>
-        /// <param name="clientId">AAD Client ID</param>
-        /// <param name="clientSecret">AAD Client Secret</param>
+        /// <param name="clientId">AAD Client ID</param>        
         /// <param name="resourceId">AAD Client ID against which the token is acquired</param>
         /// <returns>Bearer token</returns>
-        Task<string> GetAuthenticationToken(string authority, string clientId, string clientSecret, string resourceId);
+        Task<string> GetAuthenticationToken(string authority, string clientId, string resourceId);
         
         /// <summary>
         /// Augments the user identity with the required claims
