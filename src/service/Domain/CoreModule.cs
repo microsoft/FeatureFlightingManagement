@@ -221,6 +221,10 @@ namespace Microsoft.FeatureFlighting.Core
                 .As<QueryHandler<GetFeatureFlightsQuery, IEnumerable<FeatureFlightDto>>>()
                 .SingleInstance();
 
+            builder.RegisterType<GetFeatureNamesQueryHandler>()
+                .As<QueryHandler<GetFeatureNamesQuery, IEnumerable<string>>>()
+                .SingleInstance();
+
             builder.RegisterType<GetRegisteredTenantsQueryHandler>()
                 .As<QueryHandler<GetRegisteredTenantsQuery, IEnumerable<TenantConfiguration>>>()
                 .SingleInstance();
