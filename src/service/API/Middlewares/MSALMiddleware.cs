@@ -18,13 +18,15 @@ namespace Microsoft.FeatureFlighting.Api.Middlewares
         public async Task Invoke(HttpContext httpContext)
         {
             var result = await httpContext.AuthenticateAsync(S2SAuthenticationDefaults.AuthenticationScheme);
-            if (!result.Succeeded)
+            if (result.Succeeded || httpContext.Request.Path.Value == "/api/probe/ping")
             {
-                result = await httpContext.AuthenticateAsync("MSAL");
+                httpContext.User = result.Principal;
+                await _next.Invoke(httpContext);
             }
-
-            httpContext.User = result.Principal;
-            await _next.Invoke(httpContext);
+            else
+            {
+                throw new System.Exception("Authentication Failed");
+            }
         }
     }
 }
