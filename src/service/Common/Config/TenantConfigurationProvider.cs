@@ -58,7 +58,6 @@ namespace Microsoft.FeatureFlighting.Common.Config
             IEnumerable<IConfigurationSection> rawTenantConfigurations = tenantConfigurationSection.GetChildren();
             _defaultTenantConfiguration = _configuration.GetSection("Tenants:Default").Get<TenantConfiguration>();
             _defaultTenantConfiguration.IsDyanmic = true;
-            AddFlightsDatabaseConfiguration(_defaultTenantConfiguration);
             AddChangeNotificationWebhook(_defaultTenantConfiguration);
             AddMetricsConfiguration(_defaultTenantConfiguration);
 
@@ -75,7 +74,6 @@ namespace Microsoft.FeatureFlighting.Common.Config
                     tenantConfiguration.ShortName = tenantConfiguration.Name;
 
                 AddBusinessRuleEngineConfiguration(tenantConfiguration);
-                AddFlightsDatabaseConfiguration(tenantConfiguration);
                 AddChangeNotificationWebhook(tenantConfiguration);
                 AddMetricsConfiguration(tenantConfiguration);
                 tenantConfiguration.MergeWithDefault(_defaultTenantConfiguration);
@@ -83,14 +81,6 @@ namespace Microsoft.FeatureFlighting.Common.Config
 
                 _configurationCache.AddOrUpdate(tenantConfiguration.Name.ToLowerInvariant(), tenantConfiguration);
                 _configurationCache.AddOrUpdate(tenantConfiguration.ShortName.ToLowerInvariant(), tenantConfiguration);
-            }
-        }
-
-        private void AddFlightsDatabaseConfiguration(TenantConfiguration tenantConfiguration)
-        {
-            if (tenantConfiguration.FlightsDatabase != null && !tenantConfiguration.FlightsDatabase.Disabled)
-            {
-                tenantConfiguration.FlightsDatabase.PrimaryKey = _configuration.GetValue<string>(tenantConfiguration.FlightsDatabase.PrimaryKeyLocation);
             }
         }
 
