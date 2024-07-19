@@ -12,6 +12,7 @@ using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common.Storage;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Common.Config;
+using Azure.Identity;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Storage
 {
@@ -39,7 +40,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Storage
                 MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(int.Parse(_configuration["CosmosDb:MaxRetryWaitTimeOnRateLimitedRequests"])),
                 MaxRetryAttemptsOnRateLimitedRequests = int.Parse(_configuration["CosmosDb:MaxRetryAttemptsOnRateLimitedRequests"])
             };
-            CosmosClient client = new(cosmosConfiguration.Endpoint, cosmosConfiguration.PrimaryKey, options);
+            CosmosClient client = new(cosmosConfiguration.Endpoint, new DefaultAzureCredential(), options);
             Database database = client.GetDatabase(cosmosConfiguration.DatabaseId);
             _container = database.GetContainer(cosmosConfiguration.ContainerId);
             _logger = logger;
