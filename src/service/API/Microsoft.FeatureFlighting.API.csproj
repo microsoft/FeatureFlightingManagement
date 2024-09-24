@@ -35,7 +35,7 @@
     <PackageReference Include="Microsoft.IdentityModel.Validators" Version="7.5.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.8" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NuGet.Packaging" Version="6.6.2" />
     <PackageReference Include="NuGet.Protocol" Version="6.6.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
