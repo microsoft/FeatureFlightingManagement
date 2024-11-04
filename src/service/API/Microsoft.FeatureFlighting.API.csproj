@@ -30,7 +30,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />    
     <PackageReference Include="Microsoft.FeatureManagement" Version="2.6.1" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="2.4.0" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.99.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.66.1" />
     <PackageReference Include="Microsoft.Identity.ServiceEssentials.AspNetCore" Version="1.30.0" />
     <PackageReference Include="Microsoft.IdentityModel.Validators" Version="8.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.1" />
