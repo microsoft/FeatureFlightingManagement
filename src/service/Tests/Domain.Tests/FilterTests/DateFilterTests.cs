@@ -9,9 +9,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
 {
+    [ExcludeFromCodeCoverage]
     [TestCategory("DateFilter")]
     [TestClass]
     public class DateFilterTests : InitializeFilterTests
