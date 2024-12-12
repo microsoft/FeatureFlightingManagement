@@ -5,9 +5,11 @@ using Microsoft.FeatureFlighting.Core.Spec;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
 {
+    [ExcludeFromCodeCoverage]
     [TestClass]
     public class EqualEvaluatorTests
     {

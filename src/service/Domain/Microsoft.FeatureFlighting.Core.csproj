@@ -25,4 +25,10 @@
     <ProjectReference Include="..\Common\Microsoft.FeatureFlighting.Common.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<AssemblyAttribute Include="using Microsoft.FeatureFlighting.Core.Services">
+			<_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
+
 </Project>
