@@ -1,10 +1,12 @@
 ﻿using Microsoft.FeatureFlighting.Common;
 using Microsoft.FeatureFlighting.Core.Operators;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
 {
+    [ExcludeFromCodeCoverage]
     [TestClass]
     public class NotInEvaluatorTests
     {
