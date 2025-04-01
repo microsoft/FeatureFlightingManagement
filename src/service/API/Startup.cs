@@ -58,16 +58,15 @@ namespace Microsoft.PS.Services.FlightingService.Api
         /// Configures the HTTP pipeline
         /// </summary>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Flighting Service V2");
-                c.RoutePrefix = string.Empty;
-            });
-
+        {        
             if (env.IsDevelopment())
             {
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Flighting Service V2");
+                    c.RoutePrefix = string.Empty;
+                });
                 app.UseDeveloperExceptionPage();
             }
             else
