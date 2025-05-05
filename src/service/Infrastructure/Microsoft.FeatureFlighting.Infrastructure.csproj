@@ -22,4 +22,10 @@
     <ProjectReference Include="..\Common\Microsoft.FeatureFlighting.Common.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<AssemblyAttribute Include="using Microsoft.FeatureFlighting.Infrastructure.Cache">
+			<_Parameter1>Microsoft.FeatureFlighting.Infrastructure.Tests</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
+
 </Project>
