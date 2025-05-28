@@ -13,7 +13,8 @@ namespace Microsoft.FeatureFlighting.Common.Authentication
         /// <param name="authority">Authority to generate the token</param>
         /// <param name="clientId">ID of the application for generating the token</param>        
         /// <param name="resourceId">Resource ID for which the token is generated</param>
+        /// <param name="userAssignedClientId">user Assigned Client Id</param>
         /// <returns>Bearer token</returns>
-        Task<string> GenerateToken(string authority, string clientId, string resourceId);
+        Task<string> GenerateToken(string authority, string clientId, string resourceId, string userAssignedClientId);
     }
 }

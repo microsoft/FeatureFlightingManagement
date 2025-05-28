@@ -147,13 +147,14 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
                 _cache.Add(confidentialAppCacheKey, client);
 
 #else
-            IConfidentialClientApplication client =
+                var credential = new ManagedIdentityCredential(configuration["UserAssignedClientId"]);
+                IConfidentialClientApplication client =
                 ConfidentialClientApplicationBuilder
                     .Create(configuration["Graph:ClientId"])
                     .WithAuthority(new Uri(authority))
                     .WithClientAssertion((AssertionRequestOptions options) =>
                                                 {
-                                                    var accessToken = new DefaultAzureCredential().GetToken(new TokenRequestContext(new string[] { $"api://AzureADTokenExchange/.default" }), CancellationToken.None);
+                                                    var accessToken = credential.GetToken(new TokenRequestContext(new string[] { $"api://AzureADTokenExchange/.default" }), CancellationToken.None);
                                                     return Task.FromResult(accessToken.Token);
                                                 })
                     .Build();

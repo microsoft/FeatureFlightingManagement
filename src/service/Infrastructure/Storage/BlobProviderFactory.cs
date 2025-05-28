@@ -8,6 +8,9 @@ using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Common.Storage;
 using Azure.Identity;
 using Microsoft.FeatureFlighting.Common;
+using Azure.Core;
+using Microsoft.Extensions.Configuration;
+using System.Reflection.PortableExecutable;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Storage
 {
@@ -17,16 +20,23 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Storage
         private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
         private readonly ILogger _logger;
         private readonly IDictionary<string, IBlobProvider> _blobProviderCache;
-        private readonly DefaultAzureCredential _defaultAzureCredential;
-
-        public BlobProviderFactory(ITenantConfigurationProvider tenantConfigurationProvider, ILogger logger)
+        private readonly TokenCredential _defaultAzureCredential;
+        private readonly IConfiguration _configuration;
+        public BlobProviderFactory(ITenantConfigurationProvider tenantConfigurationProvider, ILogger logger, IConfiguration configuration)
         {
             _tenantConfigurationProvider = tenantConfigurationProvider ?? throw new ArgumentNullException(nameof(tenantConfigurationProvider));
             _blobProviderCache = new ConcurrentDictionary<string, IBlobProvider>(StringComparer.InvariantCultureIgnoreCase);
             _logger = logger;
+            _configuration = configuration;
             if (_defaultAzureCredential == null)
-                _defaultAzureCredential = new DefaultAzureCredential();
-
+            {
+                #if DEBUG
+                     _defaultAzureCredential = new VisualStudioCredential();
+                #else
+                     _defaultAzureCredential = new ManagedIdentityCredential(
+                     ManagedIdentityId.FromUserAssignedClientId(_configuration["UserAssignedClientId"]));
+                #endif
+            }
         }
 
         /// <inheritdoc/>
