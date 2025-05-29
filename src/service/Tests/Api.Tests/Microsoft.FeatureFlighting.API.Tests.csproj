@@ -7,8 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Identity.ServiceEssentials.AspNetCore" Version="1.31.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Validators" Version="8.3.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.72.1" />
+    <PackageReference Include="Microsoft.Identity.ServiceEssentials.AspNetCore" Version="1.35.0" />
+    <PackageReference Include="Microsoft.Identity.ServiceEssentials.Caching" Version="1.35.0" />
+    <PackageReference Include="Microsoft.Identity.ServiceEssentials.Extensions.AspNetCoreMiddleware" Version="1.35.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Validators" Version="8.11.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
     <PackageReference Include="Moq" Version="4.16.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.8" />

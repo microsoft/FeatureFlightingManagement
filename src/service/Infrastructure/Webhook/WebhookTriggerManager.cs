@@ -13,6 +13,7 @@ using Microsoft.FeatureFlighting.Common.Model.ChangeNotification;
 using System.Collections.Generic;
 using Microsoft.Graph;
 using System.Linq;
+using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
 {   
@@ -22,13 +23,14 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ITokenGenerator _tokenGenerator;
         private readonly ILogger _logger;
+        public IConfiguration _configuration { get; }
 
-        public WebhookTriggerManager(IHttpClientFactory httpClientFactory, ITokenGenerator tokenGenerator, ILogger logger)
-        {
-            
+        public WebhookTriggerManager(IHttpClientFactory httpClientFactory, ITokenGenerator tokenGenerator, ILogger logger, IConfiguration configuration)
+        {            
             _httpClientFactory = httpClientFactory;
             _tokenGenerator = tokenGenerator;
             _logger= logger;
+            _configuration = configuration;
         }
 
         // <inheritdoc/>
@@ -47,7 +49,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
 
             DependencyContext dependency = CreateDependencyContext(webhook, trackingIds);
             HttpRequestMessage request = new(new HttpMethod(webhook.HttpMethod), webhook.Uri ?? "");
-            string bearerToken = await _tokenGenerator.GenerateToken(webhook.AuthenticationAuthority, webhook.ClientId, webhook.ResourceId);
+            string bearerToken = await _tokenGenerator.GenerateToken(webhook.AuthenticationAuthority, webhook.ClientId, webhook.ResourceId, _configuration["UserAssignedClientId"]);
             request.Headers.Add("Authorization", $"Bearer {bearerToken}");
             request.Headers.Add("x-correlationId", trackingIds.CorrelationId);
             request.Headers.Add("x-messageId", trackingIds.TransactionId);

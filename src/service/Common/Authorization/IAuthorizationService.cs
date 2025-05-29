@@ -23,15 +23,16 @@ namespace Microsoft.FeatureFlighting.Common.Authorization
         /// <param name="appName">Tenant name</param>
         /// <returns>True if the required claims are present</returns>
         bool IsAuthorized(string appName);
-        
+
         /// <summary>
         /// Creates the bearer token
         /// </summary>
         /// <param name="authority">IDP authority</param>
         /// <param name="clientId">AAD Client ID</param>        
         /// <param name="resourceId">AAD Client ID against which the token is acquired</param>
+        /// <param name="userAssignedClientId">user Assigned Client Id</param>
         /// <returns>Bearer token</returns>
-        Task<string> GetAuthenticationToken(string authority, string clientId, string resourceId);
+        Task<string> GetAuthenticationToken(string authority, string clientId, string resourceId,string userAssignedClientId);
         
         /// <summary>
         /// Augments the user identity with the required claims

@@ -26,9 +26,9 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
         }
 
         // <inheritdoc/>
-        public async Task<string> GenerateToken(string authority, string clientId, string resourceId)
+        public async Task<string> GenerateToken(string authority, string clientId, string resourceId, string userAssignedClientId)
         {
-            IConfidentialClientApplication client = GetOrCreateConfidentialApp(authority, clientId);
+            IConfidentialClientApplication client = GetOrCreateConfidentialApp(authority, clientId, userAssignedClientId);
             var scopes = new string[] { resourceId };
             AuthenticationResult authenticationResult = await client
                 .AcquireTokenForClient(scopes)
@@ -36,7 +36,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
             return authenticationResult.AccessToken;
         }
 
-        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId)
+        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId, string userAssignedClientId)
         {
             string confidentialAppCacheKey = CreateConfidentialAppCacheKey(authority, clientId);
             if (_cache.ContainsKey(confidentialAppCacheKey))
@@ -58,13 +58,15 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
             return client;
 
 #else
+            var credential = new ManagedIdentityCredential(userAssignedClientId);
+
             IConfidentialClientApplication client =
                 ConfidentialClientApplicationBuilder
                     .Create(clientId)
                     .WithAuthority(new Uri(authority))
                     .WithClientAssertion((AssertionRequestOptions options) =>
                                                 {
-                                                    var accessToken = new DefaultAzureCredential().GetToken(new TokenRequestContext(new string[] { $"api://AzureADTokenExchange/.default" }), CancellationToken.None);
+                                                    var accessToken = credential.GetToken(new TokenRequestContext(new string[] { $"api://AzureADTokenExchange/.default" }), CancellationToken.None);
                                                     return Task.FromResult(accessToken.Token);
                                                 })
                     .Build();

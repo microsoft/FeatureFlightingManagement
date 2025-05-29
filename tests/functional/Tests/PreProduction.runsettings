@@ -32,6 +32,7 @@
     <Parameter name="FunctionalTest:AAD:ClientSecret" value="" />
     <Parameter name="FunctionalTest:InvalidAAD:ClientId" value="0155af7d-472f-40dc-bc8e-78d2154e7c75" />
     <Parameter name="FunctionalTest:InvalidAAD:ClientSecret" value="" />
+    <Parameter name="FunctionalTest:UserAssignedClientId" value="493d2364-979a-49e8-a67a-6db0446d079b" />
 
     <!--FEATURE FLAG API SETTNGS-->
     <Parameter name="FunctionalTest:FxpFlighting:Endpoint" value="https://feature-flights-management-api-preprod-eus.azurewebsites.net" />

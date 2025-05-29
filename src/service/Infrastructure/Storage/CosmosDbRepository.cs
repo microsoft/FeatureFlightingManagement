@@ -13,13 +13,14 @@ using Microsoft.FeatureFlighting.Common.Storage;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Common.Config;
 using Azure.Identity;
+using Azure.Core;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Storage
 {
     /// <summary>
     /// Azure Cosmos DB Document repository
     /// </summary>
-    internal class CosmosDbRepository<TDoc>: IDocumentRepository<TDoc> where TDoc : class, new()
+    internal class CosmosDbRepository<TDoc> : IDocumentRepository<TDoc> where TDoc : class, new()
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
@@ -40,7 +41,15 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Storage
                 MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(int.Parse(_configuration["CosmosDb:MaxRetryWaitTimeOnRateLimitedRequests"])),
                 MaxRetryAttemptsOnRateLimitedRequests = int.Parse(_configuration["CosmosDb:MaxRetryAttemptsOnRateLimitedRequests"])
             };
-            CosmosClient client = new(cosmosConfiguration.Endpoint, new DefaultAzureCredential(), options);
+            TokenCredential credential;
+            #if DEBUG
+                credential = new VisualStudioCredential();
+            #else
+                credential = new ManagedIdentityCredential(
+                ManagedIdentityId.FromUserAssignedClientId(_configuration["UserAssignedClientId"]));
+            #endif
+            
+            CosmosClient client = new(cosmosConfiguration.Endpoint, credential, options);
             Database database = client.GetDatabase(cosmosConfiguration.DatabaseId);
             _container = database.GetContainer(cosmosConfiguration.ContainerId);
             _logger = logger;
