@@ -3,6 +3,7 @@ using Azure.Core;
 using Azure.Data.AppConfiguration;
 using Azure.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.FeatureFlighting.Common;
 using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.AppConfig
@@ -33,11 +34,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.AppConfig
                 options.Retry.MaxRetries = 10;
                 options.Retry.Delay = TimeSpan.FromSeconds(1);
                 TokenCredential credential;
-#if DEBUG
-                credential = new VisualStudioCredential();
-#else
-                credential = new ManagedIdentityCredential();
-#endif
+                credential = ManagedIdentityHelper.GetTokenCredential();
                 string appConfigUri = _configuration["AzureAppConfigurationUri"];
                 _configurationClient = new ConfigurationClient(new Uri(appConfigUri), credential, options);
                 return _configurationClient;

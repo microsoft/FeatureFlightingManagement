@@ -15,6 +15,7 @@ using System.Security.Cryptography.X509Certificates;
 using Azure.Identity;
 using Azure.Core;
 using System.Threading;
+using Microsoft.FeatureFlighting.Common;
 
 [assembly: InternalsVisibleTo("Microsoft.FeatureFlighting.Infrastructure.Tests")]
 
@@ -115,7 +116,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
             _confidentialApps.TryAdd(confidentialAppCacheKey, app);
             return app;
 #else
-            var credential = new ManagedIdentityCredential();
+            var credential = ManagedIdentityHelper.GetTokenCredential();
             IConfidentialClientApplication app =
                 ConfidentialClientApplicationBuilder
                     .Create(clientId)                    

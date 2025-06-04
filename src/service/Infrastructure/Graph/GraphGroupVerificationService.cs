@@ -147,7 +147,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
                 _cache.Add(confidentialAppCacheKey, client);
 
 #else
-                var credential = new ManagedIdentityCredential();
+                var credential = ManagedIdentityHelper.GetTokenCredential();
                 IConfidentialClientApplication client =
                 ConfidentialClientApplicationBuilder
                     .Create(configuration["Graph:ClientId"])

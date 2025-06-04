@@ -10,6 +10,7 @@ using System.Linq;
 using Azure.Core;
 using Azure.Identity;
 using System.Threading;
+using Microsoft.FeatureFlighting.Common;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
 {
@@ -58,8 +59,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
             return client;
 
 #else
-            var credential = new ManagedIdentityCredential();
-
+            var credential = ManagedIdentityHelper.GetTokenCredential();
             IConfidentialClientApplication client =
                 ConfidentialClientApplicationBuilder
                     .Create(clientId)

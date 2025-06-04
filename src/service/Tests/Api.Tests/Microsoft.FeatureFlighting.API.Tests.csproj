@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.14.0" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.72.1" />
     <PackageReference Include="Microsoft.Identity.ServiceEssentials.AspNetCore" Version="1.35.0" />
     <PackageReference Include="Microsoft.Identity.ServiceEssentials.Caching" Version="1.35.0" />

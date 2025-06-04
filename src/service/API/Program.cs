@@ -10,7 +10,7 @@ using Autofac.Extensions.DependencyInjection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Azure.Core;
-
+using Microsoft.FeatureFlighting.Common;
 namespace Microsoft.PS.Services.FlightingService.Api
 {
     [ExcludeFromCodeCoverage]
@@ -40,11 +40,7 @@ namespace Microsoft.PS.Services.FlightingService.Api
         {
             var builtConfig = config.Build();
             TokenCredential credential;
-#if DEBUG
-            credential = new VisualStudioCredential();
-#else
-            credential = new ManagedIdentityCredential();
-#endif
+            credential = ManagedIdentityHelper.GetTokenCredential();
 
             config.AddAzureKeyVault(
                 new SecretClient(
@@ -67,12 +63,7 @@ namespace Microsoft.PS.Services.FlightingService.Api
             string configurationCommonLabel = builtConfig["AppConfiguration:ConfigurationCommonLabel"];
             string configurationEnvLabel = builtConfig["AppConfiguration:ConfigurationEnvLabel"];
             TokenCredential credential;
-#if DEBUG
-            credential = new VisualStudioCredential();
-#else
-            credential = new ManagedIdentityCredential();
-#endif
-
+            credential = ManagedIdentityHelper.GetTokenCredential();
             config.AddAzureAppConfiguration(options =>
             {
                 options

@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="AppInsights.EnterpriseTelemetry" Version="2.0.0" />
     <PackageReference Include="Autofac" Version="6.3.0" />
+    <PackageReference Include="Azure.Identity" Version="1.14.0" />
     <PackageReference Include="CQRS.Mediatr.Lite" Version="1.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
