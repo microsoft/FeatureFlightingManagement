@@ -75,14 +75,14 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
             return false;
         }
 
-        public async Task<string> GetAuthenticationToken(string authority, string clientId, string resourceId,string userAssignedClientId)
+        public async Task<string> GetAuthenticationToken(string authority, string clientId, string resourceId)
         {
             AuthenticationResult authenticationResult;
             const string MsalScopeSuffix = "/.default";
             string bearerToken = null;
             try
             {
-                IConfidentialClientApplication app = GetOrCreateConfidentialApp(authority, clientId, userAssignedClientId);
+                IConfidentialClientApplication app = GetOrCreateConfidentialApp(authority, clientId);
                 if (app != null)
                 {
                     var scopes = new[] { resourceId + MsalScopeSuffix };
@@ -97,7 +97,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
             return bearerToken;
         }
 
-        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId,string userAssignedClientId)
+        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId)
         {
             string confidentialAppCacheKey = $"{authority}-{clientId}";
             if (_confidentialApps.ContainsKey(confidentialAppCacheKey))
@@ -115,7 +115,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
             _confidentialApps.TryAdd(confidentialAppCacheKey, app);
             return app;
 #else
-            var credential = new ManagedIdentityCredential(userAssignedClientId);
+            var credential = new ManagedIdentityCredential();
             IConfidentialClientApplication app =
                 ConfidentialClientApplicationBuilder
                     .Create(clientId)                    

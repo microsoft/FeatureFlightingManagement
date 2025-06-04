@@ -42,11 +42,10 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Storage
                 MaxRetryAttemptsOnRateLimitedRequests = int.Parse(_configuration["CosmosDb:MaxRetryAttemptsOnRateLimitedRequests"])
             };
             TokenCredential credential;
-            #if DEBUG
-                credential = new VisualStudioCredential();
-            #else
-                credential = new ManagedIdentityCredential(
-                ManagedIdentityId.FromUserAssignedClientId(_configuration["UserAssignedClientId"]));
+#if DEBUG
+            credential = new VisualStudioCredential();
+#else
+            credential = new ManagedIdentityCredential();
             #endif
             
             CosmosClient client = new(cosmosConfiguration.Endpoint, credential, options);
