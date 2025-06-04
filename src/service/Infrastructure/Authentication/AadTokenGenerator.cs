@@ -10,6 +10,7 @@ using System.Linq;
 using Azure.Core;
 using Azure.Identity;
 using System.Threading;
+using Microsoft.FeatureFlighting.Common;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
 {
@@ -26,9 +27,9 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
         }
 
         // <inheritdoc/>
-        public async Task<string> GenerateToken(string authority, string clientId, string resourceId, string userAssignedClientId)
+        public async Task<string> GenerateToken(string authority, string clientId, string resourceId)
         {
-            IConfidentialClientApplication client = GetOrCreateConfidentialApp(authority, clientId, userAssignedClientId);
+            IConfidentialClientApplication client = GetOrCreateConfidentialApp(authority, clientId);
             var scopes = new string[] { resourceId };
             AuthenticationResult authenticationResult = await client
                 .AcquireTokenForClient(scopes)
@@ -36,7 +37,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
             return authenticationResult.AccessToken;
         }
 
-        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId, string userAssignedClientId)
+        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId)
         {
             string confidentialAppCacheKey = CreateConfidentialAppCacheKey(authority, clientId);
             if (_cache.ContainsKey(confidentialAppCacheKey))
@@ -58,8 +59,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authentication
             return client;
 
 #else
-            var credential = new ManagedIdentityCredential(userAssignedClientId);
-
+            var credential = ManagedIdentityHelper.GetTokenCredential();
             IConfidentialClientApplication client =
                 ConfidentialClientApplicationBuilder
                     .Create(clientId)

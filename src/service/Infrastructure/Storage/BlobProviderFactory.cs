@@ -30,12 +30,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Storage
             _configuration = configuration;
             if (_defaultAzureCredential == null)
             {
-                #if DEBUG
-                     _defaultAzureCredential = new VisualStudioCredential();
-                #else
-                     _defaultAzureCredential = new ManagedIdentityCredential(
-                     ManagedIdentityId.FromUserAssignedClientId(_configuration["UserAssignedClientId"]));
-                #endif
+                _defaultAzureCredential = ManagedIdentityHelper.GetTokenCredential();
             }
         }
 

@@ -29,10 +29,9 @@ namespace Microsoft.FeatureFlighting.Common.Authorization
         /// </summary>
         /// <param name="authority">IDP authority</param>
         /// <param name="clientId">AAD Client ID</param>        
-        /// <param name="resourceId">AAD Client ID against which the token is acquired</param>
-        /// <param name="userAssignedClientId">user Assigned Client Id</param>
+        /// <param name="resourceId">AAD Client ID against which the token is acquired</param>        
         /// <returns>Bearer token</returns>
-        Task<string> GetAuthenticationToken(string authority, string clientId, string resourceId,string userAssignedClientId);
+        Task<string> GetAuthenticationToken(string authority, string clientId, string resourceId);
         
         /// <summary>
         /// Augments the user identity with the required claims

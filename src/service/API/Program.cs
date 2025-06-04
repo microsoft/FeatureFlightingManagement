@@ -10,7 +10,7 @@ using Autofac.Extensions.DependencyInjection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Azure.Core;
-
+using Microsoft.FeatureFlighting.Common;
 namespace Microsoft.PS.Services.FlightingService.Api
 {
     [ExcludeFromCodeCoverage]
@@ -38,14 +38,9 @@ namespace Microsoft.PS.Services.FlightingService.Api
 
         private static void AddKeyVault(IConfigurationBuilder config)
         {
-            var builtConfig = config.Build();           
+            var builtConfig = config.Build();
             TokenCredential credential;
-            #if DEBUG
-                credential = new VisualStudioCredential();
-            #else
-                credential = new ManagedIdentityCredential(
-                ManagedIdentityId.FromUserAssignedClientId(builtConfig["UserAssignedClientId"]));
-            #endif
+            credential = ManagedIdentityHelper.GetTokenCredential();
 
             config.AddAzureKeyVault(
                 new SecretClient(
@@ -66,15 +61,9 @@ namespace Microsoft.PS.Services.FlightingService.Api
             string appConfigurationUri = builtConfig["AzureAppConfigurationUri"];
             string flightingAppConfigLabel = builtConfig["AppConfiguration:FeatureFlightsLabel"];
             string configurationCommonLabel = builtConfig["AppConfiguration:ConfigurationCommonLabel"];
-            string configurationEnvLabel = builtConfig["AppConfiguration:ConfigurationEnvLabel"];            
+            string configurationEnvLabel = builtConfig["AppConfiguration:ConfigurationEnvLabel"];
             TokenCredential credential;
-            #if DEBUG
-                credential = new VisualStudioCredential();
-            #else
-                credential = new ManagedIdentityCredential(
-                ManagedIdentityId.FromUserAssignedClientId(builtConfig["UserAssignedClientId"]));
-            #endif            
-
+            credential = ManagedIdentityHelper.GetTokenCredential();
             config.AddAzureAppConfiguration(options =>
             {
                 options

@@ -16,7 +16,7 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
-{   
+{
     // <inheritdoc/>
     internal class WebhookTriggerManager: IWebhookTriggerManager
     {
@@ -26,7 +26,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
         public IConfiguration _configuration { get; }
 
         public WebhookTriggerManager(IHttpClientFactory httpClientFactory, ITokenGenerator tokenGenerator, ILogger logger, IConfiguration configuration)
-        {            
+        {
             _httpClientFactory = httpClientFactory;
             _tokenGenerator = tokenGenerator;
             _logger= logger;
@@ -49,7 +49,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
 
             DependencyContext dependency = CreateDependencyContext(webhook, trackingIds);
             HttpRequestMessage request = new(new HttpMethod(webhook.HttpMethod), webhook.Uri ?? "");
-            string bearerToken = await _tokenGenerator.GenerateToken(webhook.AuthenticationAuthority, webhook.ClientId, webhook.ResourceId, _configuration["UserAssignedClientId"]);
+            string bearerToken = await _tokenGenerator.GenerateToken(webhook.AuthenticationAuthority, webhook.ClientId, webhook.ResourceId);
             request.Headers.Add("Authorization", $"Bearer {bearerToken}");
             request.Headers.Add("x-correlationId", trackingIds.CorrelationId);
             request.Headers.Add("x-messageId", trackingIds.TransactionId);
@@ -62,7 +62,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Webhook
                         request.Headers.Add(header.Key, header.Value);
                 }
             }
-            
+
             request.Content = new StringContent(payload, Encoding.UTF8, "application/json");
             dependency.RequestDetails = payload;
 
