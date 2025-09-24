@@ -18,6 +18,7 @@ using Microsoft.FeatureFlighting.Core.Events.WebhookHandlers;
 using Microsoft.FeatureFlighting.Common.Model.AzureAppConfig;
 using Microsoft.FeatureFlighting.Core.Events.TelemetryHandlers;
 using Microsoft.FeatureFlighting.Common.Cache;
+using Microsoft.FeatureFlighting.Core.Services.Cache;
 
 namespace Microsoft.FeatureFlighting.Core
 {
@@ -139,6 +140,10 @@ namespace Microsoft.FeatureFlighting.Core
                 .As<IFeatureFlightCache>()
                 .SingleInstance();
 
+            builder.RegisterType<FeatureFlightResultCache>()
+                .As<IFeatureFlightResultCache>()
+                .SingleInstance();
+
             builder.RegisterType<RulesEngineManager>()
                 .As<IRulesEngineManager>()
                 .As<IBackgroundCacheable>()
@@ -214,6 +219,10 @@ namespace Microsoft.FeatureFlighting.Core
 
             builder.RegisterType<GetFeatureFlightsQueryHandler>()
                 .As<QueryHandler<GetFeatureFlightsQuery, IEnumerable<FeatureFlightDto>>>()
+                .SingleInstance();
+
+            builder.RegisterType<GetFeatureNamesQueryHandler>()
+                .As<QueryHandler<GetFeatureNamesQuery, IEnumerable<string>>>()
                 .SingleInstance();
 
             builder.RegisterType<GetRegisteredTenantsQueryHandler>()

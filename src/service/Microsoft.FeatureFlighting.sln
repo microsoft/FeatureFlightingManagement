@@ -10,6 +10,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.Core", "Domain\Microsoft.FeatureFlighting.Core.csproj", "{AF6D1713-2BEA-4CA2-88D5-72B82D9DA486}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D22B9BC0-ABA2-4DBD-98D3-B4EA074D7110}"
+	ProjectSection(SolutionItems) = preProject
+		test.runsettings = test.runsettings
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FeatureFlighting.API.Tests", "Tests\Api.Tests\Microsoft.FeatureFlighting.API.Tests.csproj", "{11EEE271-00A5-4B2D-B963-0FF6544A4002}"
 EndProject

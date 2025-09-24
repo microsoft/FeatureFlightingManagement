@@ -21,7 +21,7 @@ namespace Microsoft.FeatureFlighting.Core.Evaluation
             _singleFlagEvaluator = singleFlagEvaluator;
         }
 
-        public async Task<IDictionary<string, bool>> Evaluate(IEnumerable<string> features, TenantConfiguration tenantConfiguration, string environment, EventContext @event)
+        public async Task<IDictionary<string, bool>> Evaluate(IEnumerable<string> features, IEnumerable<string> featureKeysOnAzure, TenantConfiguration tenantConfiguration, string environment, EventContext @event)
         {
             ConcurrentDictionary<string, bool> result = new();
             ConcurrentDictionary<string, string> telemetryProp = new();
@@ -31,7 +31,7 @@ namespace Microsoft.FeatureFlighting.Core.Evaluation
                 evaluationTasks.Add(Task.Run(async () =>
                 {
                     var startedAt = DateTime.UtcNow;
-                    bool isEnabled = await _singleFlagEvaluator.IsEnabled(feature, tenantConfiguration, environment).ConfigureAwait(false);
+                    bool isEnabled = await _singleFlagEvaluator.IsEnabled(feature, featureKeysOnAzure, tenantConfiguration, environment).ConfigureAwait(false);
                     var completedAt = DateTime.UtcNow;
                     telemetryProp.AddOrUpdate(feature, isEnabled.ToString());
                     telemetryProp.AddOrUpdate(new StringBuilder().Append(feature).Append(":TimeTaken").ToString(), (completedAt - startedAt).TotalMilliseconds.ToString());

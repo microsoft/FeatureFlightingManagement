@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.FeatureFlighting.Tests.Functional.Helper;
 using Microsoft.FeatureFlighting.Tests.Functional.Utilities;
+using Azure.Core;
+using Azure.Identity;
+using System.Threading;
 
 namespace Microsoft.FeatureFlighting.Tests.Functional
 {
@@ -216,7 +218,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional
             {
                 return _testContext.Properties["FunctionalTest:AAD:ClientSecret"].ToString();
             }
-            return await KeyVaultHelper.Instance.GetSecret(_testContext.Properties["FunctionalTest:KeyVault:Endpoint"].ToString(), _testContext.Properties["FunctionalTest:AAD:ClientSecret"].ToString());
+            return await KeyVaultHelper.Instance.GetSecret(_testContext.Properties["FunctionalTest:KeyVault:Endpoint"].ToString(), _testContext.Properties["FunctionalTest:AAD:ClientSecret"].ToString(), _testContext.Properties["FunctionalTest:UserAssignedClientId"].ToString());
         }
 
         private static async Task<string> GetAlternateClientSecretForAuthentication()
@@ -225,7 +227,7 @@ namespace Microsoft.FeatureFlighting.Tests.Functional
             {
                 return _testContext.Properties["FunctionalTest:InvalidAAD:ClientSecret"].ToString();
             }
-            return await KeyVaultHelper.Instance.GetSecret(_testContext.Properties["FunctionalTest:KeyVault:Endpoint"].ToString(), _testContext.Properties["FunctionalTest:InvalidAAD:ClientSecret"].ToString());
+            return await KeyVaultHelper.Instance.GetSecret(_testContext.Properties["FunctionalTest:KeyVault:Endpoint"].ToString(), _testContext.Properties["FunctionalTest:InvalidAAD:ClientSecret"].ToString(), _testContext.Properties["FunctionalTest:UserAssignedClientId"].ToString());
         }
 
         private static async Task<string> GetAccessTokenAsync()
@@ -238,13 +240,18 @@ namespace Microsoft.FeatureFlighting.Tests.Functional
             string cachedToken = _tokenCache.GetValueOrDefault(clientId, null);
             if (!string.IsNullOrWhiteSpace(cachedToken))
                 return cachedToken;
-
-            var authContext = new AuthenticationContext(authority);
-            var client = clientId;
-            var key = flightingKey;
-            var credential = new ClientCredential(client, key);
-            var authResult = await authContext.AcquireTokenAsync(flightingResource, credential);
-            return authResult.AccessToken;
+            string userAssignedClientId = _testContext.Properties["FunctionalTest:UserAssignedClientId"].ToString();
+            TokenCredential credential;
+            #if DEBUG
+                credential = new VisualStudioCredential();
+            #else
+                credential = new ManagedIdentityCredential(
+                ManagedIdentityId.FromUserAssignedClientId(userAssignedClientId));
+            #endif           
+           
+            var accessToken = await credential.GetTokenAsync(
+                new TokenRequestContext(scopes: new string[] { flightingResource + "/.default" }), CancellationToken.None);
+            return accessToken.Token;
         }
 
         private static async Task<string> GetAccessTokenAsyncFromAlternateAccount()
@@ -253,13 +260,18 @@ namespace Microsoft.FeatureFlighting.Tests.Functional
             string flightingKey = await GetAlternateClientSecretForAuthentication();
             string flightingResource = _testContext.Properties["FunctionalTest:FxpFlighting:AAD:ResourceId"].ToString();
             string authority = _testContext.Properties["FunctionalTest:AAD:Authority"].ToString();
+            string userAssignedClientId = _testContext.Properties["FunctionalTest:UserAssignedClientId"].ToString();
+            TokenCredential credential;
+            #if DEBUG
+                credential = new VisualStudioCredential();
+            #else
+                credential = new ManagedIdentityCredential(
+                ManagedIdentityId.FromUserAssignedClientId(userAssignedClientId));
+            #endif
 
-            var authContext = new AuthenticationContext(authority);
-            var client = clientId;
-            var key = flightingKey;
-            var credential = new ClientCredential(client, key);
-            var authResult = await authContext.AcquireTokenAsync(flightingResource, credential);
-            return authResult.AccessToken;
+            var accessToken = await credential.GetTokenAsync(
+                new TokenRequestContext(scopes: new string[] { flightingResource + "/.default" }),  CancellationToken.None );
+            return accessToken.Token;
         }
     }
 }

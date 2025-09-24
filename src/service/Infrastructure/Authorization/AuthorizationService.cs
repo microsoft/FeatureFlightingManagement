@@ -11,6 +11,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common.Config;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Common.Authorization;
+using System.Security.Cryptography.X509Certificates;
+using Azure.Identity;
+using Azure.Core;
+using System.Threading;
+using Microsoft.FeatureFlighting.Common;
 
 [assembly: InternalsVisibleTo("Microsoft.FeatureFlighting.Infrastructure.Tests")]
 
@@ -71,14 +76,14 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
             return false;
         }
 
-        public async Task<string> GetAuthenticationToken(string authority, string clientId, string clientSecret, string resourceId)
+        public async Task<string> GetAuthenticationToken(string authority, string clientId, string resourceId)
         {
             AuthenticationResult authenticationResult;
             const string MsalScopeSuffix = "/.default";
             string bearerToken = null;
             try
             {
-                IConfidentialClientApplication app = GetOrCreateConfidentialApp(authority, clientId, clientSecret);
+                IConfidentialClientApplication app = GetOrCreateConfidentialApp(authority, clientId);
                 if (app != null)
                 {
                     var scopes = new[] { resourceId + MsalScopeSuffix };
@@ -93,21 +98,48 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Authorization
             return bearerToken;
         }
 
-        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId, string clientSecret)
+        private IConfidentialClientApplication GetOrCreateConfidentialApp(string authority, string clientId)
         {
             string confidentialAppCacheKey = $"{authority}-{clientId}";
             if (_confidentialApps.ContainsKey(confidentialAppCacheKey))
             {
                 return _confidentialApps[confidentialAppCacheKey];
             }
+#if DEBUG
+            var certificate = GetCertificate("27D6D3122675FCC4FE11E4977A540FC74169E1F1");
             IConfidentialClientApplication app =
                 ConfidentialClientApplicationBuilder
-                    .Create(clientId)
-                    .WithClientSecret(clientSecret)
-                    .WithAuthority(new Uri(authority))
+                    .Create(clientId)                    
+                    .WithAuthority(AzureCloudInstance.AzurePublic, "microsoft.onmicrosoft.com")
+                    .WithCertificate(certificate, true)
                     .Build();
             _confidentialApps.TryAdd(confidentialAppCacheKey, app);
             return app;
+#else
+            var credential = ManagedIdentityHelper.GetTokenCredential();
+            IConfidentialClientApplication app =
+                ConfidentialClientApplicationBuilder
+                    .Create(clientId)                    
+                    .WithAuthority(new Uri(authority))
+                    .WithClientAssertion((AssertionRequestOptions options) =>
+                                                {
+                                                    var accessToken = credential.GetToken(new TokenRequestContext(new string[] { $"api://AzureADTokenExchange/.default" }), CancellationToken.None);
+                                                    return Task.FromResult(accessToken.Token);
+                                                })
+                    .Build();
+            _confidentialApps.TryAdd(confidentialAppCacheKey, app);
+            return app;
+#endif
+        }
+
+        public X509Certificate2 GetCertificate(string certificateThumbprint)
+        {
+            var store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+            var cert = store.Certificates.OfType<X509Certificate2>()
+                .FirstOrDefault(x => x.Thumbprint == certificateThumbprint);
+            store.Close();
+            return cert;
         }
 
         public void AugmentAdminClaims(string tenant)

@@ -14,6 +14,11 @@ using AppInsights.EnterpriseTelemetry.Web.Extension;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using Microsoft.FeatureFlighting.Api.ExceptionHandler;
 using AppInsights.EnterpriseTelemetry.Web.Extension.Middlewares;
+using Microsoft.IdentityModel.Validators;
+using Microsoft.Identity.ServiceEssentials.Extensions.AspNetCoreMiddleware;
+using Microsoft.IdentityModel.S2S.Extensions.AspNetCore;
+using System.Configuration;
+
 
 namespace Microsoft.FeatureFlighting.API.Extensions
 {
@@ -24,35 +29,24 @@ namespace Microsoft.FeatureFlighting.API.Extensions
         /// </summary>
         public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                   .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-                   {
-
-                       options.Authority = configuration["Authentication:Authority"];
-                       var primaryAudience = configuration["Authentication:Audience"];
-                       IList<string> validAudiences = !string.IsNullOrWhiteSpace(configuration["Authentication:AdditionalAudiences"])
-                        ? configuration["Authentication:AdditionalAudiences"].Split(',').ToList()
-                        : new List<string>();
-                       validAudiences.Add(primaryAudience);
-                       options.TokenValidationParameters = new IdentityModel.Tokens.TokenValidationParameters
-                       {
-                           ValidAudiences = validAudiences
-                       };
-                   })
-                    // Adding support for MSAL
-                    .AddJwtBearer("MSAL", options =>
+            services.AddAuthentication(S2SAuthenticationDefaults.AuthenticationScheme)
+                .AddMiseWithDefaultAuthentication(configuration, options =>
+                {
+                    var primaryAudience = configuration["Authentication:Audience"];
+                    IList<string> validAudiences = !string.IsNullOrWhiteSpace(configuration["Authentication:AdditionalAudiences"])
+                     ? configuration["Authentication:AdditionalAudiences"].Split(',').ToList()
+                     : new List<string>();
+                    validAudiences.Add(primaryAudience);
+                    options.Authority= configuration["Authentication:Authority"];
+                    foreach (var audience in validAudiences)
                     {
-                        options.Authority = configuration["Authentication:AuthorityV2"];
-                        var primaryAudience = configuration["Authentication:Audience"];
-                        IList<string> validAudiences = !string.IsNullOrWhiteSpace(configuration["Authentication:AdditionalAudiences"])
-                         ? configuration["Authentication:AdditionalAudiences"].Split(',').ToList()
-                         : new List<string>();
-                        validAudiences.Add(primaryAudience);
-                        options.TokenValidationParameters = new IdentityModel.Tokens.TokenValidationParameters
-                        {
-                            ValidAudiences = validAudiences
-                        };
-                    });
+                        options.Audiences.Add(audience);
+                    }
+                    options.ClientId = configuration["ClientInfo:ClientId"];
+                    options.Instance = configuration["InstanceInfo:Instance"];
+                    options.TenantId = configuration["TenantInfo:Tenant"];
+                });
+
         }
 
         /// <summary>

@@ -72,6 +72,10 @@ namespace Microsoft.FeatureFlighting.Infrastructure
                 .As<ICacheFactory>()
                 .SingleInstance();
 
+            builder.RegisterType<FeatureFlightResultCacheFactory>()
+               .As<IFeatureFlightResultCacheFactory>()
+               .SingleInstance();
+
             builder.RegisterType<BackgroundCacheManager>()
                 .As<IBackgroundCacheManager>()
                 .WithParameter(new ResolvedParameter(

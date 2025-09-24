@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.S2S.Extensions.AspNetCore;
 
 namespace Microsoft.FeatureFlighting.Api.Middlewares
 {
@@ -16,14 +17,16 @@ namespace Microsoft.FeatureFlighting.Api.Middlewares
 
         public async Task Invoke(HttpContext httpContext)
         {
-            var result = await httpContext.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
-            if (!result.Succeeded)
+            var result = await httpContext.AuthenticateAsync(S2SAuthenticationDefaults.AuthenticationScheme);
+            if (result.Succeeded || httpContext.Request.Path.Value == "/api/probe/ping")
             {
-                result = await httpContext.AuthenticateAsync("MSAL");
+                httpContext.User = result.Principal;
+                await _next.Invoke(httpContext);
             }
-
-            httpContext.User = result.Principal;
-            await _next.Invoke(httpContext);
+            else
+            {
+                throw new System.Exception("Authentication Failed");
+            }
         }
     }
 }

@@ -19,5 +19,10 @@
         /// Container where files are located
         /// </summary>
         public string ContainerName { get; set; }
+
+        /// <summary>
+        /// Storage account name for container
+        /// </summary>
+        public string StorageAccountName { get; set; }
     }
 }

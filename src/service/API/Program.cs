@@ -9,14 +9,15 @@ using Microsoft.Extensions.Configuration;
 using Autofac.Extensions.DependencyInjection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
-
+using Azure.Core;
+using Microsoft.FeatureFlighting.Common;
 namespace Microsoft.PS.Services.FlightingService.Api
 {
     [ExcludeFromCodeCoverage]
     public static class Program
     {
         public static void Main(string[] args)
-        {   
+        {
             CreateHostBuilder(args).Build().Run();
         }
 
@@ -38,11 +39,13 @@ namespace Microsoft.PS.Services.FlightingService.Api
         private static void AddKeyVault(IConfigurationBuilder config)
         {
             var builtConfig = config.Build();
+            TokenCredential credential;
+            credential = ManagedIdentityHelper.GetTokenCredential();
 
             config.AddAzureKeyVault(
                 new SecretClient(
                     new Uri(builtConfig["KeyVault:EndpointUrl"]),
-                    credential: new DefaultAzureCredential()
+                    credential
                     ),
                 new AzureKeyVaultConfigurationOptions()
                 {
@@ -55,16 +58,16 @@ namespace Microsoft.PS.Services.FlightingService.Api
         private static void AddAzureAppConfiguration(IConfigurationBuilder config)
         {
             IConfigurationRoot builtConfig = config.Build();
-            string appConfigurationConnectionStringLocation = builtConfig["AppConfiguration:ConnectionStringLocation"];
-            string appConfigurationConnectionString = builtConfig[appConfigurationConnectionStringLocation];
+            string appConfigurationUri = builtConfig["AzureAppConfigurationUri"];
             string flightingAppConfigLabel = builtConfig["AppConfiguration:FeatureFlightsLabel"];
             string configurationCommonLabel = builtConfig["AppConfiguration:ConfigurationCommonLabel"];
             string configurationEnvLabel = builtConfig["AppConfiguration:ConfigurationEnvLabel"];
-
+            TokenCredential credential;
+            credential = ManagedIdentityHelper.GetTokenCredential();
             config.AddAzureAppConfiguration(options =>
             {
                 options
-                    .Connect(appConfigurationConnectionString)
+                    .Connect(new Uri(appConfigurationUri), credential)
                     .UseFeatureFlags(configure =>
                     {
                         configure.Label = flightingAppConfigLabel;

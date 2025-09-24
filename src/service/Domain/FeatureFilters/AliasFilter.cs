@@ -9,11 +9,16 @@ using static Microsoft.FeatureFlighting.Common.Constants;
 namespace Microsoft.FeatureFlighting.Core.FeatureFilters
 {
     [FilterAlias(FilterKeys.Alias)]
-    public class AliasFilter : BaseFilter, IFeatureFilter
+    public class AliasFilter : BaseFilter, IFeatureFilter, IFilterParametersBinder
     {
         protected override string FilterType => FilterKeys.Alias;
         public AliasFilter(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger logger, IOperatorStrategy evaluatorStrategy) : base(configuration ,httpContextAccessor, logger, evaluatorStrategy)
         {
+        }
+
+        public object BindParameters(IConfiguration filterParameters)
+        {
+            return filterParameters.Get<FilterSettings>();
         }
 
         public Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context)

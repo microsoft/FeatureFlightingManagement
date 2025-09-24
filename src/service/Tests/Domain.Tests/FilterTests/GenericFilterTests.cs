@@ -51,6 +51,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_Equals_Operator()
         {
             GenericFilter GenericFilter = new GenericFilter(configMock.Object, httpContextAccessorMockInDefinedGeneric.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorEquals.Settings = GenericFilter.BindParameters(featureContextOperatorEquals.Parameters);
             var featureFlagStatus = await GenericFilter.EvaluateAsync(featureContextOperatorEquals);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -59,6 +60,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_Equals_Operator()
         {
             GenericFilter GenericFilter = new GenericFilter(configMock.Object, httpContextAccessorMockNotInDefinedGeneric.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorEquals.Settings = GenericFilter.BindParameters(featureContextOperatorEquals.Parameters);
             var featureFlagStatus = await GenericFilter.EvaluateAsync(featureContextOperatorEquals);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -67,6 +69,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_NotEquals_Operator()
         {
             GenericFilter GenericFilter = new GenericFilter(configMock.Object, httpContextAccessorMockNotInDefinedGeneric.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorNotEquals.Settings = GenericFilter.BindParameters(featureContextOperatorNotEquals.Parameters);
             var featureFlagStatus = await GenericFilter.EvaluateAsync(featureContextOperatorNotEquals);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -75,6 +78,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_NotEquals_Operator()
         {
             GenericFilter GenericFilter = new GenericFilter(configMock.Object, httpContextAccessorMockInDefinedGeneric.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorNotEquals.Settings = GenericFilter.BindParameters(featureContextOperatorNotEquals.Parameters);
             var featureFlagStatus = await GenericFilter.EvaluateAsync(featureContextOperatorNotEquals);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -83,6 +87,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_In_Operator()
         {
             GenericFilter GenericFilter = new GenericFilter(configMock.Object, httpContextAccessorMockInDefinedGeneric.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorIn.Settings = GenericFilter.BindParameters(featureContextOperatorIn.Parameters);
             var featureFlagStatus = await GenericFilter.EvaluateAsync(featureContextOperatorIn);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -91,6 +96,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_In_Operator()
         {
             GenericFilter GenericFilter = new GenericFilter(configMock.Object, httpContextAccessorMockNotInDefinedGeneric.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorIn.Settings = GenericFilter.BindParameters(featureContextOperatorIn.Parameters);
             var featureFlagStatus = await GenericFilter.EvaluateAsync(featureContextOperatorIn);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -99,6 +105,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_NotIn_Operator()
         {
             GenericFilter GenericFilter = new GenericFilter(configMock.Object, httpContextAccessorMockNotInDefinedGeneric.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorNotIn.Settings = GenericFilter.BindParameters(featureContextOperatorNotIn.Parameters);
             var featureFlagStatus = await GenericFilter.EvaluateAsync(featureContextOperatorNotIn);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -107,6 +114,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_NotIn_Operator()
         {
             GenericFilter GenericFilter = new GenericFilter(configMock.Object, httpContextAccessorMockInDefinedGeneric.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorNotIn.Settings = GenericFilter.BindParameters(featureContextOperatorNotIn.Parameters);
             var featureFlagStatus = await GenericFilter.EvaluateAsync(featureContextOperatorNotIn);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -115,6 +123,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_HttpContext_Has_No_Generic()
         {
             GenericFilter GenericFilter = new GenericFilter(configMock.Object, httpContextAccessorMockWithoutGeneric.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorIn.Settings = GenericFilter.BindParameters(featureContextOperatorIn.Parameters);
             var featureFlagStatus = await GenericFilter.EvaluateAsync(featureContextOperatorIn);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -122,6 +131,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_StageNotActive()
         {
             GenericFilter GenericFilter = new GenericFilter(configMock.Object, httpContextAccessorMockInDefinedGeneric.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorWithoutActiveStage.Settings = GenericFilter.BindParameters(featureContextOperatorWithoutActiveStage.Parameters);
             var featureFlagStatus = await GenericFilter.EvaluateAsync(featureContextOperatorWithoutActiveStage);
             Assert.AreEqual(false, featureFlagStatus);
         }

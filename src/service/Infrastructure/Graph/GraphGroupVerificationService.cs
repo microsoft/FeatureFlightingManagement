@@ -14,6 +14,11 @@ using Microsoft.FeatureFlighting.Common.Group;
 using AppInsights.EnterpriseTelemetry.Context;
 using Microsoft.FeatureFlighting.Common.Caching;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
+using System.Security.Cryptography.X509Certificates;
+using System.Collections.Concurrent;
+using Azure.Identity;
+using Azure.Core;
+using System.Threading;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.Graph
 {
@@ -26,6 +31,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
         private readonly int _cacheInterval;
         private readonly ILogger _logger;
         private readonly bool _verboseLogging;
+        private readonly IDictionary<string, object> _cache;
 
         public event EventHandler<BackgroundCacheParameters> ObjectCached;
 
@@ -35,6 +41,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
         {
             _cacheFactory = cacheFactory;
             _logger = logger;
+            _cache = new ConcurrentDictionary<string, object>();
             _cacheInterval = int.Parse(configuration["Graph:CacheExpiration"]);
             _isCachingEnabled = cacheFactory != null && _cacheInterval > 0 && bool.Parse(configuration["Graph:CachingEnabled"]);
             _graphServiceClient = CreateGraphClient(configuration);
@@ -101,7 +108,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
                 CacheDuration = _cacheInterval
             };
             List<string> groupMembers = await GetCachedObject(userCacheParameter, trackingIds);
-            if (groupMembers != null && groupMembers.Any()) 
+            if (groupMembers != null) 
             {
                 LogDebugMessage(new StringBuilder().Append(securityGroupId).Append(" members found in cache"), trackingIds);
                 return groupMembers;
@@ -110,7 +117,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
  
             var cacheableGroupMembers = await CreateCacheableObject(userCacheParameter, trackingIds);
             groupMembers = cacheableGroupMembers?.Object ?? new();
-            if (groupMembers != null && groupMembers.Any())
+            if (groupMembers != null)
             {
                 LogDebugMessage(new StringBuilder().Append(securityGroupId).Append(" members added in cache"), trackingIds);
                 await SetCacheObject(cacheableGroupMembers, trackingIds);
@@ -126,18 +133,37 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
                 string tenant = configuration["Graph:Tenant"];
                 string authority = string.Format(configuration["Graph:Authority"], tenant);
                 string[] scopes = new string[] { configuration["Graph:Scope"] };
-                string secretLocation = configuration["Graph:ClientSecretLocation"];
-                string clientSecret = configuration[secretLocation];
+                string confidentialAppCacheKey = CreateConfidentialAppCacheKey(authority, configuration["Graph:ClientId"]);
 
-                IConfidentialClientApplication confidentialClient = ConfidentialClientApplicationBuilder
+#if DEBUG
+                var certificate = GetCertificate("27D6D3122675FCC4FE11E4977A540FC74169E1F1");
+                IConfidentialClientApplication client =
+                    ConfidentialClientApplicationBuilder
+                        .Create(configuration["Graph:ClientId"])
+                        .WithAuthority(AzureCloudInstance.AzurePublic, "microsoft.onmicrosoft.com")
+                        .WithCertificate(certificate, true)
+                        .Build();
+
+                _cache.Add(confidentialAppCacheKey, client);
+
+#else
+                var credential = ManagedIdentityHelper.GetTokenCredential();
+                IConfidentialClientApplication client =
+                ConfidentialClientApplicationBuilder
                     .Create(configuration["Graph:ClientId"])
-                    .WithAuthority(authority)
-                    .WithClientSecret(clientSecret)
+                    .WithAuthority(new Uri(authority))
+                    .WithClientAssertion((AssertionRequestOptions options) =>
+                                                {
+                                                    var accessToken = credential.GetToken(new TokenRequestContext(new string[] { $"api://AzureADTokenExchange/.default" }), CancellationToken.None);
+                                                    return Task.FromResult(accessToken.Token);
+                                                })
                     .Build();
+            _cache.Add(confidentialAppCacheKey, client);
+#endif
 
                 IGraphServiceClient graphServiceClient = new GraphServiceClient(new DelegateAuthenticationProvider(async (requestMessage) =>
                 {
-                    AuthenticationResult authResult = await confidentialClient
+                    AuthenticationResult authResult = await client
                         .AcquireTokenForClient(scopes)
                         .ExecuteAsync();
 
@@ -150,6 +176,26 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
             {
                 throw HandleGraphError(ex, null);
             }
+        }
+
+        public X509Certificate2 GetCertificate(string certificateThumbprint)
+        {
+            var store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+            var cert = store.Certificates.OfType<X509Certificate2>()
+                .FirstOrDefault(x => x.Thumbprint == certificateThumbprint);
+            store.Close();
+            return cert;
+        }
+
+        private string CreateConfidentialAppCacheKey(string authority, string clientId)
+        {
+            return new StringBuilder()
+                .Append(authority)
+                .Append("-")
+                .Append(clientId)
+                .ToString()
+                .ToUpperInvariant();
         }
 
         private GraphException HandleGraphError(Exception error, LoggerTrackingIds? trackingIds)
@@ -170,16 +216,16 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
             return graphException;
         }
 
-        public async Task<List<string>> GetCachedObject(BackgroundCacheParameters parameters, LoggerTrackingIds trackingIds)
+        public async Task<List<string>?> GetCachedObject(BackgroundCacheParameters parameters, LoggerTrackingIds trackingIds)
         {
             ICache cache = _cacheFactory.Create("Default", "Graph", trackingIds.CorrelationId, trackingIds.TransactionId);
-            return (await cache.GetList(parameters.CacheKey, trackingIds.CorrelationId, trackingIds.TransactionId))?.ToList() ?? new();
+            return (await cache.GetList(parameters.CacheKey, trackingIds.CorrelationId, trackingIds.TransactionId))?.ToList();
         }
 
         public async Task SetCacheObject(BackgroundCacheableObject<List<string>> cacheableObject, LoggerTrackingIds trackingIds)
         {
             ICache cache = _cacheFactory.Create("Default", "Graph", trackingIds.CorrelationId, trackingIds.TransactionId);
-            await cache.SetList(cacheableObject.CacheParameters.CacheKey, cacheableObject.Object, trackingIds.CorrelationId, trackingIds.TransactionId, _cacheInterval);
+            await cache.SetList(cacheableObject.CacheParameters.CacheKey, cacheableObject.Object, trackingIds.CorrelationId, trackingIds.TransactionId, _cacheInterval + 10);
             ObjectCached?.Invoke(this, cacheableObject.CacheParameters);
         }
 

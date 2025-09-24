@@ -20,13 +20,13 @@ namespace Microsoft.FeatureFlighting.Core.Evaluation
             _featureBatchBuilder = featureBatchBuilder;
         }
 
-        public async Task<IDictionary<string, bool>> Evaluate(IEnumerable<string> features, TenantConfiguration tenantConfiguration, string environment, EventContext @event)
+        public async Task<IDictionary<string, bool>> Evaluate(IEnumerable<string> features, IEnumerable<string> featureKeysOnAzure, TenantConfiguration tenantConfiguration, string environment, EventContext @event)
         {
             IEnumerable<IGrouping<int, string>> batches = _featureBatchBuilder.CreateBatches(features, tenantConfiguration);
             IDictionary<string, bool> results = new Dictionary<string, bool>();
             foreach (IGrouping<int, string> batch in batches)
             {
-                IDictionary<string, bool> currentGroupResult = await _asyncEvaluationStrategy.Evaluate(batch.ToList(), tenantConfiguration, environment, @event);
+                IDictionary<string, bool> currentGroupResult = await _asyncEvaluationStrategy.Evaluate(batch.ToList(), featureKeysOnAzure, tenantConfiguration, environment, @event);
                 results.Merge(currentGroupResult);
             }
             return results;

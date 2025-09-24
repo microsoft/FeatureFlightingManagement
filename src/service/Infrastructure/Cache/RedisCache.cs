@@ -112,5 +112,15 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Cache
         {
             throw new NotImplementedException();
         }
+
+        public Task<IList<T>> GetListObject<T>(string key, string correlationId, string transactionId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SetListObjects<T>(string key, IList<T> values, string correlationId, string transactionId, int relativeExpirationMins = -1)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

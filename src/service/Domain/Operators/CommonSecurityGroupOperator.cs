@@ -48,7 +48,7 @@ namespace Microsoft.FeatureFlighting.Core.Operators
             try
             {
                 return JsonSerializer.Deserialize<SecurityGroup[]>(configuredValue, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })
-                .Select(group => group.ObjectId)
+                ?.Select(group => group.ObjectId)
                 .ToList();
             }
             catch (System.Exception)

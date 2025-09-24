@@ -54,8 +54,7 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
             TenantConfiguration tenantConfiguration = await _tenantConfigurationProvider.Get(tenant);
             IRulesEngine ruleEngine = new RE.RulesEngine(
                 jsonConfig: new string[] { workflowPayload },
-                reSettings: new ReSettings() { CustomTypes = new Type[] { typeof(Operator) } },
-                logger: null);
+                reSettings: new ReSettings() { CustomTypes = new Type[] { typeof(Operator) } });
             IRulesEngineEvaluator evaluator = new RulesEngineEvaluator(ruleEngine, workflowName, tenantConfiguration);
             return evaluator;
         }
@@ -133,8 +132,7 @@ namespace Microsoft.FeatureFlighting.Core.RulesEngine
 
             IRulesEngine ruleEngine = new RE.RulesEngine(
                 jsonConfig: new string[] { workflowJson },
-                reSettings: new ReSettings() { CustomTypes = new Type[] { typeof(Operator) } },
-                logger: null);
+                reSettings: new ReSettings() { CustomTypes = new Type[] { typeof(Operator) } });
 
             
             IRulesEngineEvaluator evaluator = new RulesEngineEvaluator(ruleEngine, workflowName, tenantConfiguration);

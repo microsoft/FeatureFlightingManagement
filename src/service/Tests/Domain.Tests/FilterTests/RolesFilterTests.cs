@@ -49,6 +49,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_Equals_Operator()
         {
             RoleFilter RolesFilter = new RoleFilter(configMock.Object, httpContextAccessorMockInDefinedRoles.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorEquals.Settings = RolesFilter.BindParameters(featureContextOperatorEquals.Parameters);
             var featureFlagStatus = await RolesFilter.EvaluateAsync(featureContextOperatorEquals);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -57,6 +58,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_Equals_Operator()
         {
             RoleFilter RolesFilter = new RoleFilter(configMock.Object, httpContextAccessorMockNotInDefinedRoles.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorEquals.Settings = RolesFilter.BindParameters(featureContextOperatorEquals.Parameters);
             var featureFlagStatus = await RolesFilter.EvaluateAsync(featureContextOperatorEquals);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -65,6 +67,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_NotEquals_Operator()
         {
             RoleFilter RolesFilter = new RoleFilter(configMock.Object, httpContextAccessorMockNotInDefinedRoles.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorNotEquals.Settings = RolesFilter.BindParameters(featureContextOperatorNotEquals.Parameters);
             var featureFlagStatus = await RolesFilter.EvaluateAsync(featureContextOperatorNotEquals);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -73,6 +76,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_NotEquals_Operator()
         {
             RoleFilter RolesFilter = new RoleFilter(configMock.Object, httpContextAccessorMockInDefinedRoles.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorNotEquals.Settings = RolesFilter.BindParameters(featureContextOperatorNotEquals.Parameters);
             var featureFlagStatus = await RolesFilter.EvaluateAsync(featureContextOperatorNotEquals);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -81,6 +85,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_In_Operator()
         {
             RoleFilter RolesFilter = new RoleFilter(configMock.Object, httpContextAccessorMockInDefinedRoles.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorIn.Settings = RolesFilter.BindParameters(featureContextOperatorIn.Parameters);
             var featureFlagStatus = await RolesFilter.EvaluateAsync(featureContextOperatorIn);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -89,6 +94,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_In_Operator()
         {
             RoleFilter RolesFilter = new RoleFilter(configMock.Object, httpContextAccessorMockNotInDefinedRoles.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorIn.Settings = RolesFilter.BindParameters(featureContextOperatorIn.Parameters);
             var featureFlagStatus = await RolesFilter.EvaluateAsync(featureContextOperatorIn);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -97,6 +103,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_NotIn_Operator()
         {
             RoleFilter RolesFilter = new RoleFilter(configMock.Object, httpContextAccessorMockNotInDefinedRoles.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorNotIn.Settings = RolesFilter.BindParameters(featureContextOperatorNotIn.Parameters);
             var featureFlagStatus = await RolesFilter.EvaluateAsync(featureContextOperatorNotIn);
             Assert.AreEqual(true, featureFlagStatus);
         }
@@ -105,6 +112,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_NotIn_Operator()
         {
             RoleFilter RolesFilter = new RoleFilter(configMock.Object, httpContextAccessorMockInDefinedRoles.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorNotIn.Settings = RolesFilter.BindParameters(featureContextOperatorNotIn.Parameters);
             var featureFlagStatus = await RolesFilter.EvaluateAsync(featureContextOperatorNotIn);
             Assert.AreEqual(false, featureFlagStatus);
         }
@@ -113,6 +121,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_HttpContext_Has_No_Roles()
         {
             RoleFilter RolesFilter = new RoleFilter(configMock.Object, httpContextAccessorMockWithoutRoles.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorIn.Settings = RolesFilter.BindParameters(featureContextOperatorIn.Parameters);
             var featureFlagStatus = await RolesFilter.EvaluateAsync(featureContextOperatorIn);
             Assert.AreEqual(false, featureFlagStatus);
         }

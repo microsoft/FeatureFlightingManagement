@@ -11,6 +11,7 @@ using Microsoft.FeatureFlighting.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
+using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
 
 namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
 {
@@ -57,6 +58,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_Equals_Operator()
         {
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockInDefinedCountry.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorEquals.Settings = countryFilter.BindParameters(featureContextOperatorEquals.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(featureContextOperatorEquals);
             Assert.IsTrue(featureFlagStatus);
         }
@@ -65,6 +67,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_Equals_Operator()
         {
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockNotInDefinedCountry.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorEquals.Settings = countryFilter.BindParameters(featureContextOperatorEquals.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(featureContextOperatorEquals);
             Assert.IsFalse(featureFlagStatus);
         }
@@ -73,6 +76,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_NotEquals_Operator()
         {
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockNotInDefinedCountry.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorNotEquals.Settings = countryFilter.BindParameters(featureContextOperatorNotEquals.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(featureContextOperatorNotEquals);
             Assert.IsTrue(featureFlagStatus);
         }
@@ -81,6 +85,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_NotEquals_Operator()
         {
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockInDefinedCountry.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorNotEquals.Settings = countryFilter.BindParameters(featureContextOperatorNotEquals.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(featureContextOperatorNotEquals);
             Assert.IsFalse(featureFlagStatus);
         }
@@ -89,6 +94,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_In_Operator()
         {
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockInDefinedCountry.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorIn.Settings = countryFilter.BindParameters(featureContextOperatorIn.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(featureContextOperatorIn);
             Assert.IsTrue(featureFlagStatus);
         }
@@ -97,6 +103,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_In_Operator()
         {
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockNotInDefinedCountry.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorIn.Settings = countryFilter.BindParameters(featureContextOperatorIn.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(featureContextOperatorIn);
             Assert.IsFalse(featureFlagStatus);
         }
@@ -105,6 +112,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_True_If_Succeeds_NotIn_Operator()
         {
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockNotInDefinedCountry.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            featureContextOperatorNotIn.Settings = countryFilter.BindParameters(featureContextOperatorNotIn.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(featureContextOperatorNotIn);
             Assert.IsTrue(featureFlagStatus);
         }
@@ -113,6 +121,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_NotIn_Operator()
         {
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockInDefinedCountry.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorNotIn.Settings = countryFilter.BindParameters(featureContextOperatorNotIn.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(featureContextOperatorNotIn);
             Assert.IsFalse(featureFlagStatus);
         }
@@ -137,6 +146,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
             };
 
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockInDefinedInt.Object, loggerMock.Object, successfullMockEvaluatorStrategy.Object);
+            context.Settings = countryFilter.BindParameters(context.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(context);
             Assert.IsTrue(featureFlagStatus);
         }
@@ -161,6 +171,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
             };
 
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockInDefinedInt.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            context.Settings = countryFilter.BindParameters(context.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(context);
             Assert.IsFalse(featureFlagStatus);
         }
@@ -185,6 +196,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
             };
 
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockInDefinedInt.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            context.Settings = countryFilter.BindParameters(context.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(context);
             Assert.IsFalse(featureFlagStatus);
         }
@@ -209,6 +221,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
             };
 
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockInDefinedInt.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            context.Settings = countryFilter.BindParameters(context.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(context);
             Assert.IsFalse(featureFlagStatus);
         }
@@ -233,6 +246,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
             };
 
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockInDefinedInt.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            context.Settings = countryFilter.BindParameters(context.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(context);
             Assert.IsFalse(featureFlagStatus);
         }
@@ -250,6 +264,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_Fails_GreaterThan_Operator()
         {
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockInDefinedCountry.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorLessThan.Settings = countryFilter.BindParameters(featureContextOperatorLessThan.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(featureContextOperatorLessThan);
             Assert.IsFalse(featureFlagStatus);
         }
@@ -274,6 +289,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
             httpContextAccessorMock.Setup(_ => _.HttpContext).Returns(httpContext);
 
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMock.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorLessThan.Settings = countryFilter.BindParameters(featureContextOperatorLessThan.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(featureContextOperatorLessThan);
             Assert.IsFalse(featureFlagStatus);
         }
@@ -282,6 +298,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         public async Task Feature_Filter_Must_Evaluate_To_False_If_HttpContext_Has_No_country()
         {
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockWithoutCountry.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
+            featureContextOperatorIn.Settings = countryFilter.BindParameters(featureContextOperatorIn.Parameters);
             var featureFlagStatus = await countryFilter.EvaluateAsync(featureContextOperatorIn);
             Assert.IsFalse(featureFlagStatus);
         }
