@@ -29,23 +29,57 @@ namespace Microsoft.FeatureFlighting.API.Extensions
         /// </summary>
         public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
+            var primaryAudience = configuration["Authentication:Audience"];
+            var clientId = configuration["ClientInfo:ClientId"];
+            var tenantId = configuration["TenantInfo:Tenant"];
+            var instance = configuration["InstanceInfo:Instance"];
+
+            // Accept the configured audience and its api:// URI form (v1.0 and v2.0 tokens), plus any
+            // extra audiences from Authentication:AdditionalAudiences (comma-separated), each in raw and api:// forms.
+            var additionalAudiences = !string.IsNullOrWhiteSpace(configuration["Authentication:AdditionalAudiences"])
+                ? configuration["Authentication:AdditionalAudiences"].Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                : Array.Empty<string>();
+            var validAudiences = new[] { primaryAudience, clientId, $"api://{primaryAudience}", $"api://{clientId}" }
+                .Concat(additionalAudiences)
+                .Concat(additionalAudiences.Select(a => $"api://{a}"))
+                .Where(a => !string.IsNullOrWhiteSpace(a))
+                .Distinct()
+                .ToArray();
+
+            // Inbound token validation via MISE 2.x with the default module set.
             services.AddAuthentication(MiseAuthenticationDefaults.AuthenticationScheme)
                 .AddMiseWithDefaultModules(configuration, miseOptions =>
                 {
-                    var primaryAudience = configuration["Authentication:Audience"];
-                    IList<string> validAudiences = !string.IsNullOrWhiteSpace(configuration["Authentication:AdditionalAudiences"])
-                     ? configuration["Authentication:AdditionalAudiences"].Split(',').ToList()
-                     : new List<string>();
-                    validAudiences.Add(primaryAudience);
-
                     miseOptions.AzureAd ??= new MiseAuthenticationOptions();
-                    miseOptions.AzureAd.Authority = configuration["Authentication:Authority"];
+                    miseOptions.AzureAd.Instance = instance;
+                    miseOptions.AzureAd.TenantId = tenantId;
+                    miseOptions.AzureAd.ClientId = clientId;
+                    miseOptions.AzureAd.Audience = primaryAudience;
                     miseOptions.AzureAd.Audiences = validAudiences;
-                    miseOptions.AzureAd.ClientId = configuration["ClientInfo:ClientId"];
-                    miseOptions.AzureAd.Instance = configuration["InstanceInfo:Instance"];
-                    miseOptions.AzureAd.TenantId = configuration["TenantInfo:Tenant"];
-                }, MiseAuthenticationDefaults.AuthenticationScheme);
 
+                    // Explicit inbound policy accepting both app and user Bearer tokens.
+                    // Required for MISE 2.x to validate inbound tokens (the default policy alone rejects them).
+                    var inboundPolicy = new MiseInboundPolicyOptions
+                    {
+                        Label = "FeatureFlightingInbound",
+                        Instance = instance,
+                        TenantId = tenantId,
+                        Audiences = validAudiences,
+                    };
+
+                    var bearerTokenTypeOptions = new TokenTypeOptions
+                    {
+                        AppToken = true,
+                        UserToken = true,
+                        AllowMissingIdTypeClaim = true,
+                    };
+                    var bearerProtocol = new ProtocolOptions();
+                    bearerProtocol.TokenTypes["AccessToken"] = bearerTokenTypeOptions;
+                    bearerProtocol.TokenTypes["AppToken"] = bearerTokenTypeOptions;
+                    inboundPolicy.Protocols[Microsoft.Identity.ServiceEssentials.Authentication.Protocol.BearerConstants.ProtocolName] = bearerProtocol;
+
+                    miseOptions.AzureAd.InboundPolicies = new List<MiseInboundPolicyOptions> { inboundPolicy };
+                }, MiseAuthenticationDefaults.AuthenticationScheme);
         }
 
         /// <summary>
