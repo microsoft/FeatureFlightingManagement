@@ -17,6 +17,16 @@ This is a centralized feature flighting management system which leverages Azure 
 ## Flighting in a nutshell
 ![Feature Flighting Architecture Diagram](https://github.com/microsoft/FeatureFlightingManagement/blob/main/assets/static/images/FLighting%20Flowchart.jpg)
 
+## Building Locally
+
+The service targets .NET 6 (with some libraries on .NET Standard 2.1). To build and test locally:
+
+```
+dotnet restore src/service/Microsoft.FeatureFlighting.sln
+dotnet build   src/service/Microsoft.FeatureFlighting.sln --no-restore
+dotnet test    src/service/Microsoft.FeatureFlighting.sln --no-build
+```
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
