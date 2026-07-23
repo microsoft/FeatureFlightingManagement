@@ -16,7 +16,7 @@ using Microsoft.FeatureFlighting.Api.Middlewares;
 using Microsoft.FeatureFlighting.API.Controllers;
 using AppInsights.EnterpriseTelemetry.Web.Extension;
 using AppInsights.EnterpriseTelemetry.Web.Extension.Filters;
-using Microsoft.Identity.ServiceEssentials.Extensions.AspNetCoreMiddleware;
+using Microsoft.Identity.ServiceEssentials;
 
 namespace Microsoft.PS.Services.FlightingService.Api
 {

@@ -15,8 +15,8 @@ using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using Microsoft.FeatureFlighting.Api.ExceptionHandler;
 using AppInsights.EnterpriseTelemetry.Web.Extension.Middlewares;
 using Microsoft.IdentityModel.Validators;
-using Microsoft.Identity.ServiceEssentials.Extensions.AspNetCoreMiddleware;
-using Microsoft.IdentityModel.S2S.Extensions.AspNetCore;
+using Microsoft.Identity.ServiceEssentials;
+using Microsoft.Identity.ServiceEssentials.Configuration;
 using System.Configuration;
 
 
@@ -29,23 +29,22 @@ namespace Microsoft.FeatureFlighting.API.Extensions
         /// </summary>
         public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddAuthentication(S2SAuthenticationDefaults.AuthenticationScheme)
-                .AddMiseWithDefaultAuthentication(configuration, options =>
+            services.AddAuthentication(MiseAuthenticationDefaults.AuthenticationScheme)
+                .AddMiseWithDefaultModules(configuration, miseOptions =>
                 {
                     var primaryAudience = configuration["Authentication:Audience"];
                     IList<string> validAudiences = !string.IsNullOrWhiteSpace(configuration["Authentication:AdditionalAudiences"])
                      ? configuration["Authentication:AdditionalAudiences"].Split(',').ToList()
                      : new List<string>();
                     validAudiences.Add(primaryAudience);
-                    options.Authority= configuration["Authentication:Authority"];
-                    foreach (var audience in validAudiences)
-                    {
-                        options.Audiences.Add(audience);
-                    }
-                    options.ClientId = configuration["ClientInfo:ClientId"];
-                    options.Instance = configuration["InstanceInfo:Instance"];
-                    options.TenantId = configuration["TenantInfo:Tenant"];
-                });
+
+                    miseOptions.AzureAd ??= new MiseAuthenticationOptions();
+                    miseOptions.AzureAd.Authority = configuration["Authentication:Authority"];
+                    miseOptions.AzureAd.Audiences = validAudiences;
+                    miseOptions.AzureAd.ClientId = configuration["ClientInfo:ClientId"];
+                    miseOptions.AzureAd.Instance = configuration["InstanceInfo:Instance"];
+                    miseOptions.AzureAd.TenantId = configuration["TenantInfo:Tenant"];
+                }, MiseAuthenticationDefaults.AuthenticationScheme);
 
         }
 

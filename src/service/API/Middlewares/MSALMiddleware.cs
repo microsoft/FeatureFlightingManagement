@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.S2S.Extensions.AspNetCore;
+using Microsoft.Identity.ServiceEssentials;
 
 namespace Microsoft.FeatureFlighting.Api.Middlewares
 {
@@ -17,7 +17,7 @@ namespace Microsoft.FeatureFlighting.Api.Middlewares
 
         public async Task Invoke(HttpContext httpContext)
         {
-            var result = await httpContext.AuthenticateAsync(S2SAuthenticationDefaults.AuthenticationScheme);
+            var result = await httpContext.AuthenticateAsync(MiseAuthenticationDefaults.AuthenticationScheme);
             if (result.Succeeded || httpContext.Request.Path.Value == "/api/probe/ping")
             {
                 httpContext.User = result.Principal;
