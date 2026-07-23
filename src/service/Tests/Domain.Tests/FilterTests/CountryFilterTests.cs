@@ -11,7 +11,6 @@ using Microsoft.FeatureFlighting.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.FeatureFlighting.Common.AppExceptions;
 using Microsoft.FeatureFlighting.Core.FeatureFilters;
-using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
 
 namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
 {

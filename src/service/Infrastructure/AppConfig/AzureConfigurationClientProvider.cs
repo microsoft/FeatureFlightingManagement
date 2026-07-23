@@ -4,7 +4,6 @@ using Azure.Data.AppConfiguration;
 using Azure.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.FeatureFlighting.Common;
-using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
 
 namespace Microsoft.FeatureFlighting.Infrastructure.AppConfig
 {
