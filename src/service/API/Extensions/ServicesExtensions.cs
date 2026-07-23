@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using Microsoft.FeatureManagement;
@@ -80,62 +79,6 @@ namespace Microsoft.FeatureFlighting.API.Extensions
 
                     miseOptions.AzureAd.InboundPolicies = new List<MiseInboundPolicyOptions> { inboundPolicy };
                 }, MiseAuthenticationDefaults.AuthenticationScheme);
-        }
-
-        /// <summary>
-        /// Adds Swagger documenation
-        /// </summary>
-        /// <remarks>
-        /// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        /// </remarks>
-        public static void AddSwagger(this IServiceCollection services)
-        {
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "Flighting Service",
-                    Version = "v2",
-                    Contact = new OpenApiContact
-                    {
-                        Email = "fxpswe@microsoft.com",
-                        Name = "Field Experience Engineering Team",
-                        Url = new System.Uri("https://aka.ms/fxpdocs")
-                    },
-                    Description = "APIs for managing and evaluating feature flags. Powered by Azure Configuration (Feature Management)"
-                });
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    In = ParameterLocation.Header,
-                    Description = "Please insert JWT with Bearer into field",
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-                    {
-                        new OpenApiSecurityScheme()
-                        {
-                            Reference = new OpenApiReference()
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        System.Array.Empty<string>()
-                    }
-                });
-                try
-                {
-                    string documentationFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                    string documentationPath = Path.Combine(AppContext.BaseDirectory, documentationFile);
-                    c.IncludeXmlComments(documentationPath);
-                }
-                catch 
-                {
-                    // Do nothing if documentation fails
-                }
-            });
-            services.AddEndpointsApiExplorer();
         }
 
         /// <summary>

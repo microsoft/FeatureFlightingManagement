@@ -44,7 +44,6 @@ namespace Microsoft.PS.Services.FlightingService.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAuthentication(Configuration);
-            services.AddSwagger();
             services.AddTelememtry(Configuration);
             AddMvc(services);
             services.AddHttpClients(Configuration);
@@ -60,12 +59,6 @@ namespace Microsoft.PS.Services.FlightingService.Api
         {        
             if (env.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Flighting Service V2");
-                    c.RoutePrefix = string.Empty;
-                });
                 app.UseDeveloperExceptionPage();
             }
             else
