@@ -251,12 +251,10 @@ namespace Microsoft.FeatureFlighting.Core.Tests.FilterTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(EvaluationException))]
         public async Task Feature_Filter_GetFilterSettings_Must_Evaluate_To_False()
         {
             CountryFilter countryFilter = new CountryFilter(configMock.Object, httpContextAccessorMockInDefinedInt.Object, loggerMock.Object, failureMockEvaluatorStrategy.Object);
-            var featureFlagStatus = await countryFilter.EvaluateAsync(null);
-            Assert.IsFalse(featureFlagStatus);
+            await Assert.ThrowsExactlyAsync<EvaluationException>(async () => await countryFilter.EvaluateAsync(null));
         }
 
         [TestMethod]
