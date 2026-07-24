@@ -27,7 +27,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Storage
         private readonly Container _container;
 
         private const string GET_ALL_DOCS_QUERY = "SELECT * FROM C";
-        private const string GET_DOC_BY_ID_QUERY = "SELECT * FROM C WHERE C.id = {0}";
+        private const string GET_DOC_BY_ID_QUERY = "SELECT * FROM C WHERE C.id = '{0}'";
 
         public CosmosDbRepository(CosmosDbConfiguration cosmosConfiguration, IConfiguration configuration, ILogger logger)
         {

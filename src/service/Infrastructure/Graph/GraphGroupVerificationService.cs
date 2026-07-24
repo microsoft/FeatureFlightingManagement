@@ -136,20 +136,13 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
                 string tenant = configuration["Graph:Tenant"];
                 string authority = string.Format(configuration["Graph:Authority"], tenant);
                 string[] scopes = new string[] { configuration["Graph:Scope"] };
-                string confidentialAppCacheKey = CreateConfidentialAppCacheKey(authority, configuration["Graph:ClientId"]);
 
 #if DEBUG
-                var certificate = GetCertificate("27D6D3122675FCC4FE11E4977A540FC74169E1F1");
-                IConfidentialClientApplication client =
-                    ConfidentialClientApplicationBuilder
-                        .Create(configuration["Graph:ClientId"])
-                        .WithAuthority(AzureCloudInstance.AzurePublic, "microsoft.onmicrosoft.com")
-                        .WithCertificate(certificate, true)
-                        .Build();
-
-                _cache.Add(confidentialAppCacheKey, client);
-
+                // Local dev: authenticate to Graph as the signed-in developer (az login) via AzureCliCredential.
+                var credential = ManagedIdentityHelper.GetTokenCredential();
+                return new GraphServiceClient(credential, scopes);
 #else
+                string confidentialAppCacheKey = CreateConfidentialAppCacheKey(authority, configuration["Graph:ClientId"]);
                 var credential = ManagedIdentityHelper.GetTokenCredential();
                 IConfidentialClientApplication client =
                 ConfidentialClientApplicationBuilder
@@ -161,27 +154,17 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
                                                     return Task.FromResult(accessToken.Token);
                                                 })
                     .Build();
-            _cache.Add(confidentialAppCacheKey, client);
-#endif
+                _cache.Add(confidentialAppCacheKey, client);
 
                 GraphServiceClient graphServiceClient = new GraphServiceClient(
                     new MsalConfidentialClientAuthenticationProvider(client, scopes));
                 return graphServiceClient;
+#endif
             }
             catch (Exception ex)
             {
                 throw HandleGraphError(ex, null);
             }
-        }
-
-        public X509Certificate2 GetCertificate(string certificateThumbprint)
-        {
-            var store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
-            store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
-            var cert = store.Certificates.OfType<X509Certificate2>()
-                .FirstOrDefault(x => x.Thumbprint == certificateThumbprint);
-            store.Close();
-            return cert;
         }
 
         private string CreateConfidentialAppCacheKey(string authority, string clientId)
