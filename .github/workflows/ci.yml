@@ -11,6 +11,14 @@ jobs:
     name: build
     runs-on: ubuntu-latest
 
+    env:
+      # Credentials for the Azure Artifacts Credential Provider so that `dotnet restore`
+      # can authenticate to the private Azure DevOps feed (PS-GCM-FieldExperiencePlatform)
+      # referenced by src/service/NuGet.Config.
+      # Requires a repository/organization secret named AZURE_DEVOPS_PAT holding an
+      # Azure DevOps PAT (MicrosoftIT org) with the "Packaging (Read)" scope.
+      VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials":[{"endpoint":"https://pkgs.dev.azure.com/MicrosoftIT/OneITVSO/_packaging/PS-GCM-FieldExperiencePlatform/nuget/v3/index.json","username":"AzureDevOps","password":"${{ secrets.AZURE_DEVOPS_PAT }}"}]}'
+
     steps:
     - uses: actions/checkout@v4
     
@@ -18,6 +26,9 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.0.x
+
+    - name: Install Azure Artifacts Credential Provider
+      run: sh -c "$(curl -fsSL https://aka.ms/install-artifacts-credprovider.sh)"
     
     - name: Restore dependencies
       run: dotnet restore  src/service/Microsoft.FeatureFlighting.sln
