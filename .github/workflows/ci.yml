@@ -15,9 +15,9 @@ jobs:
       # Credentials for the Azure Artifacts Credential Provider so that `dotnet restore`
       # can authenticate to the private Azure DevOps feed (PS-GCM-FieldExperiencePlatform)
       # referenced by src/service/NuGet.Config.
-      # Requires a repository/organization secret named AZURE_DEVOPS_PAT holding an
+      # Requires a repository/organization secret named AZURE_DEVOPS_TOKEN holding an
       # Azure DevOps PAT (MicrosoftIT org) with the "Packaging (Read)" scope.
-      VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials":[{"endpoint":"https://pkgs.dev.azure.com/MicrosoftIT/OneITVSO/_packaging/PS-GCM-FieldExperiencePlatform/nuget/v3/index.json","username":"AzureDevOps","password":"${{ secrets.AZURE_DEVOPS_PAT }}"}]}'
+      VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials":[{"endpoint":"https://pkgs.dev.azure.com/MicrosoftIT/OneITVSO/_packaging/PS-GCM-FieldExperiencePlatform/nuget/v3/index.json","username":"AzureDevOps","password":"${{ secrets.AZURE_DEVOPS_TOKEN }}"}]}'
 
     steps:
     - uses: actions/checkout@v4
@@ -32,13 +32,13 @@ jobs:
 
     - name: Verify Azure DevOps feed credential is available
       env:
-        ADO_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
+        ADO_PAT: ${{ secrets.AZURE_DEVOPS_TOKEN }}
       run: |
         if [ -z "$ADO_PAT" ]; then
-          echo "::error::Secret AZURE_DEVOPS_PAT is empty or not set for this run. Add it under Settings > Secrets and variables > Actions."
+          echo "::error::Secret AZURE_DEVOPS_TOKEN is empty or not set for this run. Add it under Settings > Secrets and variables > Actions."
           exit 1
         fi
-        echo "AZURE_DEVOPS_PAT is present (length ${#ADO_PAT})."
+        echo "AZURE_DEVOPS_TOKEN is present (length ${#ADO_PAT})."
     
     - name: Restore dependencies
       run: dotnet restore  src/service/Microsoft.FeatureFlighting.sln
