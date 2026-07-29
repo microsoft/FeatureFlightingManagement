@@ -29,6 +29,16 @@ jobs:
 
     - name: Install Azure Artifacts Credential Provider
       run: sh -c "$(curl -fsSL https://aka.ms/install-artifacts-credprovider.sh)"
+
+    - name: Verify Azure DevOps feed credential is available
+      env:
+        ADO_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
+      run: |
+        if [ -z "$ADO_PAT" ]; then
+          echo "::error::Secret AZURE_DEVOPS_PAT is empty or not set for this run. Add it under Settings > Secrets and variables > Actions."
+          exit 1
+        fi
+        echo "AZURE_DEVOPS_PAT is present (length ${#ADO_PAT})."
     
     - name: Restore dependencies
       run: dotnet restore  src/service/Microsoft.FeatureFlighting.sln
