@@ -25,7 +25,7 @@ namespace Microsoft.FeatureFlighting.Api.Middlewares
             }
             else
             {
-                throw new System.Exception("Authentication Failed");
+                httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
             }
         }
     }
