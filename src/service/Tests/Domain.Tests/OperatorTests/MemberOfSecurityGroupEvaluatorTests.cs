@@ -170,7 +170,6 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
             Assert.AreEqual(evaluationResult.Result, false);
         }
         [TestMethod]
-        [ExpectedException(typeof(GraphException))]
         public async Task evaluate_sg_operator_throws_exception_whenfor_value_not_inSG_for_alais()
         {
             //Arrange
@@ -184,8 +183,7 @@ namespace Microsoft.FeatureFlighting.Core.Tests.OperatorTests
             };
             evaluator = new MemberOfSecurityGroupOperator(mockGraphApiProviderWithUpnAliasInSGException.Object, mockConfig.Object);
             //Act
-            var evaluationResult = await evaluator.Evaluate(configuredValue, contextValue, filterType, trackingIds);
-            
+            await Assert.ThrowsExactlyAsync<GraphException>(async () => await evaluator.Evaluate(configuredValue, contextValue, filterType, trackingIds));
         }
     }
 }

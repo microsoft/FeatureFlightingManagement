@@ -2,6 +2,9 @@
 using System.Linq;
 using System.Text;
 using Microsoft.Graph;
+using Microsoft.Graph.Models;
+using Microsoft.Kiota.Abstractions;
+using Microsoft.Kiota.Abstractions.Authentication;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using Microsoft.Identity.Client;
@@ -25,7 +28,7 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
     /// <inheritdoc>/>
     internal class GraphGroupVerificationService : IGroupVerificationService, IBackgroundCacheable<List<string>>
     {
-        private readonly IGraphServiceClient _graphServiceClient;
+        private readonly GraphServiceClient _graphServiceClient;
         private readonly ICacheFactory _cacheFactory;
         private readonly bool _isCachingEnabled;
         private readonly int _cacheInterval;
@@ -126,27 +129,20 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
             return groupMembers ?? new();
         }
       
-        private IGraphServiceClient CreateGraphClient(IConfiguration configuration)
+        private GraphServiceClient CreateGraphClient(IConfiguration configuration)
         {
             try
             {
                 string tenant = configuration["Graph:Tenant"];
                 string authority = string.Format(configuration["Graph:Authority"], tenant);
                 string[] scopes = new string[] { configuration["Graph:Scope"] };
-                string confidentialAppCacheKey = CreateConfidentialAppCacheKey(authority, configuration["Graph:ClientId"]);
 
 #if DEBUG
-                var certificate = GetCertificate("27D6D3122675FCC4FE11E4977A540FC74169E1F1");
-                IConfidentialClientApplication client =
-                    ConfidentialClientApplicationBuilder
-                        .Create(configuration["Graph:ClientId"])
-                        .WithAuthority(AzureCloudInstance.AzurePublic, "microsoft.onmicrosoft.com")
-                        .WithCertificate(certificate, true)
-                        .Build();
-
-                _cache.Add(confidentialAppCacheKey, client);
-
+                // Local dev: authenticate to Graph as the signed-in developer (az login) via AzureCliCredential.
+                var credential = ManagedIdentityHelper.GetTokenCredential();
+                return new GraphServiceClient(credential, scopes);
 #else
+                string confidentialAppCacheKey = CreateConfidentialAppCacheKey(authority, configuration["Graph:ClientId"]);
                 var credential = ManagedIdentityHelper.GetTokenCredential();
                 IConfidentialClientApplication client =
                 ConfidentialClientApplicationBuilder
@@ -158,34 +154,17 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
                                                     return Task.FromResult(accessToken.Token);
                                                 })
                     .Build();
-            _cache.Add(confidentialAppCacheKey, client);
-#endif
+                _cache.Add(confidentialAppCacheKey, client);
 
-                IGraphServiceClient graphServiceClient = new GraphServiceClient(new DelegateAuthenticationProvider(async (requestMessage) =>
-                {
-                    AuthenticationResult authResult = await client
-                        .AcquireTokenForClient(scopes)
-                        .ExecuteAsync();
-
-                    requestMessage.Headers.Authorization =
-                        new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
-                }));
+                GraphServiceClient graphServiceClient = new GraphServiceClient(
+                    new MsalConfidentialClientAuthenticationProvider(client, scopes));
                 return graphServiceClient;
+#endif
             }
             catch (Exception ex)
             {
                 throw HandleGraphError(ex, null);
             }
-        }
-
-        public X509Certificate2 GetCertificate(string certificateThumbprint)
-        {
-            var store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
-            store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
-            var cert = store.Certificates.OfType<X509Certificate2>()
-                .FirstOrDefault(x => x.Thumbprint == certificateThumbprint);
-            store.Close();
-            return cert;
         }
 
         private string CreateConfidentialAppCacheKey(string authority, string clientId)
@@ -234,18 +213,21 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
             string cacheKey = cacheParameters.CacheKey;
             string groupId = cacheParameters.ObjectId;
 
-            var transitiveMembers = await _graphServiceClient.Groups[groupId]
+            var transitiveMembersResponse = await _graphServiceClient.Groups[groupId]
                    .TransitiveMembers
-                   .Request()
                    .GetAsync()
                    .ConfigureAwait(false);
 
-            var groupMembers = transitiveMembers?.ToList() ?? new();
-            while (transitiveMembers != null && transitiveMembers.NextPageRequest != null)
+            var groupMembers = new List<DirectoryObject>();
+            if (transitiveMembersResponse?.Value != null)
             {
-                transitiveMembers = await transitiveMembers.NextPageRequest.GetAsync().ConfigureAwait(false);
-                if (transitiveMembers != null)
-                    groupMembers.AddRange(transitiveMembers?.ToList() ?? new());
+                var pageIterator = PageIterator<DirectoryObject, DirectoryObjectCollectionResponse>
+                    .CreatePageIterator(_graphServiceClient, transitiveMembersResponse, (member) =>
+                    {
+                        groupMembers.Add(member);
+                        return true;
+                    });
+                await pageIterator.IterateAsync().ConfigureAwait(false);
             }
 
             List<string> userPrincipalNames = groupMembers
@@ -266,6 +248,28 @@ namespace Microsoft.FeatureFlighting.Infrastructure.Graph
             var cacheableObject = await CreateCacheableObject(cacheParameters, trackingIds).ConfigureAwait(false);
             if (cacheableObject.Object != null && cacheableObject.Object.Any())
                 await SetCacheObject(cacheableObject, trackingIds).ConfigureAwait(false);
+        }
+
+        private sealed class MsalConfidentialClientAuthenticationProvider : IAuthenticationProvider
+        {
+            private readonly IConfidentialClientApplication _client;
+            private readonly string[] _scopes;
+
+            public MsalConfidentialClientAuthenticationProvider(IConfidentialClientApplication client, string[] scopes)
+            {
+                _client = client;
+                _scopes = scopes;
+            }
+
+            public async Task AuthenticateRequestAsync(RequestInformation request, Dictionary<string, object> additionalAuthenticationContext = null, CancellationToken cancellationToken = default)
+            {
+                AuthenticationResult authResult = await _client
+                    .AcquireTokenForClient(_scopes)
+                    .ExecuteAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+                request.Headers.Add("Authorization", $"Bearer {authResult.AccessToken}");
+            }
         }
     }
 }

@@ -19,7 +19,11 @@ namespace Microsoft.FeatureFlighting.Common
             TokenCredential credential = null;
 
 #if DEBUG
-            credential = new VisualStudioCredential();
+            // Use AzureCliCredential in local/debug scenarios: it authenticates with the identity
+            // from `az login`, avoiding the VisualStudioCredential token-service hangs/timeouts that
+            // can cause Key Vault / App Configuration loading to fail. Make sure you are signed in
+            // (`az login`) with an account that has access to the target Key Vault and App Configuration.
+            credential = new AzureCliCredential();
 #else
             credential = new ManagedIdentityCredential();
 #endif

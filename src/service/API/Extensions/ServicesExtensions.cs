@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using Microsoft.FeatureManagement;
@@ -15,8 +14,8 @@ using Microsoft.FeatureFlighting.Core.FeatureFilters;
 using Microsoft.FeatureFlighting.Api.ExceptionHandler;
 using AppInsights.EnterpriseTelemetry.Web.Extension.Middlewares;
 using Microsoft.IdentityModel.Validators;
-using Microsoft.Identity.ServiceEssentials.Extensions.AspNetCoreMiddleware;
-using Microsoft.IdentityModel.S2S.Extensions.AspNetCore;
+using Microsoft.Identity.ServiceEssentials;
+using Microsoft.Identity.ServiceEssentials.Configuration;
 using System.Configuration;
 
 
@@ -29,80 +28,57 @@ namespace Microsoft.FeatureFlighting.API.Extensions
         /// </summary>
         public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddAuthentication(S2SAuthenticationDefaults.AuthenticationScheme)
-                .AddMiseWithDefaultAuthentication(configuration, options =>
-                {
-                    var primaryAudience = configuration["Authentication:Audience"];
-                    IList<string> validAudiences = !string.IsNullOrWhiteSpace(configuration["Authentication:AdditionalAudiences"])
-                     ? configuration["Authentication:AdditionalAudiences"].Split(',').ToList()
-                     : new List<string>();
-                    validAudiences.Add(primaryAudience);
-                    options.Authority= configuration["Authentication:Authority"];
-                    foreach (var audience in validAudiences)
-                    {
-                        options.Audiences.Add(audience);
-                    }
-                    options.ClientId = configuration["ClientInfo:ClientId"];
-                    options.Instance = configuration["InstanceInfo:Instance"];
-                    options.TenantId = configuration["TenantInfo:Tenant"];
-                });
+            var primaryAudience = configuration["Authentication:Audience"];
+            var clientId = configuration["ClientInfo:ClientId"];
+            var tenantId = configuration["TenantInfo:Tenant"];
+            var instance = configuration["InstanceInfo:Instance"];
 
-        }
+            // Accept the configured audience and its api:// URI form (v1.0 and v2.0 tokens), plus any
+            // extra audiences from Authentication:AdditionalAudiences (comma-separated), each in raw and api:// forms.
+            var additionalAudiences = !string.IsNullOrWhiteSpace(configuration["Authentication:AdditionalAudiences"])
+                ? configuration["Authentication:AdditionalAudiences"].Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                : Array.Empty<string>();
+            var validAudiences = new[] { primaryAudience, clientId, $"api://{primaryAudience}", $"api://{clientId}" }
+                .Concat(additionalAudiences)
+                .Concat(additionalAudiences.Select(a => $"api://{a}"))
+                .Where(a => !string.IsNullOrWhiteSpace(a))
+                .Distinct()
+                .ToArray();
 
-        /// <summary>
-        /// Adds Swagger documenation
-        /// </summary>
-        /// <remarks>
-        /// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        /// </remarks>
-        public static void AddSwagger(this IServiceCollection services)
-        {
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo
+            // Inbound token validation via MISE 2.x with the default module set.
+            services.AddAuthentication(MiseAuthenticationDefaults.AuthenticationScheme)
+                .AddMiseWithDefaultModules(configuration, miseOptions =>
                 {
-                    Title = "Flighting Service",
-                    Version = "v2",
-                    Contact = new OpenApiContact
+                    miseOptions.AzureAd ??= new MiseAuthenticationOptions();
+                    miseOptions.AzureAd.Instance = instance;
+                    miseOptions.AzureAd.TenantId = tenantId;
+                    miseOptions.AzureAd.ClientId = clientId;
+                    miseOptions.AzureAd.Audience = primaryAudience;
+                    miseOptions.AzureAd.Audiences = validAudiences;
+
+                    // Explicit inbound policy accepting both app and user Bearer tokens.
+                    // Required for MISE 2.x to validate inbound tokens (the default policy alone rejects them).
+                    var inboundPolicy = new MiseInboundPolicyOptions
                     {
-                        Email = "fxpswe@microsoft.com",
-                        Name = "Field Experience Engineering Team",
-                        Url = new System.Uri("https://aka.ms/fxpdocs")
-                    },
-                    Description = "APIs for managing and evaluating feature flags. Powered by Azure Configuration (Feature Management)"
-                });
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    In = ParameterLocation.Header,
-                    Description = "Please insert JWT with Bearer into field",
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+                        Label = "FeatureFlightingInbound",
+                        Instance = instance,
+                        TenantId = tenantId,
+                        Audiences = validAudiences,
+                    };
+
+                    var bearerTokenTypeOptions = new TokenTypeOptions
                     {
-                        new OpenApiSecurityScheme()
-                        {
-                            Reference = new OpenApiReference()
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        System.Array.Empty<string>()
-                    }
-                });
-                try
-                {
-                    string documentationFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                    string documentationPath = Path.Combine(AppContext.BaseDirectory, documentationFile);
-                    c.IncludeXmlComments(documentationPath);
-                }
-                catch 
-                {
-                    // Do nothing if documentation fails
-                }
-            });
-            services.AddEndpointsApiExplorer();
+                        AppToken = true,
+                        UserToken = true,
+                        AllowMissingIdTypeClaim = true,
+                    };
+                    var bearerProtocol = new ProtocolOptions();
+                    bearerProtocol.TokenTypes["AccessToken"] = bearerTokenTypeOptions;
+                    bearerProtocol.TokenTypes["AppToken"] = bearerTokenTypeOptions;
+                    inboundPolicy.Protocols[Microsoft.Identity.ServiceEssentials.Authentication.Protocol.BearerConstants.ProtocolName] = bearerProtocol;
+
+                    miseOptions.AzureAd.InboundPolicies = new List<MiseInboundPolicyOptions> { inboundPolicy };
+                }, MiseAuthenticationDefaults.AuthenticationScheme);
         }
 
         /// <summary>

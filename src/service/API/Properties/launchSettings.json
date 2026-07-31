@@ -12,6 +12,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
+      "launchUrl": "api/probe/ping",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "fxp-preprod"
       }
@@ -19,6 +20,7 @@
     "Microsoft.PS.Services.FlightingService.Api": {
       "commandName": "Project",
       "launchBrowser": true,
+      "launchUrl": "api/probe/ping",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "fxp-preprod"
       },

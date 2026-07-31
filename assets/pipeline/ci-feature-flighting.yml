@@ -1,0 +1,61 @@
+resources:
+    repositories:
+    - repository: FeatureFlightingGithub
+      type: github
+      endpoint: github.com
+      name: microsoft/FeatureFlightingManagement
+      trigger:
+      - main
+
+trigger: none
+name: Feature-Flighting-$(Date:yyyyMMdd)$(Rev:.rr)
+jobs:
+- job: Build
+  displayName: Agent job 1
+  pool:
+    vmImage: 'windows-2019'
+  steps:
+  - checkout: FeatureFlightingGithub
+  - task: NuGetToolInstaller@1
+    displayName: Use NuGet 4.3.0
+    inputs:
+      versionSpec: 4.3.0
+      checkLatest: true
+  - task: UseDotNet@2
+    displayName: Use .Net Core sdk 3.1.x
+    inputs:
+      version: 3.1.x
+      includePreviewVersions: true
+  - task: DotNetCoreCLI@2
+    displayName: Restore API (Microsoft.FeatureFlighting.sln)
+    inputs:
+      command: restore
+      projects: '**/Microsoft.FeatureFlighting.sln'
+  - task: DotNetCoreCLI@2
+    displayName: Build API (Microsoft.FeatureFlighting.sln)
+    inputs:
+      projects: '**/Microsoft.FeatureFlighting.sln'
+  - task: DotNetCoreCLI@2
+    displayName: Test API (Microsoft.FeatureFlighting.sln)
+    enabled: false
+    inputs:
+      command: test
+      projects: '**/*Tests.csproj'
+      arguments: --collect "Code coverage"
+      workingDirectory: src/service/
+  - task: DotNetCoreCLI@2
+    displayName: Restore Functional Tests (Microsoft.FXP.Flighting.Tests.FunctionalTest.csproj)
+    enabled: false
+    inputs:
+      command: restore
+      projects: tests/Microsoft.FXP.Experimentation.Tests/Microsoft.FXP.Flighting.Tests.FunctionalTest/Microsoft.FXP.Flighting.Tests.FunctionalTest.csproj
+      selectOrConfig: config
+      feedRestore: c94f6383-c859-4345-ad90-73d2e3bcb70f
+      nugetConfigPath: src/Microsoft.PS.FlightingService/NuGet.Config
+  - task: DotNetCoreCLI@2
+    enabled: false
+    displayName: Build Functional Tests (Microsoft.FXP.Flighting.Tests.FunctionalTest.csproj)
+    inputs:
+      projects: tests/Microsoft.FXP.Experimentation.Tests/Microsoft.FXP.Flighting.Tests.FunctionalTest/Microsoft.FXP.Flighting.Tests.FunctionalTest.csproj
+
+

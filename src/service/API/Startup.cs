@@ -16,7 +16,6 @@ using Microsoft.FeatureFlighting.Api.Middlewares;
 using Microsoft.FeatureFlighting.API.Controllers;
 using AppInsights.EnterpriseTelemetry.Web.Extension;
 using AppInsights.EnterpriseTelemetry.Web.Extension.Filters;
-using Microsoft.Identity.ServiceEssentials.Extensions.AspNetCoreMiddleware;
 
 namespace Microsoft.PS.Services.FlightingService.Api
 {
@@ -45,7 +44,6 @@ namespace Microsoft.PS.Services.FlightingService.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAuthentication(Configuration);
-            services.AddSwagger();
             services.AddTelememtry(Configuration);
             AddMvc(services);
             services.AddHttpClients(Configuration);
@@ -61,12 +59,6 @@ namespace Microsoft.PS.Services.FlightingService.Api
         {        
             if (env.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Flighting Service V2");
-                    c.RoutePrefix = string.Empty;
-                });
                 app.UseDeveloperExceptionPage();
             }
             else
@@ -83,7 +75,6 @@ namespace Microsoft.PS.Services.FlightingService.Api
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthorization();
-            app.UseMise();
             app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
 

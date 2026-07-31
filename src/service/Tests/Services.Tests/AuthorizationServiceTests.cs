@@ -45,12 +45,11 @@ namespace Services.Tests
             authService.EnsureAuthorized("TestApp", "TestOp", "CorrId");
         }
 
-        [ExpectedException(typeof(AccessForbiddenException))]
         [TestMethod]
         public void Must_Authorize_When_Claims_Are_Not_Present()
         {
             IAuthorizationService authService = new AuthorizationService(httpAccessorMockWithoutPermissions.Object, _tenantConfigurationProvider, _mockConfiguration);
-            authService.EnsureAuthorized("TestApp", "TestOp", "CorrId");
+            Assert.ThrowsExactly<AccessForbiddenException>(() => authService.EnsureAuthorized("TestApp", "TestOp", "CorrId"));
         }
 
         [TestMethod]
